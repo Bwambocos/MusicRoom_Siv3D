@@ -1,14 +1,14 @@
-﻿
-# include <Siv3D.hpp>
+﻿#include <Siv3D.hpp>
+#include "Room.h"
 
 void Main()
 {
-	const Font font(30);
-
+	Window::SetTitle(L"MusicRoom v1.5");
+	Window::Resize(640, 640);
+	
 	while (System::Update())
 	{
-		font(L"ようこそ、Siv3D の世界へ！").draw();
-
-		Circle(Mouse::Pos(), 50).draw({ 255, 0, 0, 127 });
+		Room_Update();
+		Room_Draw();
 	}
 }
