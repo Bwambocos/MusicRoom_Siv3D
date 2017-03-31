@@ -6,6 +6,7 @@ void Main()
 	Window::SetTitle(L"MusicRoom v1.5");
 	Window::Resize(640, 640);
 	
+	Room_Init();
 	while (System::Update())
 	{
 		Room_Update();
