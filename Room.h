@@ -1,4 +1,4 @@
-#pragma once
+#include <Siv3D.hpp>
 
 // 初期化
 void Room_Init();
@@ -10,7 +10,7 @@ void Room_Update();
 void Room_Draw();
 
 // 音楽イメージ画像の変化描画
-void ChangeMusicImageGraph(int toward);
+void ChangeMusicImageGraph(int32 toward);
 
 // 音楽再生（更新）
 void PlayMusic_Update();

@@ -5,7 +5,8 @@ void Main()
 {
 	Window::SetTitle(L"MusicRoom v1.5");
 	Window::Resize(640, 640);
-	
+	Profiler::EnableWarning(false);
+
 	Room_Init();
 	while (System::Update())
 	{
