@@ -1,16 +1,15 @@
-﻿#include <Siv3D.hpp>
-#include "Room.h"
+#include <Siv3D.hpp>
+#include "SceneMgr.h"
 
 void Main()
 {
-	Window::SetTitle(L"MusicRoom v1.5");
-	Window::Resize(640, 640);
-	Profiler::EnableWarning(false);
+	Window::Resize({ 768,768 }, true);
+	Window::SetTitle(L"MusicRoom v2.0");
 
-	Room_Init();
+	SceneMgr_ChangeScene(Scene_Select);
 	while (System::Update())
 	{
-		Room_Update();
-		Room_Draw();
+		SceneMgr_Update();
+		SceneMgr_Draw();
 	}
 }

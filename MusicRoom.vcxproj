@@ -162,11 +162,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Mouse.cpp" />
-    <ClCompile Include="Room.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="Resource.rc" />
   </ItemGroup>
   <ItemGroup>
@@ -279,8 +274,17 @@
     <Font Include="Example\YomogiFont.ttf" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Mouse.h" />
-    <ClInclude Include="Room.h" />
+    <ClCompile Include="Detail.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Music.cpp" />
+    <ClCompile Include="SceneMgr.cpp" />
+    <ClCompile Include="Select.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Detail.h" />
+    <ClInclude Include="Music.h" />
+    <ClInclude Include="SceneMgr.h" />
+    <ClInclude Include="Select.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
