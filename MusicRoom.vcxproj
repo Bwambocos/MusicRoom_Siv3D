@@ -274,6 +274,7 @@
     <Font Include="Example\YomogiFont.ttf" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Bar.cpp" />
     <ClCompile Include="Detail.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Music.cpp" />
@@ -281,6 +282,7 @@
     <ClCompile Include="Select.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bar.h" />
     <ClInclude Include="Detail.h" />
     <ClInclude Include="Music.h" />
     <ClInclude Include="SceneMgr.h" />
