@@ -10,6 +10,7 @@
 
 // 関数プロトタイプ宣言
 Rect MakeRect(int32_t x, int32_t y);
+Texture SelectImage(int32_t cou);
 
 // アルバム構造体
 struct Album
@@ -23,6 +24,7 @@ struct Album
 // グローバル定数・変数
 static Image main_tmp;
 static Texture main;
+static Texture fav, power;
 static Texture Gaussian;
 static const RectF main_rect(0, BAR_HEIGHT, 768, 768);
 static int64_t startTime;
@@ -57,8 +59,11 @@ void Select_Init()
 			Texture image(L"music\\" + temp + L"\\" + temp + L".png");
 			AlbumList.push_back({ name,creator,comment,image });
 		}
-		z = Grid<double>(3, AlbumList.size() / 3 + 1);
+		z = Grid<double>(3, (AlbumList.size() + 2) / 3 + 1);
 	}
+
+	fav = Texture(L"data\\Select\\fav.png");
+	power = Texture(L"data\\Select\\power.png");
 
 	startTime = Time::GetMillisec64();
 }
@@ -88,14 +93,17 @@ void Select_Draw()
 			for (int32_t x = 0; x < z.width; ++x)
 			{
 				const Rect rect = MakeRect(x, y);
+				if (!SelectImage(cou)) { break; }
 				if (!rect.mouseOver)
 				{
-					rect(AlbumList[cou].image.resize(216, 216)).draw();
+					rect(SelectImage(cou).resize(216, 216)).draw();
 					rect.drawFrame(2, 0, Color(0, 0, 0));
 					z[y][x] = Max(z[y][x] - 0.02, 0.0);
 				}
-				cou = Min<int>(AlbumList.size() - 1, cou + 1);
+				++cou;
 			}
+			if (!SelectImage(cou)) { break; }
+
 		}
 		cou = 0;
 		for (int32_t y = 0; y < z.height; ++y)
@@ -105,13 +113,16 @@ void Select_Draw()
 				const Rect rect = MakeRect(x, y);
 				if (rect.mouseOver || z[y][x])
 				{
-					if (rect.mouseOver) { z[y][x] = Max(z[y][x] + 0.05, 0.5); }
+					if (rect.mouseOver) { z[y][x] = Min(z[y][x] + 0.05, 0.5); }
 				}
 				const double s = z[y][x];
-				RectF(rect).stretched(s * 1).drawShadow({ 0,15 * s }, 32 * s, 10 * s);
-				RectF(rect).stretched(s * 1)(AlbumList[cou].image.resize(216, 216)).draw();
-				cou = Min<int>(AlbumList.size() - 1, cou + 1);
+				if (!SelectImage(cou)) { break; }
+				RectF(rect).stretched(s * 2).drawShadow({ 0,15 * s }, 32 * s, 10 * s);
+				RectF(rect).stretched(s * 2)(SelectImage(cou).resize(216, 216)).draw();
+				RectF(rect).stretched(s * 2).drawFrame();
+				++cou;
 			}
+			if (!SelectImage(cou)) { break; }
 		}
 	}
 }
@@ -119,4 +130,20 @@ void Select_Draw()
 Rect MakeRect(int32_t x, int32_t y)
 {
 	return { 30 + x * 246,BAR_HEIGHT + 30 + y * 246,216,216 };
+}
+
+Texture SelectImage(int32_t cou)
+{
+	Texture res;
+
+	// アルバム
+	if (cou < AlbumList.size()) { return res = AlbumList[cou].image; }
+
+	// お気に入り
+	else if (cou == AlbumList.size()) { return res = fav; }
+
+	// 終了
+	else if (cou == AlbumList.size() + 1) { return res = power; }
+
+	return res;
 }
