@@ -85,7 +85,7 @@ void Select_Update()
 
 	// スクロール 更新
 	{
-		scr_flag = ((first_cou + 8 <= AlbumList.size()) || (first_cou > 0) ? true : false);
+		scr_flag = ((first_cou + 8 <= (signed)AlbumList.size()) || (first_cou > 0) ? true : false);
 		if (scr_flag)
 		{
 			first_cou += Mouse::Wheel() * 3;
@@ -108,9 +108,9 @@ void Select_Draw()
 	// album_list 描画
 	{
 		int32_t cou = first_cou;
-		for (int32_t y = 0; y < z.height; ++y)
+		for (int32_t y = 0; y < (signed)z.height; ++y)
 		{
-			for (int32_t x = 0; x < z.width; ++x)
+			for (int32_t x = 0; x < (signed)z.width; ++x)
 			{
 				const Rect rect = MakeRect(x, y);
 				if (!SelectImage(cou)) { break; }
@@ -125,9 +125,9 @@ void Select_Draw()
 			if (!SelectImage(cou)) { break; }
 		}
 		cou = first_cou;
-		for (int32_t y = 0; y < z.height; ++y)
+		for (int32_t y = 0; y < (signed)z.height; ++y)
 		{
-			for (int32_t x = 0; x < z.width; ++x)
+			for (int32_t x = 0; x < (signed)z.width; ++x)
 			{
 				const Rect rect = MakeRect(x, y);
 				if (rect.mouseOver || z[y][x])
@@ -144,9 +144,9 @@ void Select_Draw()
 			if (!SelectImage(cou)) { break; }
 		}
 		cou = first_cou;
-		for (int32_t y = 0; y < z.height; ++y)
+		for (int32_t y = 0; y < (signed)z.height; ++y)
 		{
-			for (int32_t x = 0; x < z.width; ++x)
+			for (int32_t x = 0; x < (signed)z.width; ++x)
 			{
 				const Rect rect = MakeRect(x, y);
 				if (!SelectImage(cou)) { break; }
@@ -174,13 +174,13 @@ Texture SelectImage(int32_t cou)
 	Texture res;
 
 	// アルバム
-	if (cou < AlbumList.size()) { res = AlbumList[cou].image; }
+	if (cou < (signed)AlbumList.size()) { res = AlbumList[cou].image; }
 
 	// お気に入り
-	else if (cou == AlbumList.size()) { res = fav; }
+	else if (cou == (signed)AlbumList.size()) { res = fav; }
 
 	// 終了
-	else if (cou == AlbumList.size() + 1) { res = power; }
+	else if (cou == (signed)AlbumList.size() + 1) { res = power; }
 
 	return res;
 }
