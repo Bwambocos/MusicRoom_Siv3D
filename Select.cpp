@@ -85,7 +85,7 @@ void Select_Update()
 
 	// スクロール 更新
 	{
-		scr_flag = ((first_cou + 8 <= (signed)AlbumList.size()) || (first_cou > 0) ? true : false);
+		scr_flag = ((first_cou + 5 <= (signed)AlbumList.size()) || (first_cou > 0) ? true : false);
 		if (scr_flag)
 		{
 			first_cou += Mouse::Wheel() * 3;
@@ -189,31 +189,33 @@ void DrawDetails(int32_t cou)
 {
 	const Point pos = Mouse::Pos();
 	static Font font(16);
-	auto name_width = font(AlbumList[cou].name).region();
-	auto creator_width = font(AlbumList[cou].creator).region();
-	auto width = Max(name_width.w, creator_width.w);
-	if (cou % 3 == 0)
+	static String name, creator;
+	if (cou == (signed)AlbumList.size())
 	{
-		RoundRect(pos.x + 13, pos.y + 13, width + 27, 72, 27).drawShadow({ 0,15 }, 32, 10);
-		RoundRect(pos.x + 13, pos.y + 13, width + 27, 72, 27).draw(Color({ 255,255,255 }, 120));
-		RoundRect(pos.x + 13, pos.y + 13, width + 27, 72, 27).drawFrame(3);
-		font(AlbumList[cou].name).draw(pos.x + 27, pos.y + 20, Color(16, 16, 16));
-		font(AlbumList[cou].creator).draw(pos.x + 27, pos.y + 50, Color(16, 16, 16));
+		name = L"お気に入り";
+		creator = L"お気に入り登録した曲を表示します。";
 	}
-	if (cou % 3 == 1)
+	else if (cou == (signed)AlbumList.size() + 1)
 	{
-		RoundRect(pos.x - width / 2, pos.y + 13, width + 27, 72, 27).drawShadow({ 0,15 }, 32, 10);
-		RoundRect(pos.x - width / 2, pos.y + 13, width + 27, 72, 27).draw(Color({ 255,255,255 }, 120));
-		RoundRect(pos.x - width / 2, pos.y + 13, width + 27, 72, 27).drawFrame(3);
-		font(AlbumList[cou].name).draw(pos.x - width / 2 + 14, pos.y + 20, Color(16, 16, 16));
-		font(AlbumList[cou].creator).draw(pos.x - width / 2 + 14, pos.y + 50, Color(16, 16, 16));
+		name = L"終了";
+		creator = L"MusicRoom を終了します。";
 	}
-	if (cou % 3 == 2)
+	else
 	{
-		RoundRect(pos.x - width, pos.y + 13, width + 27, 72, 27).drawShadow({ 0,15 }, 32, 10);
-		RoundRect(pos.x - width, pos.y + 13, width + 27, 72, 27).draw(Color({ 255,255,255 }, 120));
-		RoundRect(pos.x - width, pos.y + 13, width + 27, 72, 27).drawFrame(3);
-		font(AlbumList[cou].name).draw(pos.x - width + 14, pos.y + 20, Color(16, 16, 16));
-		font(AlbumList[cou].creator).draw(pos.x - width + 14, pos.y + 50, Color(16, 16, 16));
+		name = AlbumList[cou].name;
+		creator = AlbumList[cou].creator;
 	}
+	const auto name_width = font(name).region();
+	const auto creator_width = font(creator).region();
+	const auto width = Max(name_width.w, creator_width.w);
+
+	static int32_t x_addtion;
+	if (cou % 3 == 0) { x_addtion = 13; }
+	if (cou % 3 == 1) { x_addtion = (-width / 2); }
+	if (cou % 3 == 2) { x_addtion = -width; }
+	RoundRect(pos.x + x_addtion, pos.y + 13, width + 27, 72, 27).drawShadow({ 0,15 }, 32, 10);
+	RoundRect(pos.x + x_addtion, pos.y + 13, width + 27, 72, 27).draw(Color({ 255,255,255 }, 120));
+	RoundRect(pos.x + x_addtion, pos.y + 13, width + 27, 72, 27).drawFrame(3);
+	font(name).draw(pos.x + x_addtion + 14, pos.y + 20, Color(16, 16, 16));
+	font(creator).draw(pos.x + x_addtion + 14, pos.y + 50, Color(16, 16, 16));
 }
