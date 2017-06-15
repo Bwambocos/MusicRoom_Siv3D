@@ -14,7 +14,7 @@
 Rect MakeRect(int32_t x, int32_t y);
 Texture SelectImage(int32_t cou);
 void DrawDetails(int32_t cou);
-int32_t returnSetAlbum();
+String getSetAlbum();
 
 // アルバム構造体
 struct Album
@@ -40,7 +40,7 @@ static bool scr_flag = true;
 static Grid<double_t> z;
 static TextReader reader;
 static std::vector<Album> AlbumList;
-static int32_t setAlbum;
+static String setAlbum;
 
 // アルバム選択 初期化
 void Select_Init()
@@ -107,7 +107,7 @@ void Select_Update()
 			if (!SelectImage(cou)) { break; }
 			if (Input::MouseL.clicked && rect.mouseOver)
 			{
-				setAlbum = cou;
+				setAlbum = AlbumList[cou].name;
 				SceneMgr_ChangeScene(Scene_Detail);
 			}
 			++cou;
@@ -241,7 +241,7 @@ void DrawDetails(int32_t cou)
 	font(creator).draw(pos.x + x_addtion + 14, pos.y + 50, Color(16, 16, 16));
 }
 
-int32_t returnSetAlbum()
+String getSetAlbum()
 {
 	return setAlbum;
 }

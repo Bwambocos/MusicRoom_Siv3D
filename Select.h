@@ -8,3 +8,5 @@ void Select_Update();
 
 // ƒAƒ‹ƒoƒ€‘I‘ð •`‰æ
 void Select_Draw();
+
+String getSetAlbum();
