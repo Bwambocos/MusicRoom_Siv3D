@@ -1,6 +1,7 @@
 // include
 #include <Siv3D.hpp>
 #include <vector>
+#include "SceneMgr.h"
 #include "Select.h"
 #include "Bar.h"
 
@@ -13,6 +14,7 @@
 Rect MakeRect(int32_t x, int32_t y);
 Texture SelectImage(int32_t cou);
 void DrawDetails(int32_t cou);
+int32_t returnSetAlbum();
 
 // アルバム構造体
 struct Album
@@ -38,6 +40,7 @@ static bool scr_flag = true;
 static Grid<double_t> z;
 static TextReader reader;
 static std::vector<Album> AlbumList;
+static int32_t setAlbum;
 
 // アルバム選択 初期化
 void Select_Init()
@@ -92,6 +95,24 @@ void Select_Update()
 			first_cou = Max(first_cou, 0);
 			first_cou = Min<int32_t>(first_cou, AlbumList.size() / 3 * 3);
 		}
+	}
+
+	// album_list 更新
+	int32_t cou = first_cou;
+	for (int32_t y = 0; y < (signed)z.height; ++y)
+	{
+		for (int32_t x = 0; x < (signed)z.width; ++x)
+		{
+			const Rect rect = MakeRect(x, y);
+			if (!SelectImage(cou)) { break; }
+			if (Input::MouseL.clicked && rect.mouseOver)
+			{
+				setAlbum = cou;
+				SceneMgr_ChangeScene(Scene_Detail);
+			}
+			++cou;
+		}
+		if (!SelectImage(cou)) { break; }
 	}
 }
 
@@ -218,4 +239,9 @@ void DrawDetails(int32_t cou)
 	RoundRect(pos.x + x_addtion, pos.y + 13, width + 27, 72, 27).drawFrame(3);
 	font(name).draw(pos.x + x_addtion + 14, pos.y + 20, Color(16, 16, 16));
 	font(creator).draw(pos.x + x_addtion + 14, pos.y + 50, Color(16, 16, 16));
+}
+
+int32_t returnSetAlbum()
+{
+	return setAlbum;
 }
