@@ -12,6 +12,7 @@ static int32_t mainRectWidth = DEFAULT_mainRectWidth;
 static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2], originPrev[2], originNext[2];
 static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep, displayPrev, displayNext;
 static Sound nowMusic;
+const static String mainText;
 
 // バー 初期化
 void Bar_Init()
@@ -47,6 +48,40 @@ void Bar_Update()
 {
 	mainRectWidth = Max(DEFAULT_mainRectWidth, mainRectWidth);
 	mainRect = RoundRect(256 - (mainRectWidth - DEFAULT_mainRectWidth) / 2, 0, mainRectWidth, BAR_HEIGHT, 16);
+	
+	// ボタン 更新
+	{
+		int32_t x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
+		for (int32_t cou = 0; cou < 5; ++cou)
+		{
+			const Circle button(x + 20, 12 + 20, 20);
+			switch (cou)
+			{
+			case 0:
+				if (button.mouseOver) { displayPrev = originPrev[1]; }
+				else { displayPrev = originPrev[0]; }
+				break;
+			case 1:
+				if (button.mouseOver) { displayPlay = originPlay[1]; }
+				else { displayPlay = originPlay[0]; }
+				break;
+			case 2:
+				if (button.mouseOver) { displayRep = originRep[1]; }
+				else { displayRep = originRep[0]; }
+				x += mainRectWidth;
+				break;
+			case 3:
+				if (button.mouseOver) { displayStop = originStop[1]; }
+				else { displayStop = originStop[0]; }
+				break;
+			case 4:
+				if (button.mouseOver) { displayNext = originNext[1]; }
+				else { displayNext = originNext[0]; }
+				break;
+			}
+			x += 40;
+		}
+	}
 }
 
 // バー 描画
