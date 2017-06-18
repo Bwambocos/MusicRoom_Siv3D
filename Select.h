@@ -1,3 +1,4 @@
+#include <Siv3D.hpp>
 #pragma once
 
 // ƒAƒ‹ƒoƒ€‘I‘ğ ‰Šú‰»
