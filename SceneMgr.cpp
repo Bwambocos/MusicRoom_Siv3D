@@ -71,3 +71,9 @@ Scene_S get_prevScene()
 {
 	return prevScene;
 }
+
+// ¡‚ÌƒV[ƒ“‚ğæ“¾
+Scene_S get_nowScene()
+{
+	return Scene;
+}

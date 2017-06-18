@@ -19,3 +19,6 @@ void SceneMgr_ChangeScene(Scene_S);
 
 // 前のシーンを取得
 Scene_S get_prevScene();
+
+// 今のシーンを取得
+Scene_S get_nowScene();

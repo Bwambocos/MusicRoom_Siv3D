@@ -12,7 +12,8 @@ static int32_t mainRectWidth = DEFAULT_mainRectWidth;
 static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2], originPrev[2], originNext[2];
 static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep, displayPrev, displayNext;
 static Sound nowMusic;
-const static String mainText;
+static String mainText;
+static Font mainFont;
 
 // バー 初期化
 void Bar_Init()
@@ -41,11 +42,15 @@ void Bar_Init()
 		displayPrev = originPrev[0];
 		displayNext = originNext[0];
 	}
+
+	mainFont = Font(18);
 }
 
 // バー 更新
 void Bar_Update()
 {
+	const Rect rect = mainFont(mainText).region();
+	mainRectWidth = rect.w + 18 * 2;
 	mainRectWidth = Max(DEFAULT_mainRectWidth, mainRectWidth);
 	mainRect = RoundRect(256 - (mainRectWidth - DEFAULT_mainRectWidth) / 2, 0, mainRectWidth, BAR_HEIGHT, 16);
 	
@@ -80,6 +85,23 @@ void Bar_Update()
 				break;
 			}
 			x += 40;
+		}
+	}
+
+	// メインテキスト 更新
+	{
+		if (!nowMusic.isPlaying())
+		{
+			auto nowScene = get_nowScene();
+			switch (nowScene)
+			{
+			case Scene_Select:
+				mainText = L"アルバムを選択してください";
+				break;
+			case Scene_Detail:
+				mainText = L"曲を選択してください";
+				break;
+			}
 		}
 	}
 }
@@ -117,5 +139,11 @@ void Bar_Draw()
 			}
 			x += 40;
 		}
+	}
+
+	// メインテキスト 描画
+	{
+		const Rect rect = mainFont(mainText).region();
+		mainFont.draw(mainText, 768 / 2 - rect.w / 2, 15);
 	}
 }
