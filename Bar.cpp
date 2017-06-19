@@ -13,7 +13,8 @@ static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], orig
 static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep, displayPrev, displayNext;
 static Sound nowMusic;
 static String mainText;
-static Font mainFont;
+static int32_t nowTime, totalTime;
+static Font mainFont, timeFont;
 
 // バー 初期化
 void Bar_Init()
@@ -44,6 +45,7 @@ void Bar_Init()
 	}
 
 	mainFont = Font(18);
+	timeFont = Font(12);
 }
 
 // バー 更新
@@ -104,6 +106,15 @@ void Bar_Update()
 			}
 		}
 	}
+
+	// 再生位置テキスト 更新
+	{
+		if (nowMusic.isPlaying())
+		{
+			totalTime = nowMusic.lengthSec();
+			nowTime = nowMusic.streamPosSec();
+		}
+	}
 }
 
 // バー 描画
@@ -145,5 +156,14 @@ void Bar_Draw()
 	{
 		const Rect rect = mainFont(mainText).region();
 		mainFont.draw(mainText, 768 / 2 - rect.w / 2, 15);
+	}
+
+	// 再生位置テキスト 描画
+	{
+		if (nowMusic.isPlaying())
+		{
+			const Rect rect = timeFont(nowTime + L":" + totalTime).region();
+			timeFont.draw(nowTime + L":" + totalTime, (768 / 2 + mainRectWidth / 2) - rect.w, 12, Color(0, 0, 0));
+		}
 	}
 }
