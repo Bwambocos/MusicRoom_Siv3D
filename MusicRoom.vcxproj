@@ -276,6 +276,7 @@
   <ItemGroup>
     <ClCompile Include="Bar.cpp" />
     <ClCompile Include="Detail.cpp" />
+    <ClCompile Include="Fav.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Music.cpp" />
     <ClCompile Include="SceneMgr.cpp" />
@@ -284,6 +285,7 @@
   <ItemGroup>
     <ClInclude Include="Bar.h" />
     <ClInclude Include="Detail.h" />
+    <ClInclude Include="Fav.h" />
     <ClInclude Include="Music.h" />
     <ClInclude Include="SceneMgr.h" />
     <ClInclude Include="Select.h" />
