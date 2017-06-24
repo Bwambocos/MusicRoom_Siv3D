@@ -1,11 +1,11 @@
-// include
+ï»¿// include
 #include <Siv3D.hpp>
 #include "Detail.h"
 #include "Bar.h"
 #include "Select.h"
 #include "Fav.h"
 
-// ‹ÈƒŠƒXƒg \‘¢‘Ì
+// æ›²ãƒªã‚¹ãƒˆ æ§‹é€ ä½“
 struct List
 {
 	bool isPlaying;
@@ -15,7 +15,7 @@ struct List
 	bool isFav;
 };
 
-// ƒOƒ[ƒoƒ‹•Ï”
+// ã‚°ãƒ­ãƒ¼ãƒãƒ«å¤‰æ•°
 static Texture main;
 static RoundRect rect_albumImage(25, 25 + BAR_HEIGHT, 250, 250, 12.5);
 static RoundRect rect_albumName(325, 25 + BAR_HEIGHT, 393, 54, 10);
@@ -29,14 +29,15 @@ static String albumName, albumCreator, albumExpl;
 static Texture albumImg;
 static std::vector<List>albumList;
 Font font_albumName, font_albumCreator, font_albumExpl;
+Font font_albumList;
 
-// ƒAƒ‹ƒoƒ€Ú× ‰Šú‰»
+// ã‚¢ãƒ«ãƒãƒ è©³ç´° åˆæœŸåŒ–
 void Detail_Init()
 {
 	main = Texture(L"data\\Detail\\main.png");
-	String temp_albumName = L"T.Dragons Act‡U";
+	String temp_albumName = L"T.Dragons Actâ…¡";
 
-	// ƒAƒ‹ƒoƒ€î•ñ ‰Šú‰»
+	// ã‚¢ãƒ«ãƒãƒ æƒ…å ± åˆæœŸåŒ–
 	{
 		TextReader reader(L"music\\" + temp_albumName + L"\\" + temp_albumName + L".txt");
 		reader.readLine(albumName);
@@ -49,7 +50,7 @@ void Detail_Init()
 		font_albumExpl = Font(12);
 	}
 
-	// ‹ÈƒŠƒXƒg ‰Šú‰»
+	// æ›²ãƒªã‚¹ãƒˆ åˆæœŸåŒ–
 	{
 		const String extensions[] = { L".wav",L".ogg",L".mp3" };
 		TextReader reader(L"music\\" + temp_albumName + L"\\music_list.txt");
@@ -69,19 +70,20 @@ void Detail_Init()
 			temp_isFav = isFav(albumName, tempName);
 			albumList.push_back({ false,tempMusic,tempName,temp_totalTime,temp_isFav });
 		}
+		font_albumList = Font(16);
 	}
 }
 
-// ƒAƒ‹ƒoƒ€Ú× XV
+// ã‚¢ãƒ«ãƒãƒ è©³ç´° æ›´æ–°
 void Detail_Update()
 {
 
 }
 
-// ƒAƒ‹ƒoƒ€Ú× •`‰æ
+// ã‚¢ãƒ«ãƒãƒ è©³ç´° æç”»
 void Detail_Draw()
 {
-	// ”wŒi •`‰æ
+	// èƒŒæ™¯ æç”»
 	{
 		main.draw(0, BAR_HEIGHT);
 		rect_albumImage.drawShadow({ 0,15 }, 32, 10);
@@ -105,13 +107,23 @@ void Detail_Draw()
 		}
 	}
 
-	// ƒAƒ‹ƒoƒ€î•ñ •`‰æ
+	// ã‚¢ãƒ«ãƒãƒ æƒ…å ± æç”»
 	{
 		const Rect rect(37.5, 37.5 + BAR_HEIGHT, 225, 225);
 		rect(albumImg).draw();
 		rect.drawFrame(0, 2, Color(200, 200, 200));
 		font_albumName(albumName).draw(333, 27 + BAR_HEIGHT);
 		font_albumCreator(albumCreator).draw(333, 88 + BAR_HEIGHT);
-		font_albumExpl(albumExpl).draw(333, 142 + BAR_HEIGHT);
+		font_albumExpl(albumExpl).draw(333, 144 + BAR_HEIGHT);
+	}
+
+	// æ›²ãƒªã‚¹ãƒˆ æç”»
+	{
+		for (int32_t i = 0; i < 5; ++i)
+		{
+			// auto temp = (albumList[i].isPlaying ? "||" : "â–¶");
+			// font_albumList(temp).draw(25, 300 + BAR_HEIGHT);
+			font_albumList(albumList[i].name).draw(70, 304 + BAR_HEIGHT + i * (36 + 2));
+		}
 	}
 }
