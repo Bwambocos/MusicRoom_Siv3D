@@ -11,3 +11,6 @@ void Bar_Update();
 
 // ƒo[ •`‰æ
 void Bar_Draw();
+
+// Ä¶’†‚©æ“¾
+bool is_nowMusicPlaying();
