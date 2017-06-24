@@ -9,7 +9,7 @@ void Main()
 	Window::SetTitle(L"MusicRoom v2.0");
 
 	Bar_Init();
-	SceneMgr_ChangeScene(Scene_Select);
+	SceneMgr_ChangeScene(Scene_Detail);
 	while (System::Update())
 	{
 		Bar_Update();
