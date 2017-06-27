@@ -1,5 +1,6 @@
 ﻿// include
 #include <Siv3D.hpp>
+#include "SceneMgr.h"
 #include "Detail.h"
 #include "Bar.h"
 #include "Select.h"
@@ -16,6 +17,8 @@ struct List
 };
 
 // グローバル変数
+static std::map<String, std::vector<List>>albums;
+static std::vector<List>albumList;
 static Texture main;
 static RoundRect rect_albumImage(25, 25 + BAR_HEIGHT, 250, 250, 12.5);
 static RoundRect rect_albumName(325, 25 + BAR_HEIGHT, 393, 54, 10);
@@ -27,18 +30,21 @@ static RoundRect rect_albumList_Time(604, 300 + BAR_HEIGHT, 100, 36, 5);
 static RoundRect rect_albumList_Fav(707, 300 + BAR_HEIGHT, 36, 36, 5);
 static String albumName, albumCreator, albumExpl;
 static Texture albumImg;
-static std::vector<List>albumList;
 Font font_albumName, font_albumCreator, font_albumExpl;
 Font font_albumList;
 
 // アルバム詳細 初期化
 void Detail_Init()
 {
-	main = Texture(L"data\\Detail\\main.png");
-	String temp_albumName = L"T.Dragons ActⅡ";
+	if (!main) { main = Texture(L"data\\Detail\\main.png"); }
+	String temp_albumName = getSetAlbum();
 
 	// アルバム情報 初期化
 	{
+		albumName.clear();
+		albumCreator.clear();
+		albumExpl.clear();
+		albumList.clear();
 		TextReader reader(L"music\\" + temp_albumName + L"\\" + temp_albumName + L".txt");
 		reader.readLine(albumName);
 		reader.readLine(albumCreator);
@@ -50,34 +56,43 @@ void Detail_Init()
 		font_albumExpl = Font(12);
 	}
 
-	// 曲リスト 初期化
+	// まだ読み込まれていないアルバム
+	if (albums.find(temp_albumName) == albums.end())
 	{
-		const String extensions[] = { L".wav",L".ogg",L".mp3" };
-		TextReader reader(L"music\\" + temp_albumName + L"\\music_list.txt");
-		String tempName; Sound tempMusic; int32_t temp_totalTime;
-		bool temp_isFav;
-		while (reader.readLine(tempName))
+		// 曲リスト 初期化
 		{
-			for (auto ext : extensions)
+			const String extensions[] = { L".wav",L".ogg",L".mp3" };
+			TextReader reader(L"music\\" + temp_albumName + L"\\music_list.txt");
+			String tempName; Sound tempMusic; int32_t temp_totalTime;
+			bool temp_isFav;
+			while (reader.readLine(tempName))
 			{
-				if (FileSystem::IsFile(L"music\\" + temp_albumName + L"\\" + tempName + L"\\" + tempName + ext))
+				for (auto ext : extensions)
 				{
-					tempMusic = Sound(L"music\\" + temp_albumName + L"\\" + tempName + L"\\" + tempName + L".mp3");
-					break;
+					if (FileSystem::IsFile(L"music\\" + temp_albumName + L"\\" + tempName + L"\\" + tempName + ext))
+					{
+						tempMusic = Sound(L"music\\" + temp_albumName + L"\\" + tempName + L"\\" + tempName + L".mp3");
+						break;
+					}
 				}
+				temp_totalTime = (int32_t)tempMusic.lengthSample();
+				temp_isFav = isFav(albumName, tempName);
+				albumList.push_back({ false,tempMusic,tempName,temp_totalTime,temp_isFav });
 			}
-			temp_totalTime = tempMusic.lengthSample();
-			temp_isFav = isFav(albumName, tempName);
-			albumList.push_back({ false,tempMusic,tempName,temp_totalTime,temp_isFav });
+			font_albumList = Font(16);
 		}
-		font_albumList = Font(16);
+		albums[temp_albumName] = albumList;
+	}
+	else
+	{
+		albumList = albums[temp_albumName];
 	}
 }
 
 // アルバム詳細 更新
 void Detail_Update()
 {
-
+	if (Input::KeyB.pressed) { SceneMgr_ChangeScene(Scene_Select); }
 }
 
 // アルバム詳細 描画
@@ -109,7 +124,7 @@ void Detail_Draw()
 
 	// アルバム情報 描画
 	{
-		const Rect rect(37.5, 37.5 + BAR_HEIGHT, 225, 225);
+		const Rect rect((int)37.5, (int)37.5 + BAR_HEIGHT, 225, 225);
 		rect(albumImg).draw();
 		rect.drawFrame(0, 2, Color(200, 200, 200));
 		font_albumName(albumName).draw(333, 27 + BAR_HEIGHT);
@@ -119,7 +134,7 @@ void Detail_Draw()
 
 	// 曲リスト 描画
 	{
-		for (int32_t i = 0; i < 5; ++i)
+		for (int32_t i = 0; i < Min<int32_t>(5, albumList.size()); ++i)
 		{
 			// auto temp = (albumList[i].isPlaying ? "||" : "▶");
 			// font_albumList(temp).draw(25, 300 + BAR_HEIGHT);
