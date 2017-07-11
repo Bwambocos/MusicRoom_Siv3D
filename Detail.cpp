@@ -148,32 +148,25 @@ void Detail_Draw()
 void albumExpl_Draw()
 {
 	Array<String> texts;
-	const int32 w = rect_albumExpl.w;
+	const int32 w = rect_albumExpl.w - 10;
 	const int32 h = rect_albumExpl.h;
 	size_t pos = 0;
 
 	while (pos < albumExpl.length)
 	{
-		bool flag = true;
-		while (flag)
+		for (int32_t i = 0; i + pos < albumExpl.length; ++i)
 		{
-			const size_t n = Max<size_t>(font_albumExpl.drawableCharacters(albumExpl, w), 1);
-			const auto tmp = albumExpl.substr(pos, n);
-			flag = false;
-			for (int32_t i = 0; i < tmp.length; ++i)
+			if (font_albumExpl(albumExpl.substr(pos, i)).region().w >= w)
 			{
-				if (tmp[i] == L'\n')
-				{
-					flag = true;
-					texts.push_back(albumExpl.substr(pos, i + 1));
-					pos += (i + 1);
-					break;
-				}
+				texts.push_back(albumExpl.substr(pos, i - 1));
+				pos += (i - 1);
+				break;
 			}
-			if (!flag)
+			if (albumExpl[pos + i] == L'\n')
 			{
-				texts.push_back(albumExpl.substr(pos, n));
-				pos += n;
+				texts.push_back(albumExpl.substr(pos, i + 1));
+				pos += (i + 1);
+				break;
 			}
 		}
 	}
