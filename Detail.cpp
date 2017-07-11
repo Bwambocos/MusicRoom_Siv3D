@@ -129,7 +129,8 @@ void Detail_Draw()
 		rect.drawFrame(0, 2, Color(200, 200, 200));
 		font_albumName(albumName).draw(333, 27 + BAR_HEIGHT);
 		font_albumCreator(albumCreator).draw(333, 88 + BAR_HEIGHT);
-		font_albumExpl(albumExpl).draw(333, 144 + BAR_HEIGHT);
+		// font_albumExpl(albumExpl).draw(333, 144 + BAR_HEIGHT);
+		albumExpl_Draw();
 	}
 
 	// 曲リスト 描画
@@ -140,5 +141,55 @@ void Detail_Draw()
 			// font_albumList(temp).draw(25, 300 + BAR_HEIGHT);
 			font_albumList(albumList[i].name).draw(70, 304 + BAR_HEIGHT + i * (36 + 2));
 		}
+	}
+}
+
+// アルバム説明 描画
+void albumExpl_Draw()
+{
+	Array<String> texts;
+	const int32 w = rect_albumExpl.w;
+	const int32 h = rect_albumExpl.h;
+	size_t pos = 0;
+
+	while (pos < albumExpl.length)
+	{
+		bool flag = true;
+		while (flag)
+		{
+			const size_t n = Max<size_t>(font_albumExpl.drawableCharacters(albumExpl, w), 1);
+			const auto tmp = albumExpl.substr(pos, n);
+			flag = false;
+			for (int32_t i = 0; i < tmp.length; ++i)
+			{
+				if (tmp[i] == L'\n')
+				{
+					flag = true;
+					texts.push_back(albumExpl.substr(pos, i + 1));
+					pos += (i + 1);
+					break;
+				}
+			}
+			if (!flag)
+			{
+				texts.push_back(albumExpl.substr(pos, n));
+				pos += n;
+			}
+		}
+	}
+
+	for (size_t i = 0; i < texts.size(); ++i)
+	{
+		const int32 y = static_cast<int32>(rect_albumExpl.y + 10 + i * font_albumExpl.height);
+		const bool overflow = (i + 1 < texts.size())
+			&& (y + font_albumExpl.height * 2 + 10 > rect_albumExpl.y + rect_albumExpl.h);
+		if (overflow)
+		{
+			if (texts[i].length > 2) { texts[i].resize(texts[i].length - (texts[i].length > 2 ? 2 : 1)); }
+			if (texts[i][texts[i].length - 1] == L'\n') { texts[i][texts[i].length - 1] = L'\0'; }
+			texts[i].append(L"...");
+		}
+		font_albumExpl(texts[i]).draw(rect_albumExpl.x + 10, y);
+		if (overflow) { break; }
 	}
 }

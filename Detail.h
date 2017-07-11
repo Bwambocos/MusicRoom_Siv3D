@@ -8,3 +8,6 @@ void Detail_Update();
 
 // アルバム詳細 描画
 void Detail_Draw();
+
+// アルバム説明 描画
+void albumExpl_Draw();
