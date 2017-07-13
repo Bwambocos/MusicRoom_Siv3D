@@ -45,6 +45,8 @@ static String setAlbum = L"";
 // アルバム選択 初期化
 void Select_Init()
 {
+	if (main_tmp) { return; }
+
 	// メイン背景
 	{
 		main_tmp = Image(L"data\\Select\\main.png");
