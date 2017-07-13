@@ -19,7 +19,7 @@ struct List
 // グローバル変数
 static std::map<String, std::vector<List>>albums;
 static std::vector<List>albumList;
-static Texture main;
+static Texture main, playing;
 static RoundRect rect_albumImage(25, 25 + BAR_HEIGHT, 250, 250, 12.5);
 static RoundRect rect_albumName(325, 25 + BAR_HEIGHT, 393, 54, 10);
 static RoundRect rect_albumCreator(325, 82 + BAR_HEIGHT, 393, 48, 10);
@@ -28,15 +28,18 @@ static RoundRect rect_albumList_Flag(25, 300 + BAR_HEIGHT, 36, 36, 5);
 static RoundRect rect_albumList_Name(64, 300 + BAR_HEIGHT, 537, 36, 5);
 static RoundRect rect_albumList_Time(604, 300 + BAR_HEIGHT, 100, 36, 5);
 static RoundRect rect_albumList_Fav(707, 300 + BAR_HEIGHT, 36, 36, 5);
+static RoundRect rect_albumList(25, 300 + BAR_HEIGHT, 718, 190, 5);
 static String albumName = L"", albumCreator = L"", albumExpl = L"";
 static Texture albumImg;
-Font font_albumName, font_albumCreator, font_albumExpl;
-Font font_albumList;
+static Font font_albumName, font_albumCreator, font_albumExpl;
+static Font font_albumList;
+static int32_t albumList_begin;
 
 // アルバム詳細 初期化
 void Detail_Init()
 {
 	if (!main) { main = Texture(L"data\\Detail\\main.png"); }
+	if (!playing) { playing = Texture(L"data\\Detail\\playing.png"); }
 	String temp_albumName = getSetAlbum();
 
 	// アルバム情報 初期化
@@ -83,16 +86,24 @@ void Detail_Init()
 		}
 		albums[temp_albumName] = albumList;
 	}
-	else
-	{
-		albumList = albums[temp_albumName];
-	}
+	else { albumList = albums[temp_albumName]; }
 }
 
 // アルバム詳細 更新
 void Detail_Update()
 {
 	if (Input::KeyB.pressed) { SceneMgr_ChangeScene(Scene_Select); }
+	if (rect_albumList.mouseOver)
+	{
+		bool scr_flag = ((albumList_begin + 5 <= (signed)albumList.size()) || (albumList_begin > 0) ? true : false);
+		if (scr_flag)
+		{
+			albumList_begin += Mouse::Wheel();
+			Print(albumList_begin);
+			albumList_begin = Max(albumList_begin, 0);
+			albumList_begin = Min<int32_t>(albumList_begin, albumList.size() - 5);
+		}
+	}
 }
 
 // アルバム詳細 描画
@@ -129,17 +140,17 @@ void Detail_Draw()
 		rect.drawFrame(0, 2, Color(200, 200, 200));
 		font_albumName(albumName).draw(333, 27 + BAR_HEIGHT);
 		font_albumCreator(albumCreator).draw(333, 88 + BAR_HEIGHT);
-		// font_albumExpl(albumExpl).draw(333, 144 + BAR_HEIGHT);
 		albumExpl_Draw();
 	}
 
 	// 曲リスト 描画
 	{
-		for (int32_t i = 0; i < Min<int32_t>(5, albumList.size()); ++i)
+		for (int32_t i = albumList_begin; (i - albumList_begin) < Min<int32_t>(5, albumList.size()); ++i)
 		{
-			// auto temp = (albumList[i].isPlaying ? "||" : "▶");
-			// font_albumList(temp).draw(25, 300 + BAR_HEIGHT);
-			font_albumList(albumList[i].name).draw(70, 304 + BAR_HEIGHT + i * (36 + 2));
+			auto num = i - albumList_begin;
+			if (albumList[i].isPlaying) { playing.draw(30, 304 + BAR_HEIGHT + num * (36 + 2)); }
+			else { font_albumList(i + 1).draw(30, 304 + BAR_HEIGHT + num * (36 + 2)); }
+			font_albumList(albumList[i].name).draw(70, 304 + BAR_HEIGHT + num * (36 + 2));
 		}
 	}
 }
