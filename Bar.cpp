@@ -12,7 +12,7 @@ static int32_t mainRectWidth = DEFAULT_mainRectWidth;
 static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2], originPrev[2], originNext[2];
 static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep, displayPrev, displayNext;
 static Sound nowMusic;
-static String mainText;
+static String mainText = L"";
 static int32_t nowTime, totalTime;
 static Font mainFont, timeFont;
 
@@ -111,8 +111,8 @@ void Bar_Update()
 	{
 		if (nowMusic.isPlaying())
 		{
-			totalTime = nowMusic.lengthSec();
-			nowTime = nowMusic.streamPosSec();
+			totalTime = (int32_t)nowMusic.lengthSec();
+			nowTime = (int32_t)nowMusic.streamPosSec();
 		}
 	}
 }

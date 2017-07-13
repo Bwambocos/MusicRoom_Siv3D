@@ -28,7 +28,7 @@ static RoundRect rect_albumList_Flag(25, 300 + BAR_HEIGHT, 36, 36, 5);
 static RoundRect rect_albumList_Name(64, 300 + BAR_HEIGHT, 537, 36, 5);
 static RoundRect rect_albumList_Time(604, 300 + BAR_HEIGHT, 100, 36, 5);
 static RoundRect rect_albumList_Fav(707, 300 + BAR_HEIGHT, 36, 36, 5);
-static String albumName, albumCreator, albumExpl;
+static String albumName = L"", albumCreator = L"", albumExpl = L"";
 static Texture albumImg;
 Font font_albumName, font_albumCreator, font_albumExpl;
 Font font_albumList;
@@ -148,8 +148,8 @@ void Detail_Draw()
 void albumExpl_Draw()
 {
 	Array<String> texts;
-	const int32 w = rect_albumExpl.w - 10;
-	const int32 h = rect_albumExpl.h;
+	const int32 w = (int32)rect_albumExpl.w - 10;
+	const int32 h = (int32)rect_albumExpl.h;
 	size_t pos = 0;
 
 	while (pos < albumExpl.length)

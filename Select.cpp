@@ -40,7 +40,7 @@ static bool scr_flag = true;
 static Grid<double_t> z;
 static TextReader reader;
 static std::vector<Album> AlbumList;
-static String setAlbum;
+static String setAlbum = L"";
 
 // ƒAƒ‹ƒoƒ€‘I‘ğ ‰Šú‰»
 void Select_Init()
