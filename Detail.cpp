@@ -9,7 +9,6 @@
 // 曲リスト 構造体
 struct List
 {
-	bool isPlaying, isPausing;
 	Sound music;
 	String name;
 	int32_t totalTime;
@@ -29,7 +28,6 @@ static RoundRect rect_albumList_Name(64, 300 + BAR_HEIGHT, 537, 36, 5);
 static RoundRect rect_albumList_Time(604, 300 + BAR_HEIGHT, 100, 36, 5);
 static RoundRect rect_albumList_Fav(707, 300 + BAR_HEIGHT, 36, 36, 5);
 static RoundRect rect_albumListAll(25, 300 + BAR_HEIGHT, 718, 190, 5);
-static RoundRect rect_albumList(25, 300 + BAR_HEIGHT, 718, 36, 5);
 static String albumName = L"", albumCreator = L"", albumExpl = L"";
 static Texture albumImg;
 static Font font_albumName, font_albumCreator, font_albumExpl;
@@ -87,7 +85,7 @@ void Detail_Init()
 				}
 				temp_totalTime = (int32_t)tempMusic.lengthSec();
 				temp_isFav = isFav(albumName, tempName);
-				albumList.push_back({ false,false,tempMusic,tempName,temp_totalTime,temp_isFav });
+				albumList.push_back({ tempMusic,tempName,temp_totalTime,temp_isFav });
 			}
 			font_albumList = Font(16);
 		}
@@ -118,26 +116,13 @@ void Detail_Update()
 		{
 			auto num = i - albumList_begin;
 			auto music = albumList[i];
-			const RoundRect rect(rect_albumList.x, rect_albumList.y + num * 39, rect_albumList.w, rect_albumList.h, rect_albumList.r);
+			RoundRect rect(rect_albumList_Flag.x, rect_albumList_Flag.y + num * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r);
+			if (rect.leftClicked) { (music.music.isPlaying() ? music.music.pause() : music.music.play()); }
+			rect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (rect.leftClicked)
 			{
-				if (music.music.isPlaying())
-				{
-					music.music.pause();
-					music.isPlaying = false;
-					music.isPausing = true;
-				}
-				else
-				{
-					music.music.play();
-					music.isPlaying = true;
-					music.isPausing = false;
-				}
+				music.isFav = (music.isFav ? false : true);
 			}
-			font_albumList(albumList[i].name).draw(70, 304 + BAR_HEIGHT + num * 39);
-			auto str = Format(Pad(albumList[i].totalTime / 60, { 2,L'0' }), L":", Pad(albumList[i].totalTime % 60, { 2,L'0' }));
-			font_albumList(str).draw(610, 304 + BAR_HEIGHT + num * 39);
-			(albumList[i].isFav ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
 		}
 	}
 }
@@ -184,16 +169,13 @@ void Detail_Draw()
 		for (int32_t i = albumList_begin; (i - albumList_begin) < Min<int32_t>(5, albumList.size()); ++i)
 		{
 			auto num = i - albumList_begin;
-			if (albumList[i].isPlaying) { playing.draw(30, 304 + BAR_HEIGHT + num * 39); }
-			else
-			{
-				if (albumList[i].isPausing) { pausing.draw(30, 304 + BAR_HEIGHT + num * 39); }
-				else { font_albumList(i + 1).draw(30, 304 + BAR_HEIGHT + num * 39); }
-			}
-			font_albumList(albumList[i].name).draw(70, 304 + BAR_HEIGHT + num * 39);
-			auto str = Format(Pad(albumList[i].totalTime / 60, { 2,L'0' }), L":", Pad(albumList[i].totalTime % 60, { 2,L'0' }));
+			auto tmp = albumList[i];
+			if (tmp.music.isPlaying()) { pausing.drawAt(43, 318 + BAR_HEIGHT + num * 39); }
+			else { playing.drawAt(43, 318 + BAR_HEIGHT + num * 39); }
+			font_albumList(tmp.name).draw(70, 304 + BAR_HEIGHT + num * 39);
+			auto str = Format(Pad(tmp.totalTime / 60, { 2,L'0' }), L":", Pad(tmp.totalTime % 60, { 2,L'0' }));
 			font_albumList(str).draw(610, 304 + BAR_HEIGHT + num * 39);
-			(albumList[i].isFav ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
+			(tmp.isFav ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
 		}
 	}
 }
