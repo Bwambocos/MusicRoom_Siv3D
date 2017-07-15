@@ -6,11 +6,9 @@
 // 曲リスト 構造体
 struct List
 {
-	bool isPlaying;
 	Sound music;
 	String albumName, musicName;
 	int32_t totalTime;
-	bool isFav;
 };
 
 // グローバル変数
@@ -47,11 +45,29 @@ bool isFav(String albumName, String musicName)
 // お気に入りに追加する
 void addFav(String albumName, String musicName)
 {
-	
+	const String extensions[] = { L".wav",L".ogg",L".mp3" };
+	String tempName; Sound tempMusic; int32_t temp_totalTime;
+	for (auto ext : extensions)
+	{
+		if (FileSystem::IsFile(L"music\\" + albumName + L"\\" + musicName + L"\\" + musicName + ext))
+		{
+			tempMusic = Sound(L"music\\" + albumName + L"\\" + musicName + L"\\" + musicName + L".mp3");
+			break;
+		}
+	}
+	temp_totalTime = (int32_t)tempMusic.lengthSample();
+	musics.push_back({ tempMusic,albumName,musicName,temp_totalTime });
 }
 
 // お気に入りから削除する
 void removeFav(String albumName, String musicName)
 {
-
+	for (int32_t i = 0; i < musics.size(); ++i)
+	{
+		if (musics[i].albumName == albumName && musics[i].musicName == musicName)
+		{
+			musics.erase(musics.begin() + i);
+			break;
+		}
+	}
 }
