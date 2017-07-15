@@ -12,7 +12,6 @@ struct List
 	Sound music;
 	String name;
 	int32_t totalTime;
-	bool isFav;
 };
 
 // グローバル変数
@@ -72,7 +71,6 @@ void Detail_Init()
 			const String extensions[] = { L".wav",L".ogg",L".mp3" };
 			TextReader reader(L"music\\" + temp_albumName + L"\\music_list.txt");
 			String tempName; Sound tempMusic; int32_t temp_totalTime;
-			bool temp_isFav;
 			while (reader.readLine(tempName))
 			{
 				for (auto ext : extensions)
@@ -83,9 +81,9 @@ void Detail_Init()
 						break;
 					}
 				}
+				if (!tempMusic) { tempName = L"読み込み失敗"; }
 				temp_totalTime = (int32_t)tempMusic.lengthSec();
-				temp_isFav = isFav(albumName, tempName);
-				albumList.push_back({ tempMusic,tempName,temp_totalTime,temp_isFav });
+				albumList.push_back({ tempMusic,tempName,temp_totalTime });
 			}
 			font_albumList = Font(16);
 		}
@@ -121,7 +119,7 @@ void Detail_Update()
 			rect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (rect.leftClicked)
 			{
-				music.isFav = (music.isFav ? false : true);
+				(isFav(albumName, music.name) ? removeFav(albumName, music.name) : addFav(albumName, music.name));
 			}
 		}
 	}
@@ -175,7 +173,7 @@ void Detail_Draw()
 			font_albumList(tmp.name).draw(70, 304 + BAR_HEIGHT + num * 39);
 			auto str = Format(Pad(tmp.totalTime / 60, { 2,L'0' }), L":", Pad(tmp.totalTime % 60, { 2,L'0' }));
 			font_albumList(str).draw(610, 304 + BAR_HEIGHT + num * 39);
-			(tmp.isFav ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
+			(isFav(albumName, tmp.name) ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
 		}
 	}
 }
