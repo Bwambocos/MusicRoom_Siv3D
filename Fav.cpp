@@ -4,7 +4,7 @@
 #include "Fav.h"
 
 // 曲リスト 構造体
-struct List
+struct List_fav
 {
 	Sound music;
 	String albumName;
@@ -13,7 +13,7 @@ struct List
 };
 
 // グローバル変数
-static std::vector<List>musics;
+static std::vector<List_fav>musics;
 
 // お気に入り 初期化
 void Fav_Init()

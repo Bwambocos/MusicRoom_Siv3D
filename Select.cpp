@@ -20,21 +20,21 @@ struct Album
 };
 
 // グローバル定数・変数
+static std::vector<std::pair<int64_t, int64_t>>comTime;
+static std::vector<Album> AlbumList;
+static const RectF main_rect(0, BAR_HEIGHT, 768, 768);
 static Image main_tmp;
 static Texture main, no_img;
 static Texture fav, power;
 static Texture Gaussian;
-static const RectF main_rect(0, BAR_HEIGHT, 768, 768);
+static String setAlbum = L"";
+static Grid<double_t> z;
+static TextReader reader;
 static int64_t startTime;
 static int64_t nowTime;
-static std::vector<std::pair<int64_t, int64_t>>comTime;
 static int32_t skel;
 static int32_t first_cou;
 static bool scr_flag = true;
-static Grid<double_t> z;
-static TextReader reader;
-static std::vector<Album> AlbumList;
-static String setAlbum = L"";
 
 // アルバム選択 初期化
 void Select_Init()
@@ -181,11 +181,13 @@ void Select_Draw()
 	}
 }
 
+// アルバム一覧 正方形区画を作成
 Rect MakeRect(int32_t x, int32_t y)
 {
 	return { 30 + x * 246,BAR_HEIGHT + 30 + y * 246,216,216 };
 }
 
+// アルバム画像を返す
 Texture SelectImage(int32_t cou)
 {
 	Texture res;
@@ -202,6 +204,13 @@ Texture SelectImage(int32_t cou)
 	return res;
 }
 
+// 選択されたアルバムの名前を返す
+String getSetAlbum()
+{
+	return setAlbum;
+}
+
+// アルバム詳細 描画
 void DrawDetails(int32_t cou)
 {
 	const Point pos = Mouse::Pos();
@@ -215,7 +224,7 @@ void DrawDetails(int32_t cou)
 	else if (cou == (signed)AlbumList.size() + 1)
 	{
 		name = L"終了";
-		creator = L"MusicRoom を終了します。";
+		creator = L"MusicRoom v2.0 を終了します。";
 	}
 	else
 	{
@@ -235,9 +244,4 @@ void DrawDetails(int32_t cou)
 	RoundRect(pos.x + x_addtion, pos.y + 13, width + 27, 72, 27).drawFrame(3);
 	font(name).draw(pos.x + x_addtion + 14, pos.y + 20, Color(16, 16, 16));
 	font(creator).draw(pos.x + x_addtion + 14, pos.y + 50, Color(16, 16, 16));
-}
-
-String getSetAlbum()
-{
-	return setAlbum;
 }

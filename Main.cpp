@@ -1,3 +1,4 @@
+// include
 #include <Siv3D.hpp>
 #include "SceneMgr.h"
 #include "Bar.h"
