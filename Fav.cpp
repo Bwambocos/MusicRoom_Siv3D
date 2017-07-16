@@ -7,7 +7,8 @@
 struct List
 {
 	Sound music;
-	String albumName, musicName;
+	String albumName;
+	String musicName;
 	int32_t totalTime;
 };
 
@@ -62,7 +63,7 @@ void addFav(String albumName, String musicName)
 // ‚¨‹C‚É“ü‚è‚©‚çíœ‚·‚é
 void removeFav(String albumName, String musicName)
 {
-	for (int32_t i = 0; i < musics.size(); ++i)
+	for (int32_t i = 0; i < (signed)musics.size(); ++i)
 	{
 		if (musics[i].albumName == albumName && musics[i].musicName == musicName)
 		{

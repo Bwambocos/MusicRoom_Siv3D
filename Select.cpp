@@ -10,12 +10,6 @@
 #define MAIN_SKEL_LIMIT 80
 #define COM_MESSAGE_MILLISEC 1250
 
-// 関数プロトタイプ宣言
-Rect MakeRect(int32_t x, int32_t y);
-Texture SelectImage(int32_t cou);
-void DrawDetails(int32_t cou);
-String getSetAlbum();
-
 // アルバム構造体
 struct Album
 {
@@ -125,7 +119,7 @@ void Select_Draw()
 	{
 		main.draw(0, BAR_HEIGHT);
 		Gaussian.draw(0, BAR_HEIGHT);
-		main_rect.draw(Color(255, skel));
+		// main_rect.draw(Color(255, skel));
 	}
 
 	// album_list 描画
