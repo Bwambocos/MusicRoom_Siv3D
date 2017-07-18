@@ -20,7 +20,7 @@ static std::vector<List_detail>albumList;
 static Texture main, playing, pausing, not_fav, fav, albumImg;
 static Font font_albumName, font_albumCreator, font_albumExpl;
 static Font font_albumList;
-static String albumName = L"", albumCreator = L"", albumExpl = L"", selectedMusic = L"";
+static String albumName = L"", albumCreator = L"", albumExpl = L"", selectedAlbum = L"", selectedMusic = L"";
 static RoundRect rect_albumImage(25, 25 + BAR_HEIGHT, 250, 250, 12.5);
 static RoundRect rect_albumName(325, 25 + BAR_HEIGHT, 393, 54, 10);
 static RoundRect rect_albumCreator(325, 82 + BAR_HEIGHT, 393, 48, 10);
@@ -30,7 +30,7 @@ static RoundRect rect_albumList_Name(64, 300 + BAR_HEIGHT, 537, 36, 5);
 static RoundRect rect_albumList_Time(604, 300 + BAR_HEIGHT, 100, 36, 5);
 static RoundRect rect_albumList_Fav(707, 300 + BAR_HEIGHT, 36, 36, 5);
 static RoundRect rect_albumListAll(25, 300 + BAR_HEIGHT, 718, 190, 5);
-static RoundRect rect_albumListCell(25, 300 + BAR_HEIGHT, 718, 36, 5);
+static RoundRect rect_albumListCell(64, 300 + BAR_HEIGHT, 582, 36, 5);
 static int32_t albumList_begin;
 
 // アルバム詳細 初期化
@@ -124,6 +124,7 @@ void Detail_Update()
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if(rect.leftClicked)
 			{
+				selectedAlbum = albumName;
 				selectedMusic = music.name;
 				SceneMgr_ChangeScene(Scene_Music);
 			}
@@ -225,4 +226,12 @@ void albumExpl_Draw()
 		font_albumExpl(texts[i]).draw(rect_albumExpl.x + 10, y);
 		if (overflow) { break; }
 	}
+}
+
+// アルバム・曲情報 受け渡し
+void setAlbumMusicName(String& albumName, String& musicName, Texture& album_Img)
+{
+	albumName = selectedAlbum;
+	musicName = selectedMusic;
+	album_Img = albumImg;
 }
