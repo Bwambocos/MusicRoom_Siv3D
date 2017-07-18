@@ -13,4 +13,4 @@ void Detail_Draw();
 void albumExpl_Draw();
 
 // ƒAƒ‹ƒoƒ€E‹Èî•ñ ó‚¯“n‚µ
-void setAlbumMusicName(String& albumName, String& musicName, Texture& album_Img);
+void setAlbumMusicName(String& album_Name, String& musicName, Texture& album_Img, Sound& music);
