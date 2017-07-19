@@ -8,3 +8,6 @@ void Music_Update();
 
 // ã» ï`âÊ
 void Music_Draw();
+
+// ã»ê‡ñæ ï`âÊ
+void musicExpl_Draw();
