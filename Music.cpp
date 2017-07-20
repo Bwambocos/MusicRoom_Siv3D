@@ -14,7 +14,9 @@ static Font music_NameTime, music_Exp;
 static RoundRect rect_musicName(25, 25 + BAR_HEIGHT, 468, 48, 10);
 static RoundRect rect_musicTime(496, 25 + BAR_HEIGHT, 199, 48, 10);
 static RoundRect rect_music_isFav(698, 25 + BAR_HEIGHT, 48, 48, 10);
+static RoundRect rect_musicBar(127, 91 + BAR_HEIGHT, 565, 21, 5);
 static RoundRect rect_musicExp(25, 130 + BAR_HEIGHT, 718, 357, 10);
+static Circle ccl_musicBar(0, rect_musicBar.y + rect_musicBar.h / 2, 15);
 static FFTResult fft;
 static int32_t music_musicTime;
 
@@ -66,6 +68,18 @@ void Music_Draw()
 		rect_music_isFav.drawShadow({ 0,15 }, 32, 10);
 		rect_music_isFav.drawFrame(3);
 		rect_music_isFav.draw(Color(32, 32, 32, 120));
+
+		// 再生バー
+		{
+			rect_musicBar.drawShadow({ 0,15 }, 32, 10);
+			rect_musicBar.drawFrame(3);
+			rect_musicBar.draw(Color(32, 32, 32, 120));
+			// ボタン１個 51x51
+			ccl_musicBar.x = rect_musicBar.x + rect_musicBar.w*music_Music.samplesPlayed() / music_Music.lengthSample();
+			ccl_musicBar.draw((music_Music.isPlaying() ? Color(200, 0, 0) : Color(64, 64, 64)));
+			ccl_musicBar.drawFrame(1, 2, Color(32, 32, 32));
+		}
+
 		rect_musicExp.drawShadow({ 0,15 }, 32, 10);
 		rect_musicExp.drawFrame(3);
 		rect_musicExp.draw(Color(32, 32, 32, 120));
