@@ -8,6 +8,8 @@
 
 // グローバル変数
 static Texture music_albumImg, music_Gaussian, music_Main, faved, not_faved;
+static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2];
+static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep;
 static String music_albumName = L"", music_musicName = L"", music_musicExp = L"";
 static Sound music_Music;
 static Font music_NameTime, music_Exp;
@@ -16,7 +18,6 @@ static RoundRect rect_musicTime(496, 25 + BAR_HEIGHT, 199, 48, 10);
 static RoundRect rect_music_isFav(698, 25 + BAR_HEIGHT, 48, 48, 10);
 static RoundRect rect_musicBar(127, 91 + BAR_HEIGHT, 565, 21, 5);
 static RoundRect rect_musicExp(25, 130 + BAR_HEIGHT, 718, 357, 10);
-static Circle ccl_musicBar(0, rect_musicBar.y + rect_musicBar.h / 2, 15);
 static FFTResult fft;
 static int32_t music_musicTime;
 
@@ -27,6 +28,21 @@ void Music_Init()
 	{
 		music_Main = Texture(L"data\\Music\\main.png");
 		music_Gaussian = Texture(Image(L"music\\" + music_albumName + L"\\" + music_albumName + L".png").gaussianBlurred(10, 10));
+		originPlay[0] = Texture(L"data\\Music\\play\\normal.png");
+		originPlay[1] = Texture(L"data\\Music\\play\\active.png");
+		originBrief[0] = Texture(L"data\\Music\\brief\\normal.png");
+		originBrief[1] = Texture(L"data\\Music\\brief\\active.png");
+		originStop[0] = Texture(L"data\\Music\\stop\\normal.png");
+		originStop[1] = Texture(L"data\\Music\\stop\\active.png");
+		originSeek[0] = Texture(L"data\\Music\\seek\\normal.png");
+		originSeek[1] = Texture(L"data\\Music\\seek\\active.png");
+		originRep[0] = Texture(L"data\\Music\\rep\\normal.png");
+		originRep[1] = Texture(L"data\\Music\\rep\\active.png");
+		displayPlay = originPlay[0];
+		displayBrief = originBrief[0];
+		displayStop = originStop[0];
+		displaySeek = originSeek[0];
+		displayRep = originRep[0];
 	}
 
 	// 曲情報 初期化
@@ -74,10 +90,13 @@ void Music_Draw()
 			rect_musicBar.drawShadow({ 0,15 }, 32, 10);
 			rect_musicBar.drawFrame(3);
 			rect_musicBar.draw(Color(32, 32, 32, 120));
-			// ボタン１個 51x51
-			ccl_musicBar.x = rect_musicBar.x + rect_musicBar.w*music_Music.samplesPlayed() / music_Music.lengthSample();
-			ccl_musicBar.draw((music_Music.isPlaying() ? Color(200, 0, 0) : Color(64, 64, 64)));
-			ccl_musicBar.drawFrame(1, 2, Color(32, 32, 32));
+			const RoundRect tmpRect(rect_musicBar.x, rect_musicBar.y, rect_musicBar.w*music_Music.samplesPlayed() / music_Music.lengthSample(), rect_musicBar.h, rect_musicBar.r);
+			tmpRect.draw(Color(0, 200, 0, 120));
+			auto x = rect_musicBar.x + rect_musicBar.w*music_Music.samplesPlayed() / music_Music.lengthSample();
+			(music_Music.isPlaying() ? originSeek[1] : originSeek[0]).drawAt(x, rect_musicBar.y + rect_musicBar.h / 2);
+			(music_Music.isPlaying() ? displayBrief : displayPlay).drawAt(45, rect_musicBar.y + rect_musicBar.h / 2);
+			displayRep.drawAt(90, rect_musicBar.y + rect_musicBar.h / 2);
+			displayStop.drawAt(723, rect_musicBar.y + rect_musicBar.h / 2);
 		}
 
 		rect_musicExp.drawShadow({ 0,15 }, 32, 10);
