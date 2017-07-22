@@ -10,7 +10,7 @@
 static Texture music_albumImg, music_Gaussian, music_Main, faved, not_faved;
 static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2];
 static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep;
-static String music_albumName = L"", music_musicName = L"", music_musicExp = L"";
+static String music_albumName = L"", music_musicName = L"", music_musicExp = L"", music_musicLength = L"";
 static Sound music_Music;
 static Font music_NameTime, music_Exp;
 static RoundRect rect_musicName(25, 25 + BAR_HEIGHT, 468, 48, 10);
@@ -89,6 +89,15 @@ void Music_Update()
 		displayStop = originStop[(tmpCircle.mouseOver ? 1 : 0)];
 		if (tmpCircle.leftClicked) { music_Music.stop(); }
 	}
+
+	// ã»èÓïÒ çXêV
+	{
+		music_musicLength = Format(Pad(music_musicTime / 60, { 2,L'0' }), L":", Pad(music_musicTime % 60, { 2,L'0' }));
+		if (rect_music_isFav.leftClicked)
+		{
+			(isFav(music_albumName, music_musicName) ? removeFav : addFav)(music_albumName, music_musicName);
+		}
+	}
 }
 
 // ã» ï`âÊ
@@ -135,10 +144,9 @@ void Music_Draw()
 
 	// ã»èÓïÒ ï`âÊ
 	{
-		auto str = Format(Pad(music_musicTime / 60, { 2,L'0' }), L":", Pad(music_musicTime % 60, { 2,L'0' }));
 		music_NameTime(music_musicName).draw(33, 31 + BAR_HEIGHT);
-		music_NameTime(str).draw(504, 31 + BAR_HEIGHT);
-		(isFav(music_albumName, music_musicName) ? faved : not_faved).drawAt(722, 49 + BAR_HEIGHT);
+		music_NameTime(music_musicLength).draw(504, 31 + BAR_HEIGHT);
+		((isFav(music_albumName, music_musicName) || rect_music_isFav.mouseOver) ? faved : not_faved).drawAt(722, 49 + BAR_HEIGHT);
 		musicExpl_Draw();
 	}
 }
