@@ -11,3 +11,6 @@ void Detail_Draw();
 
 // アルバム説明 描画
 void albumExpl_Draw();
+
+// アルバム・曲情報 受け渡し
+void setAlbumMusicName(String& album_Name, String& musicName, Texture& album_Img, Sound& music);

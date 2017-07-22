@@ -7,7 +7,6 @@
 
 // define
 #define WELCOME_MESSAGE_MILLISEC 3000
-#define MAIN_SKEL_LIMIT 80
 #define COM_MESSAGE_MILLISEC 1250
 
 // アルバム構造体
@@ -22,7 +21,6 @@ struct Album
 // グローバル定数・変数
 static std::vector<std::pair<int64_t, int64_t>>comTime;
 static std::vector<Album> AlbumList;
-static const RectF main_rect(0, BAR_HEIGHT, 768, 768);
 static Image main_tmp;
 static Texture main, no_img;
 static Texture fav, power;
@@ -32,7 +30,6 @@ static Grid<double_t> z;
 static TextReader reader;
 static int64_t startTime;
 static int64_t nowTime;
-static int32_t skel;
 static int32_t first_cou;
 static bool scr_flag = true;
 
@@ -79,7 +76,6 @@ void Select_Init()
 // アルバム選択 更新
 void Select_Update()
 {
-	skel = (skel < MAIN_SKEL_LIMIT ? skel + 1 : skel);
 	nowTime = Time::GetMillisec64();
 
 	// スクロール 更新
@@ -119,7 +115,6 @@ void Select_Draw()
 	{
 		main.draw(0, BAR_HEIGHT);
 		Gaussian.draw(0, BAR_HEIGHT);
-		// main_rect.draw(Color(255, skel));
 	}
 
 	// album_list 描画
