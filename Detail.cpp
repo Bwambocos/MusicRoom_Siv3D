@@ -111,7 +111,7 @@ void Detail_Update()
 				albumList_begin = Min<int32_t>(albumList_begin, albumList.size() - 5);
 			}
 		}
-		for (int32_t i = albumList_begin; ((i - albumList_begin) < Min<int32_t>(5, albumList.size()))&&(i<albumList.size()); ++i)
+		for (int32_t i = albumList_begin; ((i - albumList_begin) < Min<int32_t>(5, (signed)albumList.size())) && (i < (signed)albumList.size()); ++i)
 		{
 			auto num = i - albumList_begin;
 			auto music = albumList[i];
