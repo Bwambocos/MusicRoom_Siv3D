@@ -68,6 +68,14 @@ void Music_Update()
 
 	// 再生バー 更新
 	{
+		// バー
+		if (rect_musicBar.leftPressed)
+		{
+			const Point tmpPoint = Mouse::Pos();
+			music_Music.setPosSample(music_Music.lengthSample()*(tmpPoint.x - rect_musicBar.x) / rect_musicBar.w);
+		}
+
+		// ボタン
 		Circle tmpCircle(45, rect_musicBar.y + rect_musicBar.h / 2, 15);
 		displayPlay = originPlay[(tmpCircle.mouseOver ? 1 : 0)];
 		displayBrief = originBrief[(tmpCircle.mouseOver ? 1 : 0)];
@@ -79,7 +87,7 @@ void Music_Update()
 		displayRep = originRep[((tmpCircle.mouseOver || music_Music.isLoop()) ? 1 : 0)];
 		if (tmpCircle.leftClicked)
 		{
-			const int64 tmpTime = music_Music.samplesPlayed() % music_Music.lengthSample();
+			const int64 tmpTime = music_Music.streamPosSample();
 			music_Music.pause();
 			music_Music.setLoop(music_Music.isLoop() ? false : true);
 			music_Music.play();
@@ -124,11 +132,11 @@ void Music_Draw()
 			rect_musicBar.drawShadow({ 0,15 }, 32, 10);
 			rect_musicBar.drawFrame(3);
 			rect_musicBar.draw(Color(32, 32, 32, 120));
-			const RoundRect tmpRect(rect_musicBar.x, rect_musicBar.y, rect_musicBar.w*(music_Music.samplesPlayed() % music_Music.lengthSample()) / music_Music.lengthSample(), rect_musicBar.h, rect_musicBar.r);
+			const RoundRect tmpRect(rect_musicBar.x, rect_musicBar.y, rect_musicBar.w*music_Music.streamPosSample() / music_Music.lengthSample(), rect_musicBar.h, rect_musicBar.r);
 			tmpRect.draw(Color(0, 200, 0, 120));
 
 			// Seek
-			auto x = rect_musicBar.x + rect_musicBar.w*(music_Music.samplesPlayed() % music_Music.lengthSample()) / music_Music.lengthSample();
+			auto x = rect_musicBar.x + rect_musicBar.w*music_Music.streamPosSample() / music_Music.lengthSample();
 			(music_Music.isPlaying() ? originSeek[1] : originSeek[0]).drawAt(x, rect_musicBar.y + rect_musicBar.h / 2);
 
 			// ボタン
