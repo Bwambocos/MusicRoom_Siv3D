@@ -65,6 +65,30 @@ void Music_Init()
 void Music_Update()
 {
 	if (Input::KeyB.clicked) { SceneMgr_ChangeScene(Scene_Detail); }
+
+	// 再生バー 更新
+	{
+		Circle tmpCircle(45, rect_musicBar.y + rect_musicBar.h / 2, 15);
+		displayPlay = originPlay[(tmpCircle.mouseOver ? 1 : 0)];
+		displayBrief = originBrief[(tmpCircle.mouseOver ? 1 : 0)];
+		if (tmpCircle.leftClicked)
+		{
+			(music_Music.isPlaying() ? music_Music.pause() : music_Music.play());
+		}
+		tmpCircle = Circle(90, rect_musicBar.y + rect_musicBar.h / 2, 15);
+		displayRep = originRep[((tmpCircle.mouseOver || music_Music.isLoop()) ? 1 : 0)];
+		if (tmpCircle.leftClicked)
+		{
+			const int64 tmpTime = music_Music.samplesPlayed() % music_Music.lengthSample();
+			music_Music.pause();
+			music_Music.setLoop(music_Music.isLoop() ? false : true);
+			music_Music.play();
+			music_Music.setPosSample(tmpTime);
+		}
+		tmpCircle = Circle(723, rect_musicBar.y + rect_musicBar.h / 2, 15);
+		displayStop = originStop[(tmpCircle.mouseOver ? 1 : 0)];
+		if (tmpCircle.leftClicked) { music_Music.stop(); }
+	}
 }
 
 // 曲 描画
@@ -74,7 +98,7 @@ void Music_Draw()
 	{
 		music_Main.draw(0, BAR_HEIGHT);
 		fft = FFT::Analyze(music_Music);
-		for (auto i : step(51)) { RectF(1 + i * 15, Window::Height(), 15, -Pow(fft.buffer[i], 0.8) * 750).draw(HSV(i * 7.0315)); }
+		for (auto i : step(51)) { RectF(1 + i * 15, Window::Height(), 15, -Pow(fft.buffer[i], 0.8) * 750).draw(Color(200, 200, 200)); }
 		rect_musicName.drawShadow({ 0,15 }, 32, 10);
 		rect_musicName.drawFrame(3);
 		rect_musicName.draw(Color(32, 32, 32, 120));
@@ -87,13 +111,18 @@ void Music_Draw()
 
 		// 再生バー
 		{
+			// バー
 			rect_musicBar.drawShadow({ 0,15 }, 32, 10);
 			rect_musicBar.drawFrame(3);
 			rect_musicBar.draw(Color(32, 32, 32, 120));
-			const RoundRect tmpRect(rect_musicBar.x, rect_musicBar.y, rect_musicBar.w*music_Music.samplesPlayed() / music_Music.lengthSample(), rect_musicBar.h, rect_musicBar.r);
+			const RoundRect tmpRect(rect_musicBar.x, rect_musicBar.y, rect_musicBar.w*(music_Music.samplesPlayed() % music_Music.lengthSample()) / music_Music.lengthSample(), rect_musicBar.h, rect_musicBar.r);
 			tmpRect.draw(Color(0, 200, 0, 120));
-			auto x = rect_musicBar.x + rect_musicBar.w*music_Music.samplesPlayed() / music_Music.lengthSample();
+
+			// Seek
+			auto x = rect_musicBar.x + rect_musicBar.w*(music_Music.samplesPlayed() % music_Music.lengthSample()) / music_Music.lengthSample();
 			(music_Music.isPlaying() ? originSeek[1] : originSeek[0]).drawAt(x, rect_musicBar.y + rect_musicBar.h / 2);
+
+			// ボタン
 			(music_Music.isPlaying() ? displayBrief : displayPlay).drawAt(45, rect_musicBar.y + rect_musicBar.h / 2);
 			displayRep.drawAt(90, rect_musicBar.y + rect_musicBar.h / 2);
 			displayStop.drawAt(723, rect_musicBar.y + rect_musicBar.h / 2);
