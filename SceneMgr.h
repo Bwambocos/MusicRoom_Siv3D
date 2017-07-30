@@ -6,6 +6,7 @@ typedef enum
 	Scene_Select,
 	Scene_Detail,
 	Scene_Music,
+	Scene_Fav,
 }Scene_S;
 
 // XV
