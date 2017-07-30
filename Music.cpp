@@ -51,7 +51,7 @@ void Music_Init()
 		TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
 		music_reader.readAll(music_musicExp);
 		music_musicExp += L'\n';
-		music_musicTime = music_Music.lengthSec();
+		music_musicTime = (int32_t)music_Music.lengthSec();
 		faved = Texture(L"data\\Music\\fav.png");
 		not_faved = Texture(L"data\\Music\\not_fav.png");
 		music_NameTime = Font(18);
@@ -72,7 +72,7 @@ void Music_Update()
 		if (rect_musicBar.leftPressed)
 		{
 			const Point tmpPoint = Mouse::Pos();
-			music_Music.setPosSample(music_Music.lengthSample()*(tmpPoint.x - rect_musicBar.x) / rect_musicBar.w);
+			music_Music.setPosSample(music_Music.lengthSample()*(tmpPoint.x - (int64)rect_musicBar.x) / (int64)rect_musicBar.w);
 		}
 
 		// ƒ{ƒ^ƒ“

@@ -111,7 +111,7 @@ void Detail_Update()
 				albumList_begin = Min<int32_t>(albumList_begin, albumList.size() - 5);
 			}
 		}
-		for (int32_t i = albumList_begin; ((i - albumList_begin) < Min<int32_t>(5, albumList.size()))&&(i<albumList.size()); ++i)
+		for (int32_t i = albumList_begin; ((i - albumList_begin) < Min<int32_t>(5, (signed)albumList.size())) && (i < (signed)albumList.size()); ++i)
 		{
 			auto num = i - albumList_begin;
 			auto music = albumList[i];
@@ -177,12 +177,13 @@ void Detail_Draw()
 		{
 			auto num = i - albumList_begin;
 			auto tmp = albumList[i];
+			RoundRect tmpRRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (tmp.music.isPlaying()) { pausing.drawAt(43, 318 + BAR_HEIGHT + num * 39); }
 			else { playing.drawAt(43, 318 + BAR_HEIGHT + num * 39); }
 			font_albumList(tmp.name).draw(70, 304 + BAR_HEIGHT + num * 39);
 			auto str = Format(Pad(tmp.totalTime / 60, { 2,L'0' }), L":", Pad(tmp.totalTime % 60, { 2,L'0' }));
 			font_albumList(str).draw(610, 304 + BAR_HEIGHT + num * 39);
-			(isFav(albumName, tmp.name) ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
+			((isFav(albumName, tmp.name) || tmpRRect.mouseOver) ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
 		}
 	}
 }
