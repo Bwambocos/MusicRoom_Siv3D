@@ -1,3 +1,4 @@
+// include
 #include <Siv3D.hpp>
 #include "SceneMgr.h"
 #include "Bar.h"
@@ -12,9 +13,9 @@ void Main()
 	SceneMgr_ChangeScene(Scene_Select);
 	while (System::Update())
 	{
-		Bar_Update();
 		SceneMgr_Update();
-		Bar_Draw();
+		Bar_Update();
 		SceneMgr_Draw();
+		Bar_Draw();
 	}
 }

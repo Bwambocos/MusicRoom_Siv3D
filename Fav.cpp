@@ -4,15 +4,16 @@
 #include "Fav.h"
 
 // 曲リスト 構造体
-struct List
+struct List_fav
 {
 	Sound music;
-	String albumName, musicName;
+	String albumName;
+	String musicName;
 	int32_t totalTime;
 };
 
 // グローバル変数
-static std::vector<List>musics;
+static std::vector<List_fav>musics;
 
 // お気に入り 初期化
 void Fav_Init()
@@ -62,7 +63,7 @@ void addFav(String albumName, String musicName)
 // お気に入りから削除する
 void removeFav(String albumName, String musicName)
 {
-	for (int32_t i = 0; i < musics.size(); ++i)
+	for (int32_t i = 0; i < (signed)musics.size(); ++i)
 	{
 		if (musics[i].albumName == albumName && musics[i].musicName == musicName)
 		{

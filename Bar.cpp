@@ -6,15 +6,14 @@
 // define
 #define DEFAULT_mainRectWidth 256
 
-static RoundRect fieldRect(0, 0, 768, BAR_HEIGHT, 16);
-static RoundRect mainRect(256, 0, 256, BAR_HEIGHT, 16);
-static int32_t mainRectWidth = DEFAULT_mainRectWidth;
 static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2], originPrev[2], originNext[2];
 static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep, displayPrev, displayNext;
+static RoundRect fieldRect(0, 0, 768, BAR_HEIGHT, 16);
+static RoundRect mainRect(256, 0, 256, BAR_HEIGHT, 16);
 static Sound nowMusic;
 static String mainText = L"";
-static int32_t nowTime, totalTime;
 static Font mainFont, timeFont;
+static int32_t mainRectWidth = DEFAULT_mainRectWidth, nowTime, totalTime;
 
 // バー 初期化
 void Bar_Init()
@@ -52,10 +51,9 @@ void Bar_Init()
 void Bar_Update()
 {
 	const Rect rect = mainFont(mainText).region();
-	mainRectWidth = rect.w + 18 * 2;
-	mainRectWidth = Max(DEFAULT_mainRectWidth, mainRectWidth);
+	mainRectWidth = Max(DEFAULT_mainRectWidth, rect.w + 18 * 2);
 	mainRect = RoundRect(256 - (mainRectWidth - DEFAULT_mainRectWidth) / 2, 0, mainRectWidth, BAR_HEIGHT, 16);
-	
+
 	// ボタン 更新
 	{
 		int32_t x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
@@ -122,7 +120,7 @@ void Bar_Draw()
 {
 	fieldRect.draw(Color(200, 200, 200));
 	mainRect.draw(Color(125, 125, 125));
-	
+
 	// ボタン 描画
 	{
 		int32_t x = 768 / 2 - mainRectWidth / 2 - 40 * 3;

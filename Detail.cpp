@@ -7,19 +7,20 @@
 #include "Fav.h"
 
 // 曲リスト 構造体
-struct List
+struct List_detail
 {
-	bool isPlaying;
 	Sound music;
 	String name;
 	int32_t totalTime;
-	bool isFav;
 };
 
 // グローバル変数
-static std::map<String, std::vector<List>>albums;
-static std::vector<List>albumList;
-static Texture main;
+static std::map<String, std::vector<List_detail>>albums;
+static std::vector<List_detail>albumList;
+static Texture main, playing, pausing, not_fav, fav, albumImg;
+static Font font_albumName, font_albumCreator, font_albumExpl;
+static Font font_albumList;
+static String albumName = L"", albumCreator = L"", albumExpl = L"", selectedAlbumName = L"", selectedMusicName = L"";
 static RoundRect rect_albumImage(25, 25 + BAR_HEIGHT, 250, 250, 12.5);
 static RoundRect rect_albumName(325, 25 + BAR_HEIGHT, 393, 54, 10);
 static RoundRect rect_albumCreator(325, 82 + BAR_HEIGHT, 393, 48, 10);
@@ -28,15 +29,23 @@ static RoundRect rect_albumList_Flag(25, 300 + BAR_HEIGHT, 36, 36, 5);
 static RoundRect rect_albumList_Name(64, 300 + BAR_HEIGHT, 537, 36, 5);
 static RoundRect rect_albumList_Time(604, 300 + BAR_HEIGHT, 100, 36, 5);
 static RoundRect rect_albumList_Fav(707, 300 + BAR_HEIGHT, 36, 36, 5);
-static String albumName = L"", albumCreator = L"", albumExpl = L"";
-static Texture albumImg;
-Font font_albumName, font_albumCreator, font_albumExpl;
-Font font_albumList;
+static RoundRect rect_albumListAll(25, 300 + BAR_HEIGHT, 718, 190, 5);
+static RoundRect rect_albumListCell(64, 300 + BAR_HEIGHT, 582, 36, 5);
+static Sound selectedMusic;
+static int32_t albumList_begin;
 
 // アルバム詳細 初期化
 void Detail_Init()
 {
-	if (!main) { main = Texture(L"data\\Detail\\main.png"); }
+	if (!main)
+	{
+		main = Texture(L"data\\Detail\\main.png");
+		playing = Texture(L"data\\Detail\\playing.png");
+		pausing = Texture(L"data\\Detail\\pausing.png");
+		not_fav = Texture(L"data\\Detail\\not_fav.png");
+		fav = Texture(L"data\\Detail\\fav.png");
+	}
+
 	String temp_albumName = getSetAlbum();
 
 	// アルバム情報 初期化
@@ -64,7 +73,6 @@ void Detail_Init()
 			const String extensions[] = { L".wav",L".ogg",L".mp3" };
 			TextReader reader(L"music\\" + temp_albumName + L"\\music_list.txt");
 			String tempName; Sound tempMusic; int32_t temp_totalTime;
-			bool temp_isFav;
 			while (reader.readLine(tempName))
 			{
 				for (auto ext : extensions)
@@ -75,24 +83,55 @@ void Detail_Init()
 						break;
 					}
 				}
-				temp_totalTime = (int32_t)tempMusic.lengthSample();
-				temp_isFav = isFav(albumName, tempName);
-				albumList.push_back({ false,tempMusic,tempName,temp_totalTime,temp_isFav });
+				if (!tempMusic) { tempName = L"！読み込み失敗！"; }
+				temp_totalTime = (int32_t)tempMusic.lengthSec();
+				albumList.push_back({ tempMusic,tempName,temp_totalTime });
 			}
 			font_albumList = Font(16);
 		}
 		albums[temp_albumName] = albumList;
 	}
-	else
-	{
-		albumList = albums[temp_albumName];
-	}
+	else { albumList = albums[temp_albumName]; }
 }
 
 // アルバム詳細 更新
 void Detail_Update()
 {
 	if (Input::KeyB.pressed) { SceneMgr_ChangeScene(Scene_Select); }
+
+	// 曲リスト 更新
+	{
+		if (rect_albumListAll.mouseOver)
+		{
+			bool scr_flag = ((albumList_begin + 5 <= (signed)albumList.size()) || (albumList_begin > 0) ? true : false);
+			if (scr_flag)
+			{
+				albumList_begin += Mouse::Wheel();
+				albumList_begin = Max(albumList_begin, 0);
+				albumList_begin = Min<int32_t>(albumList_begin, albumList.size() - 5);
+			}
+		}
+		for (int32_t i = albumList_begin; ((i - albumList_begin) < Min<int32_t>(5, (signed)albumList.size())) && (i < (signed)albumList.size()); ++i)
+		{
+			auto num = i - albumList_begin;
+			auto music = albumList[i];
+			RoundRect rect(rect_albumList_Flag.x, rect_albumList_Flag.y + num * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r);
+			if (rect.leftClicked) { (music.music.isPlaying() ? music.music.pause() : music.music.play()); }
+			rect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
+			if (rect.leftClicked)
+			{
+				(isFav(albumName, music.name) ? removeFav(albumName, music.name) : addFav(albumName, music.name));
+			}
+			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
+			if(rect.leftClicked)
+			{
+				selectedAlbumName = albumName;
+				selectedMusicName = music.name;
+				selectedMusic = music.music;
+				SceneMgr_ChangeScene(Scene_Music);
+			}
+		}
+	}
 }
 
 // アルバム詳細 描画
@@ -129,17 +168,22 @@ void Detail_Draw()
 		rect.drawFrame(0, 2, Color(200, 200, 200));
 		font_albumName(albumName).draw(333, 27 + BAR_HEIGHT);
 		font_albumCreator(albumCreator).draw(333, 88 + BAR_HEIGHT);
-		// font_albumExpl(albumExpl).draw(333, 144 + BAR_HEIGHT);
 		albumExpl_Draw();
 	}
 
 	// 曲リスト 描画
 	{
-		for (int32_t i = 0; i < Min<int32_t>(5, albumList.size()); ++i)
+		for (int32_t i = albumList_begin; (i - albumList_begin) < Min<int32_t>(5, albumList.size()); ++i)
 		{
-			// auto temp = (albumList[i].isPlaying ? "||" : "▶");
-			// font_albumList(temp).draw(25, 300 + BAR_HEIGHT);
-			font_albumList(albumList[i].name).draw(70, 304 + BAR_HEIGHT + i * (36 + 2));
+			auto num = i - albumList_begin;
+			auto tmp = albumList[i];
+			RoundRect tmpRRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
+			if (tmp.music.isPlaying()) { pausing.drawAt(43, 318 + BAR_HEIGHT + num * 39); }
+			else { playing.drawAt(43, 318 + BAR_HEIGHT + num * 39); }
+			font_albumList(tmp.name).draw(70, 304 + BAR_HEIGHT + num * 39);
+			auto str = Format(Pad(tmp.totalTime / 60, { 2,L'0' }), L":", Pad(tmp.totalTime % 60, { 2,L'0' }));
+			font_albumList(str).draw(610, 304 + BAR_HEIGHT + num * 39);
+			((isFav(albumName, tmp.name) || tmpRRect.mouseOver) ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
 		}
 	}
 }
@@ -185,4 +229,13 @@ void albumExpl_Draw()
 		font_albumExpl(texts[i]).draw(rect_albumExpl.x + 10, y);
 		if (overflow) { break; }
 	}
+}
+
+// アルバム・曲情報 受け渡し
+void setAlbumMusicName(String& album_Name, String& musicName, Texture& album_Img, Sound& musicData)
+{
+	album_Name = selectedAlbumName;
+	musicName = selectedMusicName;
+	album_Img = albumImg;
+	musicData = selectedMusic;
 }
