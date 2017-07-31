@@ -17,3 +17,6 @@ void addFav(String albumName, String musicName);
 
 // ‚¨‹C‚É“ü‚è‚©‚çíœ‚·‚é
 void removeFav(String albumName, String musicName);
+
+// ‹Èî•ñ ó‚¯“n‚µ
+void setFavMusicName(String& album_Name, String& musicName, Texture& album_Img, Sound& music);
