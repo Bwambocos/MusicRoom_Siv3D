@@ -142,3 +142,11 @@ void removeFav(String albumName, String musicName)
 		}
 	}
 }
+
+// ‹Èî•ñ ó‚¯“n‚µ
+void setFavMusicName(String& album_Name, String& musicName, Texture& album_Img, Sound& music)
+{
+	album_Name = selectedAlbumName;
+	musicName = selectedMusicName;
+	music = selectedMusic;
+}
