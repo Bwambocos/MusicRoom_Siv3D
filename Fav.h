@@ -13,7 +13,7 @@ void Fav_Draw();
 bool isFav(String albumName, String musicName);
 
 // ‚¨‹C‚É“ü‚è‚É’Ç‰Á‚·‚é
-void addFav(String albumName, String musicName);
+void addFav(String albumName, String musicName, Sound music);
 
 // ‚¨‹C‚É“ü‚è‚©‚çíœ‚·‚é
 void removeFav(String albumName, String musicName);
