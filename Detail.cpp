@@ -120,7 +120,7 @@ void Detail_Update()
 			rect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (rect.leftClicked)
 			{
-				(isFav(albumName, music.name) ? removeFav(albumName, music.name) : addFav(albumName, music.name));
+				(isFav(albumName, music.name) ? removeFav(albumName, music.name) : addFav(albumName, music.name, music.music));
 			}
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if(rect.leftClicked)

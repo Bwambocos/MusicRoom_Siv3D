@@ -3,6 +3,7 @@
 #include "Select.h"
 #include "Detail.h"
 #include "Music.h"
+#include "Fav.h"
 
 // グローバル変数
 static Scene_S Scene = Scene_Select;
@@ -24,6 +25,10 @@ void SceneMgr_Update()
 	case Scene_Music:
 		Music_Update();
 		break;
+
+	case Scene_Fav:
+		Fav_Update();
+		break;
 	}
 }
 
@@ -43,12 +48,17 @@ void SceneMgr_Draw()
 	case Scene_Music:
 		Music_Draw();
 		break;
+
+	case Scene_Fav:
+		Fav_Draw();
+		break;
 	}
 }
 
 // シーン変更
 void SceneMgr_ChangeScene(Scene_S nextScene)
 {
+	prevScene = Scene;
 	Scene = nextScene;
 	switch (Scene)
 	{
@@ -62,6 +72,10 @@ void SceneMgr_ChangeScene(Scene_S nextScene)
 
 	case Scene_Music:
 		Music_Init();
+		break;
+
+	case Scene_Fav:
+		Fav_Init();
 		break;
 	}
 }

@@ -99,8 +99,12 @@ void Select_Update()
 			if (!SelectImage(cou)) { break; }
 			if (Input::MouseL.clicked && rect.mouseOver)
 			{
-				setAlbum = AlbumList[cou].name;
-				SceneMgr_ChangeScene(Scene_Detail);
+				if (cou == (signed)AlbumList.size()) { SceneMgr_ChangeScene(Scene_Fav); }
+				else
+				{
+					setAlbum = AlbumList[cou].name;
+					SceneMgr_ChangeScene(Scene_Detail);
+				}
 			}
 			++cou;
 		}

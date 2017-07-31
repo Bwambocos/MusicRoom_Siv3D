@@ -47,7 +47,16 @@ void Music_Init()
 
 	// ã»èÓïÒ èâä˙âª
 	{
-		setAlbumMusicName(music_albumName, music_musicName, music_albumImg, music_Music);
+		switch (get_prevScene())
+		{
+		case Scene_Detail:
+			setAlbumMusicName(music_albumName, music_musicName, music_albumImg, music_Music);
+			break;
+
+		case Scene_Fav:
+			setFavMusicName(music_albumName, music_musicName, music_albumImg, music_Music);
+			break;
+		}
 		TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
 		music_reader.readAll(music_musicExp);
 		music_musicExp += L'\n';
@@ -103,7 +112,7 @@ void Music_Update()
 		music_musicLength = Format(Pad(music_musicTime / 60, { 2,L'0' }), L":", Pad(music_musicTime % 60, { 2,L'0' }));
 		if (rect_music_isFav.leftClicked)
 		{
-			(isFav(music_albumName, music_musicName) ? removeFav : addFav)(music_albumName, music_musicName);
+			(isFav(music_albumName, music_musicName) ? removeFav(music_albumName, music_musicName) : addFav(music_albumName, music_musicName, music_Music));
 		}
 	}
 }
