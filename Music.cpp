@@ -112,7 +112,7 @@ void Music_Update()
 		music_musicLength = Format(Pad(music_musicTime / 60, { 2,L'0' }), L":", Pad(music_musicTime % 60, { 2,L'0' }));
 		if (rect_music_isFav.leftClicked)
 		{
-			(isFav(music_albumName, music_musicName) ? removeFav : addFav)(music_albumName, music_musicName);
+			(isFav(music_albumName, music_musicName) ? removeFav(music_albumName, music_musicName) : addFav(music_albumName, music_musicName, music_Music));
 		}
 	}
 }
