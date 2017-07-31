@@ -49,6 +49,7 @@ void SceneMgr_Draw()
 // ƒV[ƒ“•ÏX
 void SceneMgr_ChangeScene(Scene_S nextScene)
 {
+	prevScene = Scene;
 	Scene = nextScene;
 	switch (Scene)
 	{
