@@ -87,13 +87,13 @@ void Music_Update()
 		Circle tmpCircle(45, rect_musicBar.y + rect_musicBar.h / 2, 15);
 		displayPlay = originPlay[(tmpCircle.mouseOver ? 1 : 0)];
 		displayBrief = originBrief[(tmpCircle.mouseOver ? 1 : 0)];
-		if (tmpCircle.leftClicked)
+		if (tmpCircle.leftClicked || Input::KeyEnter.clicked)
 		{
 			(music_Music.isPlaying() ? music_Music.pause() : music_Music.play());
 		}
 		tmpCircle = Circle(90, rect_musicBar.y + rect_musicBar.h / 2, 15);
 		displayRep = originRep[((tmpCircle.mouseOver || music_Music.isLoop()) ? 1 : 0)];
-		if (tmpCircle.leftClicked)
+		if (tmpCircle.leftClicked || Input::KeyShift.clicked)
 		{
 			const int64 tmpTime = music_Music.streamPosSample();
 			music_Music.pause();
@@ -103,7 +103,7 @@ void Music_Update()
 		}
 		tmpCircle = Circle(723, rect_musicBar.y + rect_musicBar.h / 2, 15);
 		displayStop = originStop[(tmpCircle.mouseOver ? 1 : 0)];
-		if (tmpCircle.leftClicked) { music_Music.stop(); }
+		if (tmpCircle.leftClicked || Input::KeySpace.clicked) { music_Music.stop(); }
 	}
 
 	// ã»èÓïÒ çXêV
