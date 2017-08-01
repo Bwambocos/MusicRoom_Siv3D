@@ -7,7 +7,7 @@
 #include "Fav.h"
 
 // ÉOÉçÅ[ÉoÉãïœêî
-static Texture music_albumImg, music_Gaussian, music_Main, faved, not_faved;
+static Texture music_Main, faved, not_faved;
 static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2];
 static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep;
 static String music_albumName = L"", music_musicName = L"", music_musicExp = L"", music_musicLength = L"";
@@ -27,7 +27,6 @@ void Music_Init()
 	// îwåi èâä˙âª
 	{
 		music_Main = Texture(L"data\\Music\\main.png");
-		music_Gaussian = Texture(Image(L"music\\" + music_albumName + L"\\" + music_albumName + L".png").gaussianBlurred(10, 10));
 		originPlay[0] = Texture(L"data\\Music\\play\\normal.png");
 		originPlay[1] = Texture(L"data\\Music\\play\\active.png");
 		originBrief[0] = Texture(L"data\\Music\\brief\\normal.png");
@@ -50,11 +49,11 @@ void Music_Init()
 		switch (get_prevScene())
 		{
 		case Scene_Detail:
-			setAlbumMusicName(music_albumName, music_musicName, music_albumImg, music_Music);
+			setAlbumMusicName(music_albumName, music_musicName, music_Music);
 			break;
 
 		case Scene_Fav:
-			setFavMusicName(music_albumName, music_musicName, music_albumImg, music_Music);
+			setFavMusicName(music_albumName, music_musicName, music_Music);
 			break;
 		}
 		TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
