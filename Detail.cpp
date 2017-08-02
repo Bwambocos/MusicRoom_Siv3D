@@ -232,10 +232,9 @@ void albumExpl_Draw()
 }
 
 // アルバム・曲情報 受け渡し
-void setAlbumMusicName(String& album_Name, String& musicName, Texture& album_Img, Sound& musicData)
+void setAlbumMusicName(String& album_Name, String& musicName, Sound& musicData)
 {
 	album_Name = selectedAlbumName;
 	musicName = selectedMusicName;
-	album_Img = albumImg;
 	musicData = selectedMusic;
 }
