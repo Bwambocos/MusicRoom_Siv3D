@@ -79,7 +79,7 @@ void Detail_Init()
 				{
 					if (FileSystem::IsFile(L"music\\" + temp_albumName + L"\\" + tempName + L"\\" + tempName + ext))
 					{
-						tempMusic = Sound(L"music\\" + temp_albumName + L"\\" + tempName + L"\\" + tempName + L".mp3");
+						tempMusic = Sound(L"music\\" + temp_albumName + L"\\" + tempName + L"\\" + tempName + ext);
 						break;
 					}
 				}
