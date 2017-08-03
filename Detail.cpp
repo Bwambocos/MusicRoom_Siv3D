@@ -6,6 +6,11 @@
 #include "Select.h"
 #include "Fav.h"
 
+// define
+#define DEFAULT_albumName_X 333
+#define DEFAULT_albumCreator_X 333
+#define DRAW_STAYMSEC 3500
+
 // 曲リスト 構造体
 struct List_detail
 {
@@ -33,6 +38,9 @@ static RoundRect rect_albumListAll(25, 300 + BAR_HEIGHT, 718, 190, 5);
 static RoundRect rect_albumListCell(64, 300 + BAR_HEIGHT, 582, 36, 5);
 static Sound selectedMusic;
 static int32_t albumList_begin;
+static int32_t draw_albumName_x, draw_albumCreator_x;
+static int64 draw_albumName_startMSec, draw_albumName_stayMSec, draw_albumCreator_stayMSec;
+static bool draw_albumName_stayFlag, draw_albumCreator_stayFlag;
 
 // アルバム詳細 初期化
 void Detail_Init()
@@ -92,6 +100,11 @@ void Detail_Init()
 		albums[temp_albumName] = albumList;
 	}
 	else { albumList = albums[temp_albumName]; }
+
+	// 描画位置 初期化
+	draw_albumName_startMSec = Time::GetMillisec64();
+	draw_albumName_x = DEFAULT_albumName_X;
+	draw_albumCreator_x = DEFAULT_albumCreator_X;
 }
 
 // アルバム詳細 更新
@@ -166,7 +179,15 @@ void Detail_Draw()
 		const Rect rect((int)37.5, (int)37.5 + BAR_HEIGHT, 225, 225);
 		rect(albumImg).draw();
 		rect.drawFrame(0, 2, Color(200, 200, 200));
-		font_albumName(albumName).draw(333, 27 + BAR_HEIGHT);
+		Detail_drawAlbumDetails();
+		{
+			RasterizerState rasterizer = RasterizerState::Default2D;
+			rasterizer.scissorEnable = true;
+			Graphics2D::SetRasterizerState(rasterizer);
+			Graphics2D::SetScissorRect(Rect(rect_albumName.x, rect_albumName.y, rect_albumName.w, rect_albumName.h));
+			font_albumName(albumName).draw(draw_albumName_x, 27 + BAR_HEIGHT);
+			Graphics2D::SetScissorRect(Rect(0, 0, Window::Width(), Window::Height()));
+		}
 		font_albumCreator(albumCreator).draw(333, 88 + BAR_HEIGHT);
 		albumExpl_Draw();
 	}
@@ -237,4 +258,33 @@ void setAlbumMusicName(String& album_Name, String& musicName, Sound& musicData)
 	album_Name = selectedAlbumName;
 	musicName = selectedMusicName;
 	musicData = selectedMusic;
+}
+
+// 各文字列 描画
+void Detail_drawAlbumDetails()
+{
+	auto rect = rect_albumName;
+	auto width = font_albumName(albumName).region().w + rect.r;
+	if (width > rect_albumName.w)
+	{
+		if (!draw_albumName_stayFlag)
+		{
+			if (draw_albumName_x + width > rect.x + rect.w) { --draw_albumName_x; }
+			else
+			{
+				draw_albumName_startMSec = draw_albumName_stayMSec = Time::GetMillisec64();
+				draw_albumName_stayFlag = true;
+			}
+		}
+		if (draw_albumName_stayFlag)
+		{
+			if (draw_albumName_stayMSec - draw_albumName_startMSec >= DRAW_STAYMSEC)
+			{
+				draw_albumName_startMSec = draw_albumName_stayMSec;
+				if (draw_albumName_x == DEFAULT_albumName_X) { draw_albumName_stayFlag = false; }
+				else { draw_albumName_x = DEFAULT_albumName_X; }
+			}
+			else { draw_albumName_stayMSec = Time::GetMillisec64(); }
+		}
+	}
 }
