@@ -16,4 +16,7 @@ void albumExpl_Draw();
 void setAlbumMusicName(String& album_Name, String& musicName, Sound& music);
 
 // Še•¶š—ñ •`‰æ
-void Detail_drawAlbumDetails();
+void drawAlbumDetailStrings();
+
+// ‹È–¼’Zk
+String musicNameBeShort(String text);
