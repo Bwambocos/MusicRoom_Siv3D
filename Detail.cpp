@@ -78,6 +78,7 @@ void Detail_Init()
 	{
 		// 曲リスト 初期化
 		{
+			font_albumList = Font(16);
 			const String extensions[] = { L".wav",L".ogg",L".mp3" };
 			TextReader reader(L"music\\" + temp_albumName + L"\\music_list.txt");
 			String tempName; Sound tempMusic; int32_t temp_totalTime;
@@ -96,7 +97,6 @@ void Detail_Init()
 				tempName = musicNameBeShort(tempName);
 				albumList.push_back({ tempMusic,tempName,temp_totalTime });
 			}
-			font_albumList = Font(16);
 		}
 		albums[temp_albumName] = albumList;
 	}
@@ -326,7 +326,7 @@ String musicNameBeShort(String text)
 		if (font_albumList(text.substr(0, i)).region().w >= (int)rect_albumList_Name.w)
 		{
 			res = text.substr(0, i - 4);
-			res += L"...";
+			res.append(L"...");
 			break;
 		}
 	}
