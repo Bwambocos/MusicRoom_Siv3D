@@ -15,7 +15,8 @@
 struct List_detail
 {
 	Sound music;
-	String name;
+	String displayName;
+	String originName;
 	int32_t totalTime;
 };
 
@@ -94,8 +95,7 @@ void Detail_Init()
 				}
 				if (!tempMusic) { tempName = L"！読み込み失敗！"; }
 				temp_totalTime = (int32_t)tempMusic.lengthSec();
-				tempName = musicNameBeShort(tempName);
-				albumList.push_back({ tempMusic,tempName,temp_totalTime });
+				albumList.push_back({ tempMusic,musicNameBeShort(tempName),tempName,temp_totalTime });
 			}
 		}
 		albums[temp_albumName] = albumList;
@@ -137,13 +137,13 @@ void Detail_Update()
 			rect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (rect.leftClicked)
 			{
-				(isFav(albumName, music.name) ? removeFav(albumName, music.name) : addFav(albumName, music.name, music.music));
+				(isFav(albumName, music.originName) ? removeFav(albumName, music.originName) : addFav(albumName, music.originName, music.music));
 			}
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if(rect.leftClicked)
 			{
 				selectedAlbumName = albumName;
-				selectedMusicName = music.name;
+				selectedMusicName = music.originName;
 				selectedMusic = music.music;
 				SceneMgr_ChangeScene(Scene_Music);
 			}
@@ -205,10 +205,10 @@ void Detail_Draw()
 			RoundRect tmpRRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (tmp.music.isPlaying()) { pausing.drawAt(43, 318 + BAR_HEIGHT + num * 39); }
 			else { playing.drawAt(43, 318 + BAR_HEIGHT + num * 39); }
-			font_albumList(tmp.name).draw(70, 304 + BAR_HEIGHT + num * 39);
+			font_albumList(tmp.displayName).draw(70, 304 + BAR_HEIGHT + num * 39);
 			auto str = Format(Pad(tmp.totalTime / 60, { 2,L'0' }), L":", Pad(tmp.totalTime % 60, { 2,L'0' }));
 			font_albumList(str).draw(610, 304 + BAR_HEIGHT + num * 39);
-			((isFav(albumName, tmp.name) || tmpRRect.mouseOver) ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
+			((isFav(albumName, tmp.originName) || tmpRRect.mouseOver) ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
 		}
 	}
 }
@@ -320,16 +320,11 @@ void drawAlbumDetailStrings()
 // 曲名短縮
 String musicNameBeShort(String text)
 {
-	String res;
-	for (int32_t i = 0; i < text.length; ++i)
-	{
-		if (font_albumList(text.substr(0, i)).region().w >= (int)rect_albumList_Name.w)
-		{
-			res = text.substr(0, i - 4);
-			res.append(L"...");
-			break;
-		}
-	}
-	if (res.isEmpty) { res = text; }
-	return res;
+	static const String dots(L"...");
+	const double dotsWidth = font_albumList(dots).region().w;
+	const size_t num_chars = font_albumList.drawableCharacters(text, rect_albumList_Name.w - dotsWidth);
+
+	if (font_albumList(text).region().w <= rect_albumList_Name.w) { return text; }
+	if (dotsWidth > rect_albumList_Name.w) { return String(); }
+	return text.substr(0, num_chars) + dots;
 }
