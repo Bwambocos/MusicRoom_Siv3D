@@ -95,7 +95,7 @@ void Detail_Init()
 				}
 				if (!tempMusic) { tempName = L"！読み込み失敗！"; }
 				temp_totalTime = (int32_t)tempMusic.lengthSec();
-				albumList.push_back({ tempMusic,musicNameBeShort(tempName),tempName,temp_totalTime });
+				albumList.push_back({ tempMusic,Detail_musicNameBeShort(tempName),tempName,temp_totalTime });
 			}
 		}
 		albums[temp_albumName] = albumList;
@@ -318,7 +318,7 @@ void drawAlbumDetailStrings()
 }
 
 // 曲名短縮
-String musicNameBeShort(String text)
+String Detail_musicNameBeShort(String text)
 {
 	static const String dots(L"...");
 	const double dotsWidth = font_albumList(dots).region().w;

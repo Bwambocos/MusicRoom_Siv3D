@@ -19,4 +19,4 @@ void setAlbumMusicName(String& album_Name, String& musicName, Sound& music);
 void drawAlbumDetailStrings();
 
 // ã»ñºíZèk
-String musicNameBeShort(String text);
+String Detail_musicNameBeShort(String text);
