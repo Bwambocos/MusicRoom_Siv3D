@@ -20,3 +20,6 @@ void removeFav(String albumName, String musicName);
 
 // ‹Èî•ñ ó‚¯“n‚µ
 void setFavMusicName(String& album_Name, String& musicName, Sound& music);
+
+// ‹È–¼’Zk
+String Fav_musicNameBeShort(String text);

@@ -6,6 +6,10 @@
 #include "Detail.h"
 #include "Fav.h"
 
+// define
+#define DEFAULT_musicName_X 33
+#define DRAW_STAYMSEC 3500
+
 // グローバル変数
 static Texture music_Main, faved, not_faved;
 static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2];
@@ -20,6 +24,9 @@ static RoundRect rect_musicBar(127, 91 + BAR_HEIGHT, 565, 21, 5);
 static RoundRect rect_musicExp(25, 130 + BAR_HEIGHT, 718, 357, 10);
 static FFTResult fft;
 static int32_t music_musicTime;
+static int32_t draw_musicName_x;
+static int64 draw_musicName_startMSec, draw_musicName_stayMSec;
+static bool draw_musicName_stayFlag;
 
 // 曲 初期化
 void Music_Init()
@@ -66,6 +73,11 @@ void Music_Init()
 		music_Exp = Font(16);
 	}
 
+	// 描画位置 初期化
+	draw_musicName_startMSec = Time::GetMillisec64();
+	draw_musicName_stayFlag = true;
+	draw_musicName_x = DEFAULT_musicName_X;
+
 	music_Music.play();
 }
 
@@ -108,6 +120,7 @@ void Music_Update()
 
 	// 曲情報 更新
 	{
+		Update_drawMusicDetailStrings();
 		music_musicLength = Format(Pad(music_musicTime / 60, { 2,L'0' }), L":", Pad(music_musicTime % 60, { 2,L'0' }));
 		if (rect_music_isFav.leftClicked)
 		{
@@ -160,7 +173,14 @@ void Music_Draw()
 
 	// 曲情報 描画
 	{
-		music_NameTime(music_musicName).draw(33, 31 + BAR_HEIGHT);
+		{
+			RasterizerState rasterizer = RasterizerState::Default2D;
+			rasterizer.scissorEnable = true;
+			Graphics2D::SetRasterizerState(rasterizer);
+			Graphics2D::SetScissorRect(Rect((int)rect_musicName.x, (int)rect_musicName.y, (int)rect_musicName.w, (int)rect_musicName.h));
+			music_NameTime(music_musicName).draw(draw_musicName_x, 31 + BAR_HEIGHT);
+			Graphics2D::SetScissorRect(Rect(0, 0, Window::Width(), Window::Height()));
+		}
 		music_NameTime(music_musicLength).draw(504, 31 + BAR_HEIGHT);
 		((isFav(music_albumName, music_musicName) || rect_music_isFav.mouseOver) ? faved : not_faved).drawAt(722, 49 + BAR_HEIGHT);
 		musicExpl_Draw();
@@ -207,5 +227,34 @@ void musicExpl_Draw()
 		}
 		music_Exp(texts[i]).draw(rect_musicExp.x + 10, y);
 		if (overflow) { break; }
+	}
+}
+
+// 曲名描画位置 更新
+void Update_drawMusicDetailStrings()
+{
+	auto rect = rect_musicName;
+	auto width = music_NameTime(music_musicName).region().w + rect.r;
+	if (width > rect_musicName.w)
+	{
+		if (!draw_musicName_stayFlag)
+		{
+			if (draw_musicName_x + width > rect.x + rect.w) { --draw_musicName_x; }
+			else
+			{
+				draw_musicName_startMSec = draw_musicName_stayMSec = Time::GetMillisec64();
+				draw_musicName_stayFlag = true;
+			}
+		}
+		if (draw_musicName_stayFlag)
+		{
+			if (draw_musicName_stayMSec - draw_musicName_startMSec >= DRAW_STAYMSEC)
+			{
+				draw_musicName_startMSec = draw_musicName_stayMSec;
+				if (draw_musicName_x == DEFAULT_musicName_X) { draw_musicName_stayFlag = false; }
+				else { draw_musicName_x = DEFAULT_musicName_X; }
+			}
+			else { draw_musicName_stayMSec = Time::GetMillisec64(); }
+		}
 	}
 }
