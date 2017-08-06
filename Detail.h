@@ -15,8 +15,8 @@ void albumExpl_Draw();
 // アルバム・曲情報 受け渡し
 void setAlbumMusicName(String& album_Name, String& musicName, Sound& music);
 
-// 各文字列 描画
-void drawAlbumDetailStrings();
+// 名前描画位置 更新
+void Update_drawAlbumDetailStrings();
 
 // 曲名短縮
 String Detail_musicNameBeShort(String text);

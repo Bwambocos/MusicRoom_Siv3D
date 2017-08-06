@@ -104,6 +104,9 @@ void Detail_Init()
 
 	// 描画位置 初期化
 	draw_albumName_startMSec = Time::GetMillisec64();
+	draw_albumCreator_startMSec = Time::GetMillisec64();
+	draw_albumName_stayFlag = true;
+	draw_albumCreator_stayFlag = true;
 	draw_albumName_x = DEFAULT_albumName_X;
 	draw_albumCreator_x = DEFAULT_albumCreator_X;
 }
@@ -114,7 +117,7 @@ void Detail_Update()
 	if (Input::KeyB.pressed) { SceneMgr_ChangeScene(Scene_Select); }
 
 	// アルバム情報 更新
-	drawAlbumDetailStrings();
+	Update_drawAlbumDetailStrings();
 
 	// 曲リスト 更新
 	{
@@ -265,7 +268,7 @@ void setAlbumMusicName(String& album_Name, String& musicName, Sound& musicData)
 }
 
 // 各文字列 描画
-void drawAlbumDetailStrings()
+void Update_drawAlbumDetailStrings()
 {
 	auto rect = rect_albumName;
 	auto width = font_albumName(albumName).region().w + rect.r;

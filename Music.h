@@ -11,3 +11,6 @@ void Music_Draw();
 
 // ‹Èà–¾ •`‰æ
 void musicExpl_Draw();
+
+// ‹È–¼•`‰æˆÊ’u XV
+void Update_drawMusicDetailStrings();
