@@ -6,11 +6,17 @@
 #include "Select.h"
 #include "Fav.h"
 
+// define
+#define DEFAULT_albumName_X 333
+#define DEFAULT_albumCreator_X 333
+#define DRAW_STAYMSEC 3500
+
 // 曲リスト 構造体
 struct List_detail
 {
 	Sound music;
-	String name;
+	String displayName;
+	String originName;
 	int32_t totalTime;
 };
 
@@ -33,6 +39,9 @@ static RoundRect rect_albumListAll(25, 300 + BAR_HEIGHT, 718, 190, 5);
 static RoundRect rect_albumListCell(64, 300 + BAR_HEIGHT, 582, 36, 5);
 static Sound selectedMusic;
 static int32_t albumList_begin;
+static int32_t draw_albumName_x, draw_albumCreator_x;
+static int64 draw_albumName_startMSec, draw_albumCreator_startMSec, draw_albumName_stayMSec, draw_albumCreator_stayMSec;
+static bool draw_albumName_stayFlag, draw_albumCreator_stayFlag;
 
 // アルバム詳細 初期化
 void Detail_Init()
@@ -70,6 +79,7 @@ void Detail_Init()
 	{
 		// 曲リスト 初期化
 		{
+			font_albumList = Font(16);
 			const String extensions[] = { L".wav",L".ogg",L".mp3" };
 			TextReader reader(L"music\\" + temp_albumName + L"\\music_list.txt");
 			String tempName; Sound tempMusic; int32_t temp_totalTime;
@@ -85,19 +95,26 @@ void Detail_Init()
 				}
 				if (!tempMusic) { tempName = L"！読み込み失敗！"; }
 				temp_totalTime = (int32_t)tempMusic.lengthSec();
-				albumList.push_back({ tempMusic,tempName,temp_totalTime });
+				albumList.push_back({ tempMusic,musicNameBeShort(tempName),tempName,temp_totalTime });
 			}
-			font_albumList = Font(16);
 		}
 		albums[temp_albumName] = albumList;
 	}
 	else { albumList = albums[temp_albumName]; }
+
+	// 描画位置 初期化
+	draw_albumName_startMSec = Time::GetMillisec64();
+	draw_albumName_x = DEFAULT_albumName_X;
+	draw_albumCreator_x = DEFAULT_albumCreator_X;
 }
 
 // アルバム詳細 更新
 void Detail_Update()
 {
 	if (Input::KeyB.pressed) { SceneMgr_ChangeScene(Scene_Select); }
+
+	// アルバム情報 更新
+	drawAlbumDetailStrings();
 
 	// 曲リスト 更新
 	{
@@ -120,13 +137,13 @@ void Detail_Update()
 			rect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (rect.leftClicked)
 			{
-				(isFav(albumName, music.name) ? removeFav(albumName, music.name) : addFav(albumName, music.name, music.music));
+				(isFav(albumName, music.originName) ? removeFav(albumName, music.originName) : addFav(albumName, music.originName, music.music));
 			}
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if(rect.leftClicked)
 			{
 				selectedAlbumName = albumName;
-				selectedMusicName = music.name;
+				selectedMusicName = music.originName;
 				selectedMusic = music.music;
 				SceneMgr_ChangeScene(Scene_Music);
 			}
@@ -166,8 +183,16 @@ void Detail_Draw()
 		const Rect rect((int)37.5, (int)37.5 + BAR_HEIGHT, 225, 225);
 		rect(albumImg).draw();
 		rect.drawFrame(0, 2, Color(200, 200, 200));
-		font_albumName(albumName).draw(333, 27 + BAR_HEIGHT);
-		font_albumCreator(albumCreator).draw(333, 88 + BAR_HEIGHT);
+		{
+			RasterizerState rasterizer = RasterizerState::Default2D;
+			rasterizer.scissorEnable = true;
+			Graphics2D::SetRasterizerState(rasterizer);
+			Graphics2D::SetScissorRect(Rect((int)rect_albumName.x, (int)rect_albumName.y, (int)rect_albumName.w, (int)rect_albumName.h));
+			font_albumName(albumName).draw(draw_albumName_x, 27 + BAR_HEIGHT);
+			Graphics2D::SetScissorRect(Rect((int)rect_albumCreator.x, (int)rect_albumCreator.y, (int)rect_albumCreator.w, (int)rect_albumCreator.h));
+			font_albumCreator(albumCreator).draw(draw_albumCreator_x, 88 + BAR_HEIGHT);
+			Graphics2D::SetScissorRect(Rect(0, 0, Window::Width(), Window::Height()));
+		}
 		albumExpl_Draw();
 	}
 
@@ -180,10 +205,10 @@ void Detail_Draw()
 			RoundRect tmpRRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (tmp.music.isPlaying()) { pausing.drawAt(43, 318 + BAR_HEIGHT + num * 39); }
 			else { playing.drawAt(43, 318 + BAR_HEIGHT + num * 39); }
-			font_albumList(tmp.name).draw(70, 304 + BAR_HEIGHT + num * 39);
+			font_albumList(tmp.displayName).draw(70, 304 + BAR_HEIGHT + num * 39);
 			auto str = Format(Pad(tmp.totalTime / 60, { 2,L'0' }), L":", Pad(tmp.totalTime % 60, { 2,L'0' }));
 			font_albumList(str).draw(610, 304 + BAR_HEIGHT + num * 39);
-			((isFav(albumName, tmp.name) || tmpRRect.mouseOver) ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
+			((isFav(albumName, tmp.originName) || tmpRRect.mouseOver) ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
 		}
 	}
 }
@@ -232,10 +257,74 @@ void albumExpl_Draw()
 }
 
 // アルバム・曲情報 受け渡し
-void setAlbumMusicName(String& album_Name, String& musicName, Texture& album_Img, Sound& musicData)
+void setAlbumMusicName(String& album_Name, String& musicName, Sound& musicData)
 {
 	album_Name = selectedAlbumName;
 	musicName = selectedMusicName;
-	album_Img = albumImg;
 	musicData = selectedMusic;
+}
+
+// 各文字列 描画
+void drawAlbumDetailStrings()
+{
+	auto rect = rect_albumName;
+	auto width = font_albumName(albumName).region().w + rect.r;
+	if (width > rect_albumName.w)
+	{
+		if (!draw_albumName_stayFlag)
+		{
+			if (draw_albumName_x + width > rect.x + rect.w) { --draw_albumName_x; }
+			else
+			{
+				draw_albumName_startMSec = draw_albumName_stayMSec = Time::GetMillisec64();
+				draw_albumName_stayFlag = true;
+			}
+		}
+		if (draw_albumName_stayFlag)
+		{
+			if (draw_albumName_stayMSec - draw_albumName_startMSec >= DRAW_STAYMSEC)
+			{
+				draw_albumName_startMSec = draw_albumName_stayMSec;
+				if (draw_albumName_x == DEFAULT_albumName_X) { draw_albumName_stayFlag = false; }
+				else { draw_albumName_x = DEFAULT_albumName_X; }
+			}
+			else { draw_albumName_stayMSec = Time::GetMillisec64(); }
+		}
+	}
+	rect = rect_albumCreator;
+	width = font_albumCreator(albumCreator).region().w + rect.r;
+	if (width > rect_albumCreator.w)
+	{
+		if (!draw_albumCreator_stayFlag)
+		{
+			if (draw_albumCreator_x + width > rect.x + rect.w) { --draw_albumCreator_x; }
+			else
+			{
+				draw_albumCreator_startMSec = draw_albumCreator_stayMSec = Time::GetMillisec64();
+				draw_albumCreator_stayFlag = true;
+			}
+		}
+		if (draw_albumCreator_stayFlag)
+		{
+			if (draw_albumCreator_stayMSec - draw_albumCreator_startMSec >= DRAW_STAYMSEC)
+			{
+				draw_albumCreator_startMSec = draw_albumCreator_stayMSec;
+				if (draw_albumCreator_x == DEFAULT_albumCreator_X) { draw_albumCreator_stayFlag = false; }
+				else { draw_albumCreator_x = DEFAULT_albumCreator_X; }
+			}
+			else { draw_albumCreator_stayMSec = Time::GetMillisec64(); }
+		}
+	}
+}
+
+// 曲名短縮
+String musicNameBeShort(String text)
+{
+	static const String dots(L"...");
+	const double dotsWidth = font_albumList(dots).region().w;
+	const size_t num_chars = font_albumList.drawableCharacters(text, rect_albumList_Name.w - dotsWidth);
+
+	if (font_albumList(text).region().w <= rect_albumList_Name.w) { return text; }
+	if (dotsWidth > rect_albumList_Name.w) { return String(); }
+	return text.substr(0, num_chars) + dots;
 }
