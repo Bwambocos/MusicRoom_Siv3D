@@ -187,9 +187,9 @@ void Detail_Draw()
 			RasterizerState rasterizer = RasterizerState::Default2D;
 			rasterizer.scissorEnable = true;
 			Graphics2D::SetRasterizerState(rasterizer);
-			Graphics2D::SetScissorRect(Rect(rect_albumName.x, rect_albumName.y, rect_albumName.w, rect_albumName.h));
+			Graphics2D::SetScissorRect(Rect((int)rect_albumName.x, (int)rect_albumName.y, (int)rect_albumName.w, (int)rect_albumName.h));
 			font_albumName(albumName).draw(draw_albumName_x, 27 + BAR_HEIGHT);
-			Graphics2D::SetScissorRect(Rect(rect_albumCreator.x, rect_albumCreator.y, rect_albumCreator.w, rect_albumCreator.h));
+			Graphics2D::SetScissorRect(Rect((int)rect_albumCreator.x, (int)rect_albumCreator.y, (int)rect_albumCreator.w, (int)rect_albumCreator.h));
 			font_albumCreator(albumCreator).draw(draw_albumCreator_x, 88 + BAR_HEIGHT);
 			Graphics2D::SetScissorRect(Rect(0, 0, Window::Width(), Window::Height()));
 		}
