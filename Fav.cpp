@@ -30,6 +30,7 @@ static RoundRect rect_albumListAll(25, 25 + BAR_HEIGHT, 718, 190, 5);
 static RoundRect rect_albumListCell(64, 25 + BAR_HEIGHT, 582, 36, 5);
 static Sound selectedMusic;
 static int32_t albumList_begin;
+static int selectedMusic_num;
 
 // Ç®ãCÇ…ì¸ÇË èâä˙âª
 void Fav_Init()
@@ -76,6 +77,7 @@ void Fav_Update()
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if (rect.leftClicked)
 			{
+				selectedMusic_num = i;
 				selectedAlbumName = music.albumName;
 				selectedMusicName = music.musicOriginName;
 				selectedMusic = music.music;
@@ -150,6 +152,14 @@ void setFavMusicName(String& album_Name, String& musicName, Sound& music)
 	album_Name = selectedAlbumName;
 	musicName = selectedMusicName;
 	music = selectedMusic;
+}
+void setFavMusicName(int flag, String& album_Name, String& musicName, Sound& music)
+{
+	selectedMusic_num = (selectedMusic_num + flag + musics.size()) % musics.size();
+	const auto data = musics[selectedMusic_num];
+	album_Name = data.albumName;
+	musicName = data.musicOriginName;
+	music = data.music;
 }
 
 // ã»ñºíZèk

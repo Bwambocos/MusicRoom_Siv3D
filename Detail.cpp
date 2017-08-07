@@ -270,7 +270,8 @@ void setAlbumMusicName(String& album_Name, String& musicName, Sound& musicData)
 }
 void setAlbumMusicName(int flag, String& album_Name, String& musicName, Sound& music)
 {
-	const auto data = albumList[(selectedMusic_num + flag + albumList.size()) % albumList.size()];
+	selectedMusic_num = (selectedMusic_num + flag + albumList.size()) % albumList.size();
+	const auto data = albumList[selectedMusic_num];
 	album_Name = selectedAlbumName;
 	musicName = data.originName;
 	music = data.music;
