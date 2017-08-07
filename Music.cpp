@@ -27,28 +27,32 @@ static int32_t music_musicTime;
 static int32_t draw_musicName_x;
 static int64 draw_musicName_startMSec, draw_musicName_stayMSec;
 static bool draw_musicName_stayFlag;
+static bool favLoop_flag = false, stop_flag = false;
 
 // 曲 初期化
 void Music_Init()
 {
 	// 背景 初期化
 	{
-		music_Main = Texture(L"data\\Music\\main.png");
-		originPlay[0] = Texture(L"data\\Music\\play\\normal.png");
-		originPlay[1] = Texture(L"data\\Music\\play\\active.png");
-		originBrief[0] = Texture(L"data\\Music\\brief\\normal.png");
-		originBrief[1] = Texture(L"data\\Music\\brief\\active.png");
-		originStop[0] = Texture(L"data\\Music\\stop\\normal.png");
-		originStop[1] = Texture(L"data\\Music\\stop\\active.png");
-		originSeek[0] = Texture(L"data\\Music\\seek\\normal.png");
-		originSeek[1] = Texture(L"data\\Music\\seek\\active.png");
-		originRep[0] = Texture(L"data\\Music\\rep\\normal.png");
-		originRep[1] = Texture(L"data\\Music\\rep\\active.png");
-		displayPlay = originPlay[0];
-		displayBrief = originBrief[0];
-		displayStop = originStop[0];
-		displaySeek = originSeek[0];
-		displayRep = originRep[0];
+		if (!music_Main)
+		{
+			music_Main = Texture(L"data\\Music\\main.png");
+			originPlay[0] = Texture(L"data\\Music\\play\\normal.png");
+			originPlay[1] = Texture(L"data\\Music\\play\\active.png");
+			originBrief[0] = Texture(L"data\\Music\\brief\\normal.png");
+			originBrief[1] = Texture(L"data\\Music\\brief\\active.png");
+			originStop[0] = Texture(L"data\\Music\\stop\\normal.png");
+			originStop[1] = Texture(L"data\\Music\\stop\\active.png");
+			originSeek[0] = Texture(L"data\\Music\\seek\\normal.png");
+			originSeek[1] = Texture(L"data\\Music\\seek\\active.png");
+			originRep[0] = Texture(L"data\\Music\\rep\\normal.png");
+			originRep[1] = Texture(L"data\\Music\\rep\\active.png");
+			displayPlay = originPlay[0];
+			displayBrief = originBrief[0];
+			displayStop = originStop[0];
+			displaySeek = originSeek[0];
+			displayRep = originRep[0];
+		}
 	}
 
 	// 曲情報 初期化
@@ -57,10 +61,16 @@ void Music_Init()
 		{
 		case Scene_Detail:
 			setAlbumMusicName(music_albumName, music_musicName, music_Music);
+			favLoop_flag = false;
 			break;
 
 		case Scene_Fav:
 			setFavMusicName(music_albumName, music_musicName, music_Music);
+			break;
+
+		case Scene_Music:
+			if (!favLoop_flag) { setAlbumMusicName(1, music_albumName, music_musicName, music_Music); }
+			else { setFavMusicName(1, music_albumName, music_musicName, music_Music); }
 			break;
 		}
 		TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
@@ -84,8 +94,14 @@ void Music_Init()
 // 曲 更新
 void Music_Update()
 {
-	if (Input::KeyB.clicked) { SceneMgr_ChangeScene(Scene_Detail); }
-
+	if (Input::KeyB.clicked) { SceneMgr_ChangeScene((favLoop_flag ? Scene_Fav : Scene_Detail)); }
+	if (!music_Music.isPlaying() && !stop_flag
+		&& music_Music.samplesPlayed() % music_Music.lengthSample() == 0)
+	{
+		favLoop_flag = (get_prevScene() == Scene_Fav || favLoop_flag);
+		SceneMgr_ChangeScene(Scene_Music);
+	}
+	
 	// 再生バー 更新
 	{
 		// バー
@@ -102,6 +118,7 @@ void Music_Update()
 		if (tmpCircle.leftClicked || Input::KeyEnter.clicked)
 		{
 			(music_Music.isPlaying() ? music_Music.pause() : music_Music.play());
+			stop_flag = false;
 		}
 		tmpCircle = Circle(90, rect_musicBar.y + rect_musicBar.h / 2, 15);
 		displayRep = originRep[((tmpCircle.mouseOver || music_Music.isLoop()) ? 1 : 0)];
@@ -112,10 +129,15 @@ void Music_Update()
 			music_Music.setLoop(music_Music.isLoop() ? false : true);
 			music_Music.play();
 			music_Music.setPosSample(tmpTime);
+			stop_flag = false;
 		}
 		tmpCircle = Circle(723, rect_musicBar.y + rect_musicBar.h / 2, 15);
 		displayStop = originStop[(tmpCircle.mouseOver ? 1 : 0)];
-		if (tmpCircle.leftClicked || Input::KeySpace.clicked) { music_Music.stop(); }
+		if (tmpCircle.leftClicked || Input::KeySpace.clicked)
+		{
+			music_Music.stop();
+			stop_flag = true;
+		}
 	}
 
 	// 曲情報 更新
