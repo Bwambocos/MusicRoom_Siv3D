@@ -42,6 +42,7 @@ static int32_t albumList_begin;
 static int32_t draw_albumName_x, draw_albumCreator_x;
 static int64 draw_albumName_startMSec, draw_albumCreator_startMSec, draw_albumName_stayMSec, draw_albumCreator_stayMSec;
 static bool draw_albumName_stayFlag, draw_albumCreator_stayFlag;
+static int selectedMusic_num;
 
 // アルバム詳細 初期化
 void Detail_Init()
@@ -145,6 +146,7 @@ void Detail_Update()
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if(rect.leftClicked)
 			{
+				selectedMusic_num = i;
 				selectedAlbumName = albumName;
 				selectedMusicName = music.originName;
 				selectedMusic = music.music;
@@ -259,12 +261,19 @@ void albumExpl_Draw()
 	}
 }
 
-// アルバム・曲情報 受け渡し
+// アルバム・曲情報 受け渡し（flag == 1 -> 次 : -1 -> 前）
 void setAlbumMusicName(String& album_Name, String& musicName, Sound& musicData)
 {
 	album_Name = selectedAlbumName;
 	musicName = selectedMusicName;
 	musicData = selectedMusic;
+}
+void setAlbumMusicName(int flag, String& album_Name, String& musicName, Sound& music)
+{
+	const auto data = albumList[(selectedMusic_num + flag + albumList.size()) % albumList.size()];
+	album_Name = selectedAlbumName;
+	musicName = data.originName;
+	music = data.music;
 }
 
 // 各文字列 描画

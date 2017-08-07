@@ -33,22 +33,25 @@ void Music_Init()
 {
 	// 背景 初期化
 	{
-		music_Main = Texture(L"data\\Music\\main.png");
-		originPlay[0] = Texture(L"data\\Music\\play\\normal.png");
-		originPlay[1] = Texture(L"data\\Music\\play\\active.png");
-		originBrief[0] = Texture(L"data\\Music\\brief\\normal.png");
-		originBrief[1] = Texture(L"data\\Music\\brief\\active.png");
-		originStop[0] = Texture(L"data\\Music\\stop\\normal.png");
-		originStop[1] = Texture(L"data\\Music\\stop\\active.png");
-		originSeek[0] = Texture(L"data\\Music\\seek\\normal.png");
-		originSeek[1] = Texture(L"data\\Music\\seek\\active.png");
-		originRep[0] = Texture(L"data\\Music\\rep\\normal.png");
-		originRep[1] = Texture(L"data\\Music\\rep\\active.png");
-		displayPlay = originPlay[0];
-		displayBrief = originBrief[0];
-		displayStop = originStop[0];
-		displaySeek = originSeek[0];
-		displayRep = originRep[0];
+		if (!music_Main)
+		{
+			music_Main = Texture(L"data\\Music\\main.png");
+			originPlay[0] = Texture(L"data\\Music\\play\\normal.png");
+			originPlay[1] = Texture(L"data\\Music\\play\\active.png");
+			originBrief[0] = Texture(L"data\\Music\\brief\\normal.png");
+			originBrief[1] = Texture(L"data\\Music\\brief\\active.png");
+			originStop[0] = Texture(L"data\\Music\\stop\\normal.png");
+			originStop[1] = Texture(L"data\\Music\\stop\\active.png");
+			originSeek[0] = Texture(L"data\\Music\\seek\\normal.png");
+			originSeek[1] = Texture(L"data\\Music\\seek\\active.png");
+			originRep[0] = Texture(L"data\\Music\\rep\\normal.png");
+			originRep[1] = Texture(L"data\\Music\\rep\\active.png");
+			displayPlay = originPlay[0];
+			displayBrief = originBrief[0];
+			displayStop = originStop[0];
+			displaySeek = originSeek[0];
+			displayRep = originRep[0];
+		}
 	}
 
 	// 曲情報 初期化
@@ -62,6 +65,9 @@ void Music_Init()
 		case Scene_Fav:
 			setFavMusicName(music_albumName, music_musicName, music_Music);
 			break;
+
+		case Scene_Music:
+			setAlbumMusicName(1, music_albumName, music_musicName, music_Music);
 		}
 		TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
 		music_reader.readAll(music_musicExp);
@@ -85,7 +91,12 @@ void Music_Init()
 void Music_Update()
 {
 	if (Input::KeyB.clicked) { SceneMgr_ChangeScene(Scene_Detail); }
-
+	if (!music_Music.isPlaying()
+		&& music_Music.samplesPlayed() % music_Music.lengthSample() == 0)
+	{
+		SceneMgr_ChangeScene(Scene_Music);
+	}
+	
 	// 再生バー 更新
 	{
 		// バー
