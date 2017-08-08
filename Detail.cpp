@@ -133,7 +133,7 @@ void Detail_Update()
 			if (scr_flag) { albumList_begin += Mouse::Wheel(); }
 		}
 		albumList_begin = Max(albumList_begin, 0);
-		albumList_begin = Min<int32_t>(albumList_begin, albumList.size() - 5);
+		albumList_begin = Min<int32_t>(albumList_begin, Max<int>(albumList.size() - 5, 0));
 
 		for (int32_t i = albumList_begin; ((i - albumList_begin) < Min<int32_t>(5, (signed)albumList.size())) && (i < (signed)albumList.size()); ++i)
 		{
