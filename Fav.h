@@ -18,5 +18,9 @@ void addFav(String albumName, String musicName, Sound music);
 // Ç®ãCÇ…ì¸ÇËÇ©ÇÁçÌèúÇ∑ÇÈ
 void removeFav(String albumName, String musicName);
 
-// ã»èÓïÒ éÛÇØìnÇµ
+// ã»èÓïÒ éÛÇØìnÇµÅiflag == 1 -> éü : -1 -> ëOÅj
 void setFavMusicName(String& album_Name, String& musicName, Sound& music);
+void setFavMusicName(int flag, String& album_Name, String& musicName, Sound& music);
+
+// ã»ñºíZèk
+String Fav_musicNameBeShort(String text);

@@ -42,6 +42,7 @@ static int32_t albumList_begin;
 static int32_t draw_albumName_x, draw_albumCreator_x;
 static int64 draw_albumName_startMSec, draw_albumCreator_startMSec, draw_albumName_stayMSec, draw_albumCreator_stayMSec;
 static bool draw_albumName_stayFlag, draw_albumCreator_stayFlag;
+static int selectedMusic_num;
 
 // アルバム詳細 初期化
 void Detail_Init()
@@ -95,7 +96,7 @@ void Detail_Init()
 				}
 				if (!tempMusic) { tempName = L"！読み込み失敗！"; }
 				temp_totalTime = (int32_t)tempMusic.lengthSec();
-				albumList.push_back({ tempMusic,musicNameBeShort(tempName),tempName,temp_totalTime });
+				albumList.push_back({ tempMusic,Detail_musicNameBeShort(tempName),tempName,temp_totalTime });
 			}
 		}
 		albums[temp_albumName] = albumList;
@@ -104,6 +105,9 @@ void Detail_Init()
 
 	// 描画位置 初期化
 	draw_albumName_startMSec = Time::GetMillisec64();
+	draw_albumCreator_startMSec = Time::GetMillisec64();
+	draw_albumName_stayFlag = true;
+	draw_albumCreator_stayFlag = true;
 	draw_albumName_x = DEFAULT_albumName_X;
 	draw_albumCreator_x = DEFAULT_albumCreator_X;
 }
@@ -114,7 +118,7 @@ void Detail_Update()
 	if (Input::KeyB.pressed) { SceneMgr_ChangeScene(Scene_Select); }
 
 	// アルバム情報 更新
-	drawAlbumDetailStrings();
+	Update_drawAlbumDetailStrings();
 
 	// 曲リスト 更新
 	{
@@ -142,6 +146,7 @@ void Detail_Update()
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if(rect.leftClicked)
 			{
+				selectedMusic_num = i;
 				selectedAlbumName = albumName;
 				selectedMusicName = music.originName;
 				selectedMusic = music.music;
@@ -256,16 +261,24 @@ void albumExpl_Draw()
 	}
 }
 
-// アルバム・曲情報 受け渡し
+// アルバム・曲情報 受け渡し（flag == 1 -> 次 : -1 -> 前）
 void setAlbumMusicName(String& album_Name, String& musicName, Sound& musicData)
 {
 	album_Name = selectedAlbumName;
 	musicName = selectedMusicName;
 	musicData = selectedMusic;
 }
+void setAlbumMusicName(int flag, String& album_Name, String& musicName, Sound& music)
+{
+	selectedMusic_num = (selectedMusic_num + flag + albumList.size()) % albumList.size();
+	const auto data = albumList[selectedMusic_num];
+	album_Name = selectedAlbumName;
+	musicName = data.originName;
+	music = data.music;
+}
 
 // 各文字列 描画
-void drawAlbumDetailStrings()
+void Update_drawAlbumDetailStrings()
 {
 	auto rect = rect_albumName;
 	auto width = font_albumName(albumName).region().w + rect.r;
@@ -318,7 +331,7 @@ void drawAlbumDetailStrings()
 }
 
 // 曲名短縮
-String musicNameBeShort(String text)
+String Detail_musicNameBeShort(String text)
 {
 	static const String dots(L"...");
 	const double dotsWidth = font_albumList(dots).region().w;
