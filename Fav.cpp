@@ -26,8 +26,10 @@ static RoundRect rect_albumList_Flag(25, 25 + BAR_HEIGHT, 36, 36, 5);
 static RoundRect rect_albumList_Name(64, 25 + BAR_HEIGHT, 537, 36, 5);
 static RoundRect rect_albumList_Time(604, 25 + BAR_HEIGHT, 100, 36, 5);
 static RoundRect rect_albumList_Fav(707, 25 + BAR_HEIGHT, 36, 36, 5);
-static RoundRect rect_albumListAll(25, 25 + BAR_HEIGHT, 718, 190, 5);
+static RoundRect rect_albumListAll(25, 25 + BAR_HEIGHT, 718, 456, 5);
 static RoundRect rect_albumListCell(64, 25 + BAR_HEIGHT, 582, 36, 5);
+static Triangle goUp({ 384,75 }, { 414,85 }, { 354,85 });
+static Triangle goDown({ 354,560 }, { 414,560 }, { 384,570 });
 static Sound selectedMusic;
 static int32_t albumList_begin;
 static int selectedMusic_num;
@@ -53,16 +55,16 @@ void Fav_Update()
 
 	// 曲リスト 更新
 	{
+		if (goUp.leftClicked) { --albumList_begin; }
+		if (goDown.leftClicked) { ++albumList_begin; }
 		if (rect_albumListAll.mouseOver)
 		{
 			bool scr_flag = ((albumList_begin + MAX_CELL_NUM <= (signed)musics.size()) || (albumList_begin > 0) ? true : false);
-			if (scr_flag)
-			{
-				albumList_begin += Mouse::Wheel();
-				albumList_begin = Max(albumList_begin, 0);
-				albumList_begin = Min<int32_t>(albumList_begin, musics.size() - 5);
-			}
+			if (scr_flag) { albumList_begin += Mouse::Wheel(); }
 		}
+		albumList_begin = Max(albumList_begin, 0);
+		albumList_begin = Min<int32_t>(albumList_begin, Max<int>(musics.size() - MAX_CELL_NUM, 0));
+
 		for (int32_t i = albumList_begin; ((i - albumList_begin) < Min<int32_t>(MAX_CELL_NUM, (signed)musics.size())) && (i < (signed)musics.size()); ++i)
 		{
 			auto num = i - albumList_begin;
@@ -94,6 +96,8 @@ void Fav_Draw()
 
 	// 曲リスト 描画
 	{
+		if (albumList_begin > 0) { goUp.draw((goUp.mouseOver ? Palette::Orange : Palette::White)); }
+		if (albumList_begin + MAX_CELL_NUM < (signed)musics.size()) { goDown.draw((goDown.mouseOver ? Palette::Orange : Palette::White)); }
 		for (int32_t i = 0; i < MAX_CELL_NUM; ++i)
 		{
 			RoundRect(rect_albumList_Flag.x, rect_albumList_Flag.y + i * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r).draw(Color(32, 32, 32, 200));
@@ -101,16 +105,17 @@ void Fav_Draw()
 			RoundRect(rect_albumList_Time.x, rect_albumList_Time.y + i * 39, rect_albumList_Time.w, rect_albumList_Time.h, rect_albumList_Time.r).draw(Color(32, 32, 32, 200));
 			RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + i * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r).draw(Color(32, 32, 32, 200));
 		}
-		for (int32_t i = albumList_begin; (i - albumList_begin) < Min<int32_t>(MAX_CELL_NUM, musics.size()); ++i)
+		for (int32_t i = albumList_begin; (i - albumList_begin) < Min<int32_t>(MAX_CELL_NUM, musics.size() - albumList_begin); ++i)
 		{
 			auto num = i - albumList_begin;
 			auto tmp = musics[i];
-			RoundRect tmpRRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
-			if (tmp.music.isPlaying()) { pausing.drawAt(43, 43 + BAR_HEIGHT + num * 39); }
-			else { playing.drawAt(43, 43 + BAR_HEIGHT + num * 39); }
+			RoundRect tmpRRect(rect_albumList_Flag.x, rect_albumList_Flag.y + num * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r);
+			if (tmp.music.isPlaying()) { pausing.drawAt(43, 43 + BAR_HEIGHT + num * 39, (tmpRRect.mouseOver ? Palette::Orange : Palette::White)); }
+			else { playing.drawAt(43, 43 + BAR_HEIGHT + num * 39, (tmpRRect.mouseOver ? Palette::Orange : Palette::White)); }
 			font_albumList(tmp.musicDisplayName).draw(70, 29 + BAR_HEIGHT + num * 39);
 			auto str = Format(Pad(tmp.totalTime / 60, { 2,L'0' }), L":", Pad(tmp.totalTime % 60, { 2,L'0' }));
 			font_albumList(str).draw(610, 29 + BAR_HEIGHT + num * 39);
+			tmpRRect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			((isFav(tmp.albumName, tmp.musicOriginName) || tmpRRect.mouseOver) ? fav : not_fav).drawAt(725, 43 + BAR_HEIGHT + num * 39);
 		}
 	}
