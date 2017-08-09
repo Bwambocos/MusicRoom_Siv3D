@@ -37,6 +37,8 @@ static RoundRect rect_albumList_Time(604, 300 + BAR_HEIGHT, 100, 36, 5);
 static RoundRect rect_albumList_Fav(707, 300 + BAR_HEIGHT, 36, 36, 5);
 static RoundRect rect_albumListAll(25, 300 + BAR_HEIGHT, 718, 190, 5);
 static RoundRect rect_albumListCell(64, 300 + BAR_HEIGHT, 582, 36, 5);
+static Triangle goUp({ 384,350 }, { 414,360 }, { 354,360 });
+static Triangle goDown({ 354,560 }, { 414,560 }, { 384,570 });
 static Sound selectedMusic;
 static int32_t albumList_begin;
 static int32_t draw_albumName_x, draw_albumCreator_x;
@@ -73,6 +75,7 @@ void Detail_Init()
 		font_albumName = Font(24);
 		font_albumCreator = Font(18);
 		font_albumExpl = Font(12);
+		albumList_begin = 0;
 	}
 
 	// まだ読み込まれていないアルバム
@@ -122,16 +125,16 @@ void Detail_Update()
 
 	// 曲リスト 更新
 	{
+		if (goUp.leftClicked) { --albumList_begin; }
+		if (goDown.leftClicked) { ++albumList_begin; }
 		if (rect_albumListAll.mouseOver)
 		{
 			bool scr_flag = ((albumList_begin + 5 <= (signed)albumList.size()) || (albumList_begin > 0) ? true : false);
-			if (scr_flag)
-			{
-				albumList_begin += Mouse::Wheel();
-				albumList_begin = Max(albumList_begin, 0);
-				albumList_begin = Min<int32_t>(albumList_begin, albumList.size() - 5);
-			}
+			if (scr_flag) { albumList_begin += Mouse::Wheel(); }
 		}
+		albumList_begin = Max(albumList_begin, 0);
+		albumList_begin = Min<int32_t>(albumList_begin, Max<int>(albumList.size() - 5, 0));
+
 		for (int32_t i = albumList_begin; ((i - albumList_begin) < Min<int32_t>(5, (signed)albumList.size())) && (i < (signed)albumList.size()); ++i)
 		{
 			auto num = i - albumList_begin;
@@ -174,6 +177,8 @@ void Detail_Draw()
 		rect_albumExpl.drawShadow({ 0,15 }, 32, 10);
 		rect_albumExpl.drawFrame(3);
 		rect_albumExpl.draw(Color(32, 32, 32, 120));
+		if (albumList_begin > 0) { goUp.draw((goUp.mouseOver ? Palette::Orange : Palette::White)); }
+		if (albumList_begin + 5 < (signed)albumList.size()) { goDown.draw((goDown.mouseOver ? Palette::Orange : Palette::White)); }
 		for (int32_t i = 0; i < 5; ++i)
 		{
 			RoundRect(rect_albumList_Flag.x, rect_albumList_Flag.y + i * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r).draw(Color(32, 32, 32, 200));
@@ -203,16 +208,17 @@ void Detail_Draw()
 
 	// 曲リスト 描画
 	{
-		for (int32_t i = albumList_begin; (i - albumList_begin) < Min<int32_t>(5, albumList.size()); ++i)
+		for (int32_t i = albumList_begin; (i - albumList_begin) < Min<int32_t>(5, albumList.size() - albumList_begin); ++i)
 		{
 			auto num = i - albumList_begin;
 			auto tmp = albumList[i];
-			RoundRect tmpRRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
-			if (tmp.music.isPlaying()) { pausing.drawAt(43, 318 + BAR_HEIGHT + num * 39); }
-			else { playing.drawAt(43, 318 + BAR_HEIGHT + num * 39); }
+			RoundRect tmpRRect(rect_albumList_Flag.x, rect_albumList_Flag.y + num * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r);
+			if (tmp.music.isPlaying()) { pausing.drawAt(43, 318 + BAR_HEIGHT + num * 39, (tmpRRect.mouseOver ? Palette::Orange : Palette::White)); }
+			else { playing.drawAt(43, 318 + BAR_HEIGHT + num * 39, (tmpRRect.mouseOver ? Palette::Orange : Palette::White)); }
 			font_albumList(tmp.displayName).draw(70, 304 + BAR_HEIGHT + num * 39);
 			auto str = Format(Pad(tmp.totalTime / 60, { 2,L'0' }), L":", Pad(tmp.totalTime % 60, { 2,L'0' }));
 			font_albumList(str).draw(610, 304 + BAR_HEIGHT + num * 39);
+			tmpRRect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			((isFav(albumName, tmp.originName) || tmpRRect.mouseOver) ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
 		}
 	}
