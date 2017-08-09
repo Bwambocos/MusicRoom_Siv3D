@@ -178,7 +178,7 @@ void Detail_Draw()
 		rect_albumExpl.drawFrame(3);
 		rect_albumExpl.draw(Color(32, 32, 32, 120));
 		if (albumList_begin > 0) { goUp.draw((goUp.mouseOver ? Palette::Orange : Palette::White)); }
-		if (albumList_begin + 5 < albumList.size()) { goDown.draw((goDown.mouseOver ? Palette::Orange : Palette::White)); }
+		if (albumList_begin + 5 < (signed)albumList.size()) { goDown.draw((goDown.mouseOver ? Palette::Orange : Palette::White)); }
 		for (int32_t i = 0; i < 5; ++i)
 		{
 			RoundRect(rect_albumList_Flag.x, rect_albumList_Flag.y + i * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r).draw(Color(32, 32, 32, 200));
