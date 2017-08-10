@@ -65,12 +65,11 @@ void Select_Init()
 			if (!image) { image = no_img; }
 			AlbumList.push_back({ name,creator,comment,image });
 		}
-		AlbumList.push_back({ L"シングル曲",L"作曲者",L"コメント",Texture(L"data\\Select\\single.png") });
 		z = Grid<double>(3, (AlbumList.size() + 2) / 3 + 1);
 	}
 
 	startTime = Time::GetMillisec64();
-	comTime.resize(AlbumList.size() + 2);
+	comTime.resize(AlbumList.size() + 1);
 }
 
 // アルバム選択 更新
