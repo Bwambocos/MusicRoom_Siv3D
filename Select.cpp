@@ -7,7 +7,7 @@
 
 // define
 #define WELCOME_MESSAGE_MILLISEC 3000
-#define COM_MESSAGE_MILLISEC 1250
+#define COM_MESSAGE_MILLISEC 1000
 
 // アルバム構造体
 struct Album
@@ -69,7 +69,7 @@ void Select_Init()
 	}
 
 	startTime = Time::GetMillisec64();
-	comTime.resize(AlbumList.size() + 1);
+	comTime.resize(AlbumList.size() + 2);
 }
 
 // アルバム選択 更新
@@ -95,10 +95,33 @@ void Select_Update()
 		for (int32_t x = 0; x < (signed)z.width; ++x)
 		{
 			const Rect rect = MakeRect(x, y);
-			if (!SelectImage(cou)) { break; }
+			if (cou == AlbumList.size() + 2) { break; }
 			if (Input::MouseL.clicked && rect.mouseOver)
 			{
 				if (cou == (signed)AlbumList.size()) { SceneMgr_ChangeScene(Scene_Fav); }
+				else if (cou == (signed)AlbumList.size() + 1)
+				{
+					GUI gui(GUIStyle::Default);
+					gui.setTitle(L"終了確認");
+					gui.addln(GUIText::Create(L"終了しますか？"));
+					gui.add(L"yes", GUIButton::Create(L"はい"));
+					gui.add(L"no", GUIButton::Create(L"いいえ"));
+					while (System::Update())
+					{
+						gui.setCenter(Window::Center());
+						gui.show();
+						if (gui.button(L"yes").pushed)
+						{
+							System::Exit();
+							break;
+						}
+						else if (gui.button(L"no").pushed)
+						{
+							gui.hide();
+							break;
+						}
+					}
+				}
 				else
 				{
 					setAlbum = AlbumList[cou].name;
@@ -107,7 +130,7 @@ void Select_Update()
 			}
 			++cou;
 		}
-		if (!SelectImage(cou)) { break; }
+		if (cou == AlbumList.size() + 2) { break; }
 	}
 }
 
@@ -128,7 +151,7 @@ void Select_Draw()
 			for (int32_t x = 0; x < (signed)z.width; ++x)
 			{
 				const Rect rect = MakeRect(x, y);
-				if (!SelectImage(cou)) { break; }
+				if (cou == AlbumList.size() + 2) { break; }
 				if (!rect.mouseOver)
 				{
 					rect(SelectImage(cou).resize(216, 216)).draw();
@@ -137,7 +160,7 @@ void Select_Draw()
 				}
 				++cou;
 			}
-			if (!SelectImage(cou)) { break; }
+			if (cou == AlbumList.size() + 2) { break; }
 		}
 		cou = first_cou;
 		for (int32_t y = 0; y < (signed)z.height; ++y)
@@ -150,13 +173,13 @@ void Select_Draw()
 					if (rect.mouseOver) { z[y][x] = Min(z[y][x] + 0.05, 0.5); }
 				}
 				const double s = z[y][x];
-				if (!SelectImage(cou)) { break; }
+				if (cou == AlbumList.size() + 2) { break; }
 				RectF(rect).stretched(s * 2).drawShadow({ 0,15 * s }, 32 * s, 10 * s);
 				RectF(rect).stretched(s * 2)(SelectImage(cou).resize(216, 216)).draw();
 				RectF(rect).stretched(s * 2).drawFrame(3, 0, Color(0, 0, 0));
 				++cou;
 			}
-			if (!SelectImage(cou)) { break; }
+			if (cou == AlbumList.size() + 2) { break; }
 		}
 		cou = first_cou;
 		for (int32_t y = 0; y < (signed)z.height; ++y)
@@ -164,7 +187,7 @@ void Select_Draw()
 			for (int32_t x = 0; x < (signed)z.width; ++x)
 			{
 				const Rect rect = MakeRect(x, y);
-				if (!SelectImage(cou)) { break; }
+				if (cou == AlbumList.size() + 2) { break; }
 				if (rect.mouseOver)
 				{
 					comTime[cou].first = (comTime[cou].first == 0 ? Time::GetMillisec64() : comTime[cou].first);
@@ -174,9 +197,10 @@ void Select_Draw()
 				else { comTime[cou].first = comTime[cou].second = 0; }
 				++cou;
 			}
-			if (!SelectImage(cou)) { break; }
+			if (cou == AlbumList.size() + 2) { break; }
 		}
 	}
+
 }
 
 // アルバム一覧 正方形区画を作成
