@@ -96,7 +96,7 @@ void Select_Update()
 		for (int32_t x = 0; x < (signed)z.width; ++x)
 		{
 			const Rect rect = MakeRect(x, y);
-			if (cou == AlbumList.size() + 2) { break; }
+			if (cou == (signed)AlbumList.size() + 2) { break; }
 			if (Input::MouseL.clicked && rect.mouseOver)
 			{
 				if (cou == (signed)AlbumList.size()) { SceneMgr_ChangeScene(Scene_Fav); }
@@ -131,7 +131,7 @@ void Select_Update()
 			}
 			++cou;
 		}
-		if (cou == AlbumList.size() + 2) { break; }
+		if (cou == (signed)AlbumList.size() + 2) { break; }
 	}
 }
 
@@ -154,7 +154,7 @@ void Select_Draw()
 			for (int32_t x = 0; x < (signed)z.width; ++x)
 			{
 				const Rect rect = MakeRect(x, y);
-				if (cou == AlbumList.size() + 2) { break; }
+				if (cou == (signed)AlbumList.size() + 2) { break; }
 				if (!rect.mouseOver)
 				{
 					rect(SelectImage(cou).resize(216, 216)).draw();
@@ -163,7 +163,7 @@ void Select_Draw()
 				}
 				++cou;
 			}
-			if (cou == AlbumList.size() + 2) { break; }
+			if (cou == (signed)AlbumList.size() + 2) { break; }
 		}
 		cou = first_cou;
 		for (int32_t y = 0; y < (signed)z.height; ++y)
@@ -176,13 +176,13 @@ void Select_Draw()
 					if (rect.mouseOver) { z[y][x] = Min(z[y][x] + 0.05, 0.5); }
 				}
 				const double s = z[y][x];
-				if (cou == AlbumList.size() + 2) { break; }
+				if (cou == (signed)AlbumList.size() + 2) { break; }
 				RectF(rect).stretched(s * 2).drawShadow({ 0,15 * s }, 32 * s, 10 * s);
 				RectF(rect).stretched(s * 2)(SelectImage(cou).resize(216, 216)).draw();
 				RectF(rect).stretched(s * 2).drawFrame(3, 0, Color(0, 0, 0));
 				++cou;
 			}
-			if (cou == AlbumList.size() + 2) { break; }
+			if (cou == (signed)AlbumList.size() + 2) { break; }
 		}
 		cou = first_cou;
 		for (int32_t y = 0; y < (signed)z.height; ++y)
@@ -190,7 +190,7 @@ void Select_Draw()
 			for (int32_t x = 0; x < (signed)z.width; ++x)
 			{
 				const Rect rect = MakeRect(x, y);
-				if (cou == AlbumList.size() + 2) { break; }
+				if (cou == (signed)AlbumList.size() + 2) { break; }
 				if (rect.mouseOver)
 				{
 					comTime[cou].first = (comTime[cou].first == 0 ? Time::GetMillisec64() : comTime[cou].first);
@@ -200,10 +200,9 @@ void Select_Draw()
 				else { comTime[cou].first = comTime[cou].second = 0; }
 				++cou;
 			}
-			if (cou == AlbumList.size() + 2) { break; }
+			if (cou == (signed)AlbumList.size() + 2) { break; }
 		}
 	}
-
 }
 
 // ƒAƒ‹ƒoƒ€ˆê—— ³•ûŒ`‹æ‰æ‚ðì¬
