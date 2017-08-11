@@ -28,6 +28,7 @@ static int32_t draw_musicName_x;
 static int64 draw_musicName_startMSec, draw_musicName_stayMSec;
 static bool draw_musicName_stayFlag;
 static bool favLoop_flag = false, stop_flag = false;
+static int prev_or_next;
 
 // ã» èâä˙âª
 void Music_Init()
@@ -69,8 +70,8 @@ void Music_Init()
 			break;
 
 		case Scene_Music:
-			if (!favLoop_flag) { setAlbumMusicName(1, music_albumName, music_musicName, music_Music); }
-			else { setFavMusicName(1, music_albumName, music_musicName, music_Music); }
+			if (!favLoop_flag) { setAlbumMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
+			else { setFavMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
 			break;
 		}
 		TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
@@ -97,11 +98,7 @@ void Music_Update()
 {
 	if (Input::KeyB.clicked) { SceneMgr_ChangeScene((favLoop_flag ? Scene_Fav : Scene_Detail)); }
 	if (!music_Music.isPlaying() && !stop_flag
-		&& music_Music.samplesPlayed() % music_Music.lengthSample() == 0)
-	{
-		favLoop_flag = (get_prevScene() == Scene_Fav || favLoop_flag);
-		SceneMgr_ChangeScene(Scene_Music);
-	}
+		&& music_Music.samplesPlayed() % music_Music.lengthSample() == 0) { changeMusic(1); }
 	
 	// çƒê∂ÉoÅ[ çXêV
 	{
@@ -279,5 +276,43 @@ void Update_drawMusicDetailStrings()
 			}
 			else { draw_musicName_stayMSec = Time::GetMillisec64(); }
 		}
+	}
+}
+
+// ã»éËìÆëJà⁄
+void changeMusic(int flag)
+{
+	favLoop_flag = (get_prevScene() == Scene_Fav || favLoop_flag);
+	prev_or_next = flag;
+	music_Music.stop();
+	SceneMgr_ChangeScene(Scene_Music);
+}
+
+// ã»ëÄçÏ
+// kind: 0->àÍéûí‚é~, 1->çƒê∂, 2->í‚é~, 3->åJÇËï‘ÇµêÿÇËë÷Ç¶
+void changeMusicStats(int kind)
+{
+	switch (kind)
+	{
+	case 0:
+		music_Music.pause();
+		stop_flag = false;
+		break;
+	case 1:
+		music_Music.play();
+		stop_flag = false;
+		break;
+	case 2:
+		music_Music.stop();
+		stop_flag = true;
+		break;
+	case 3:
+		const int64 tmpTime = music_Music.streamPosSample();
+		music_Music.pause();
+		music_Music.setLoop(music_Music.isLoop() ? false : true);
+		music_Music.play();
+		music_Music.setPosSample(tmpTime);
+		stop_flag = false;
+		break;
 	}
 }

@@ -2,6 +2,7 @@
 #include <Siv3D.hpp>
 #include "SceneMgr.h"
 #include "Bar.h"
+#include "Music.h"
 
 // define
 #define DEFAULT_mainRectWidth 256
@@ -24,6 +25,7 @@ static Sound nowMusic;
 static String mainText = L"";
 static Font mainFont, timeFont;
 static int32_t mainRectWidth = DEFAULT_mainRectWidth;
+static bool stop_flag = false;
 
 // バー 初期化
 void Bar_Init()
@@ -64,6 +66,9 @@ void Bar_Update()
 	mainRectWidth = Max(DEFAULT_mainRectWidth, rect.w + 18 * 2);
 	mainRect = RoundRect(256 - (mainRectWidth - DEFAULT_mainRectWidth) / 2, 0, mainRectWidth, BAR_HEIGHT, 16);
 
+	if (!music.music.isEmpty() && !music.music.isPlaying() && !stop_flag
+		&& music.music.samplesPlayed() % music.music.lengthSample() == 0) { changeMusic(1); }
+	
 	// ボタン 更新
 	{
 		int32_t x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
@@ -75,23 +80,53 @@ void Bar_Update()
 			case 0:
 				if (button.mouseOver) { displayPrev = originPrev[1]; }
 				else { displayPrev = originPrev[0]; }
+				if (button.leftClicked) { changeMusic(-1); }
 				break;
 			case 1:
-				if (button.mouseOver) { displayPlay = originPlay[1]; }
-				else { displayPlay = originPlay[0]; }
+				if (music.music.isPlaying())
+				{
+					if (button.mouseOver) { displayBrief = originBrief[1]; }
+					else { displayBrief = originBrief[0]; }
+					if (button.leftClicked)
+					{
+						changeMusicStats(0);
+						stop_flag = false;
+					}
+				}
+				else
+				{
+					if (button.mouseOver) { displayPlay = originPlay[1]; }
+					else { displayPlay = originPlay[0]; }
+					if (button.leftClicked)
+					{
+						changeMusicStats(1);
+						stop_flag = false;
+					}
+				}
 				break;
 			case 2:
 				if (button.mouseOver) { displayRep = originRep[1]; }
 				else { displayRep = originRep[0]; }
+				if (button.leftClicked)
+				{
+					changeMusicStats(3);
+					stop_flag = false;
+				}
 				x += mainRectWidth;
 				break;
 			case 3:
 				if (button.mouseOver) { displayStop = originStop[1]; }
 				else { displayStop = originStop[0]; }
+				if (button.leftClicked)
+				{
+					changeMusicStats(2);
+					stop_flag = true;
+				}
 				break;
 			case 4:
 				if (button.mouseOver) { displayNext = originNext[1]; }
 				else { displayNext = originNext[0]; }
+				if (button.leftClicked) { changeMusic(1); }
 				break;
 			}
 			x += 40;
@@ -116,7 +151,7 @@ void Bar_Update()
 				break;
 			}
 		}
-		else { mainText = music.musicName; }
+		else { mainText = L"『" + music.albumName + L"』" + music.musicName; }
 	}
 
 	// 再生位置テキスト 更新
@@ -146,7 +181,7 @@ void Bar_Draw()
 				displayPrev.draw(x, 12);
 				break;
 			case 1:
-				if (nowMusic.isPlaying()) { displayBrief.draw(x, 12); }
+				if (music.music.isPlaying()) { displayBrief.draw(x, 12); }
 				else { displayPlay.draw(x, 12); }
 				break;
 			case 2:
