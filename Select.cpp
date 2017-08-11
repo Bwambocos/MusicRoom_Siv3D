@@ -7,7 +7,7 @@
 
 // define
 #define WELCOME_MESSAGE_MILLISEC 3000
-#define COM_MESSAGE_MILLISEC 1250
+#define COM_MESSAGE_MILLISEC 1000
 
 // アルバム構造体
 struct Album
@@ -28,6 +28,8 @@ static Texture Gaussian;
 static String setAlbum = L"";
 static Grid<double_t> z;
 static TextReader reader;
+static Triangle goUp({ 384,75 }, { 414,85 }, { 354,85 });
+static Triangle goDown({ 354,560 }, { 414,560 }, { 384,570 });
 static int64_t startTime;
 static int64_t nowTime;
 static int32_t first_cou;
@@ -65,7 +67,6 @@ void Select_Init()
 			if (!image) { image = no_img; }
 			AlbumList.push_back({ name,creator,comment,image });
 		}
-		AlbumList.push_back({ L"シングル曲",L"作曲者",L"コメント",Texture(L"data\\Select\\single.png") });
 		z = Grid<double>(3, (AlbumList.size() + 2) / 3 + 1);
 	}
 
@@ -80,13 +81,12 @@ void Select_Update()
 
 	// スクロール 更新
 	{
+		if (goUp.leftClicked) { first_cou -= 3; }
+		if (goDown.leftClicked) { first_cou += 3; }
 		scr_flag = ((first_cou + 5 <= (signed)AlbumList.size()) || (first_cou > 0) ? true : false);
-		if (scr_flag)
-		{
-			first_cou += Mouse::Wheel() * 3;
-			first_cou = Max(first_cou, 0);
-			first_cou = Min<int32_t>(first_cou, AlbumList.size() / 3 * 3);
-		}
+		if (scr_flag) { first_cou += Mouse::Wheel() * 3; }
+		first_cou = Max(first_cou, 0);
+		first_cou = Min<int32_t>(first_cou, AlbumList.size() / 3 * 3);
 	}
 
 	// album_list 更新
@@ -96,10 +96,33 @@ void Select_Update()
 		for (int32_t x = 0; x < (signed)z.width; ++x)
 		{
 			const Rect rect = MakeRect(x, y);
-			if (!SelectImage(cou)) { break; }
+			if (cou == (signed)AlbumList.size() + 2) { break; }
 			if (Input::MouseL.clicked && rect.mouseOver)
 			{
 				if (cou == (signed)AlbumList.size()) { SceneMgr_ChangeScene(Scene_Fav); }
+				else if (cou == (signed)AlbumList.size() + 1)
+				{
+					GUI gui(GUIStyle::Default);
+					gui.setTitle(L"終了確認");
+					gui.addln(GUIText::Create(L"終了しますか？"));
+					gui.add(L"yes", GUIButton::Create(L"はい"));
+					gui.add(L"no", GUIButton::Create(L"いいえ"));
+					gui.setCenter(Window::Center());
+					while (System::Update())
+					{
+						gui.show();
+						if (gui.button(L"yes").pushed)
+						{
+							System::Exit();
+							break;
+						}
+						else if (gui.button(L"no").pushed)
+						{
+							gui.hide();
+							break;
+						}
+					}
+				}
 				else
 				{
 					setAlbum = AlbumList[cou].name;
@@ -108,7 +131,7 @@ void Select_Update()
 			}
 			++cou;
 		}
-		if (!SelectImage(cou)) { break; }
+		if (cou == (signed)AlbumList.size() + 2) { break; }
 	}
 }
 
@@ -119,6 +142,8 @@ void Select_Draw()
 	{
 		main.draw(0, BAR_HEIGHT);
 		Gaussian.draw(0, BAR_HEIGHT);
+		if (first_cou > 0) { goUp.draw((goUp.mouseOver ? Palette::Orange : Palette::White)); }
+		if (first_cou + 5 <= (signed)AlbumList.size()) { goDown.draw((goDown.mouseOver ? Palette::Orange : Palette::White)); }
 	}
 
 	// album_list 描画
@@ -129,7 +154,7 @@ void Select_Draw()
 			for (int32_t x = 0; x < (signed)z.width; ++x)
 			{
 				const Rect rect = MakeRect(x, y);
-				if (!SelectImage(cou)) { break; }
+				if (cou == (signed)AlbumList.size() + 2) { break; }
 				if (!rect.mouseOver)
 				{
 					rect(SelectImage(cou).resize(216, 216)).draw();
@@ -138,7 +163,7 @@ void Select_Draw()
 				}
 				++cou;
 			}
-			if (!SelectImage(cou)) { break; }
+			if (cou == (signed)AlbumList.size() + 2) { break; }
 		}
 		cou = first_cou;
 		for (int32_t y = 0; y < (signed)z.height; ++y)
@@ -151,13 +176,13 @@ void Select_Draw()
 					if (rect.mouseOver) { z[y][x] = Min(z[y][x] + 0.05, 0.5); }
 				}
 				const double s = z[y][x];
-				if (!SelectImage(cou)) { break; }
+				if (cou == (signed)AlbumList.size() + 2) { break; }
 				RectF(rect).stretched(s * 2).drawShadow({ 0,15 * s }, 32 * s, 10 * s);
 				RectF(rect).stretched(s * 2)(SelectImage(cou).resize(216, 216)).draw();
 				RectF(rect).stretched(s * 2).drawFrame(3, 0, Color(0, 0, 0));
 				++cou;
 			}
-			if (!SelectImage(cou)) { break; }
+			if (cou == (signed)AlbumList.size() + 2) { break; }
 		}
 		cou = first_cou;
 		for (int32_t y = 0; y < (signed)z.height; ++y)
@@ -165,7 +190,7 @@ void Select_Draw()
 			for (int32_t x = 0; x < (signed)z.width; ++x)
 			{
 				const Rect rect = MakeRect(x, y);
-				if (!SelectImage(cou)) { break; }
+				if (cou == (signed)AlbumList.size() + 2) { break; }
 				if (rect.mouseOver)
 				{
 					comTime[cou].first = (comTime[cou].first == 0 ? Time::GetMillisec64() : comTime[cou].first);
@@ -175,7 +200,7 @@ void Select_Draw()
 				else { comTime[cou].first = comTime[cou].second = 0; }
 				++cou;
 			}
-			if (!SelectImage(cou)) { break; }
+			if (cou == (signed)AlbumList.size() + 2) { break; }
 		}
 	}
 }
