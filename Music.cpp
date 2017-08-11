@@ -88,6 +88,7 @@ void Music_Init()
 	draw_musicName_stayFlag = true;
 	draw_musicName_x = DEFAULT_musicName_X;
 
+	giveMusicData(music_albumName, music_musicName, music_Music);
 	music_Music.play();
 }
 

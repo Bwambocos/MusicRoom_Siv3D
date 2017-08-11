@@ -14,3 +14,6 @@ void Bar_Draw();
 
 // Ä¶’†‚©æ“¾
 bool is_nowMusicPlaying();
+
+// ‹ÈÚ×ƒf[ƒ^ó‚¯“n‚µ
+void giveMusicData(String albumName, String musicName, Sound musicData);

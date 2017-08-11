@@ -6,6 +6,16 @@
 // define
 #define DEFAULT_mainRectWidth 256
 
+struct Music
+{
+	Sound music;
+	String albumName;
+	String musicName;
+	int32_t nowTime;
+	int32_t totalTime;
+};
+
+static Music music;
 static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2], originPrev[2], originNext[2];
 static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep, displayPrev, displayNext;
 static RoundRect fieldRect(0, 0, 768, BAR_HEIGHT, 16);
@@ -13,7 +23,7 @@ static RoundRect mainRect(256, 0, 256, BAR_HEIGHT, 16);
 static Sound nowMusic;
 static String mainText = L"";
 static Font mainFont, timeFont;
-static int32_t mainRectWidth = DEFAULT_mainRectWidth, nowTime, totalTime;
+static int32_t mainRectWidth = DEFAULT_mainRectWidth;
 
 // バー 初期化
 void Bar_Init()
@@ -90,9 +100,9 @@ void Bar_Update()
 
 	// メインテキスト 更新
 	{
-		if (!nowMusic.isPlaying())
+		auto nowScene = get_nowScene();
+		if (nowScene != Scene_Music)
 		{
-			auto nowScene = get_nowScene();
 			switch (nowScene)
 			{
 			case Scene_Select:
@@ -101,16 +111,20 @@ void Bar_Update()
 			case Scene_Detail:
 				mainText = L"曲を選択してください";
 				break;
+			case Scene_Fav:
+				mainText = L"曲を選択してください";
+				break;
 			}
 		}
+		else { mainText = music.musicName; }
 	}
 
 	// 再生位置テキスト 更新
 	{
 		if (nowMusic.isPlaying())
 		{
-			totalTime = (int32_t)nowMusic.lengthSec();
-			nowTime = (int32_t)nowMusic.streamPosSec();
+			music.totalTime = (int32_t)nowMusic.lengthSec();
+			music.nowTime = (int32_t)nowMusic.streamPosSec();
 		}
 	}
 }
@@ -160,8 +174,8 @@ void Bar_Draw()
 	{
 		if (nowMusic.isPlaying())
 		{
-			const Rect rect = timeFont(nowTime + L":" + totalTime).region();
-			timeFont.draw(nowTime + L":" + totalTime, (768 / 2 + mainRectWidth / 2) - rect.w, 12, Color(0, 0, 0));
+			const Rect rect = timeFont(music.nowTime + L":" + music.totalTime).region();
+			timeFont.draw(music.nowTime + L":" + music.totalTime, (768 / 2 + mainRectWidth / 2) - rect.w, 12, Color(0, 0, 0));
 		}
 	}
 }
@@ -170,4 +184,12 @@ void Bar_Draw()
 bool is_nowMusicPlaying()
 {
 	return nowMusic.isPlaying();
+}
+
+// 曲詳細データ受け渡し
+void giveMusicData(String albumName, String musicName, Sound musicData)
+{
+	music.albumName = albumName;
+	music.musicName = musicName;
+	music.music = musicData;
 }
