@@ -3,6 +3,7 @@
 #include "SceneMgr.h"
 #include "Bar.h"
 #include "Fav.h"
+#include "Music.h"
 
 // define
 #define MAX_CELL_NUM 12
@@ -83,6 +84,7 @@ void Fav_Update()
 				selectedAlbumName = music.albumName;
 				selectedMusicName = music.musicOriginName;
 				selectedMusic = music.music;
+				set_stillFlag(true);
 				SceneMgr_ChangeScene(Scene_Music);
 			}
 		}

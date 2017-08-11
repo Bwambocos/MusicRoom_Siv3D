@@ -5,6 +5,7 @@
 #include "Bar.h"
 #include "Select.h"
 #include "Fav.h"
+#include "Music.h"
 
 // define
 #define DEFAULT_albumName_X 333
@@ -158,6 +159,7 @@ void Detail_Update()
 				selectedAlbumName = albumName;
 				selectedMusicName = music.originName;
 				selectedMusic = music.music;
+				set_stillFlag(true);
 				SceneMgr_ChangeScene(Scene_Music);
 			}
 		}

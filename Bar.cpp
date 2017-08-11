@@ -135,9 +135,9 @@ void Bar_Update()
 
 	// メインテキスト 更新
 	{
-		auto nowScene = get_nowScene();
-		if (nowScene != Scene_Music)
+		if (!music.music.isPlaying())
 		{
+			auto nowScene = get_nowScene();
 			switch (nowScene)
 			{
 			case Scene_Select:

@@ -27,7 +27,7 @@ static int32_t music_musicTime;
 static int32_t draw_musicName_x;
 static int64 draw_musicName_startMSec, draw_musicName_stayMSec;
 static bool draw_musicName_stayFlag;
-static bool favLoop_flag = false, stop_flag = false;
+static bool favLoop_flag = false, stop_flag = false, still_flag = true;
 static int prev_or_next;
 
 // 曲 初期化
@@ -91,12 +91,17 @@ void Music_Init()
 
 	giveMusicData(music_albumName, music_musicName, music_Music);
 	music_Music.play();
+	if (!still_flag) { SceneMgr_ChangeScene(get_prevScene()); }
 }
 
 // 曲 更新
 void Music_Update()
 {
-	if (Input::KeyB.clicked) { SceneMgr_ChangeScene((favLoop_flag ? Scene_Fav : Scene_Detail)); }
+	if (Input::KeyB.clicked)
+	{
+		SceneMgr_ChangeScene((favLoop_flag ? Scene_Fav : Scene_Detail));
+		still_flag = false;
+	}
 	if (!music_Music.isPlaying() && !stop_flag
 		&& music_Music.samplesPlayed() % music_Music.lengthSample() == 0) { changeMusic(1); }
 	
@@ -315,4 +320,10 @@ void changeMusicStats(int kind)
 		stop_flag = false;
 		break;
 	}
+}
+
+// 他画面中フラグセット
+void set_stillFlag(bool flag)
+{
+	still_flag = flag;
 }
