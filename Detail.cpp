@@ -9,6 +9,7 @@
 // define
 #define DEFAULT_albumName_X 333
 #define DEFAULT_albumCreator_X 333
+#define DEFAULT_albumExpl_Y 143 + BAR_HEIGHT
 #define DRAW_STAYMSEC 3500
 
 // 曲リスト 構造体
@@ -42,8 +43,9 @@ static Triangle goDown({ 354,560 }, { 414,560 }, { 384,570 });
 static Sound selectedMusic;
 static int32_t albumList_begin;
 static int32_t draw_albumName_x, draw_albumCreator_x;
-static int64 draw_albumName_startMSec, draw_albumCreator_startMSec, draw_albumName_stayMSec, draw_albumCreator_stayMSec;
-static bool draw_albumName_stayFlag, draw_albumCreator_stayFlag;
+static double draw_albumExpl_y;
+static int64 draw_albumName_startMSec, draw_albumCreator_startMSec, draw_albumExpl_startMSec, draw_albumName_stayMSec, draw_albumCreator_stayMSec, draw_albumExpl_stayMSec;
+static bool draw_albumName_stayFlag, draw_albumCreator_stayFlag, draw_albumExpl_stayFlag;
 static int selectedMusic_num;
 
 // アルバム詳細 初期化
@@ -109,10 +111,13 @@ void Detail_Init()
 	// 描画位置 初期化
 	draw_albumName_startMSec = Time::GetMillisec64();
 	draw_albumCreator_startMSec = Time::GetMillisec64();
+	draw_albumExpl_startMSec = Time::GetMillisec64();
 	draw_albumName_stayFlag = true;
 	draw_albumCreator_stayFlag = true;
+	draw_albumExpl_stayFlag = true;
 	draw_albumName_x = DEFAULT_albumName_X;
 	draw_albumCreator_x = DEFAULT_albumCreator_X;
+	draw_albumExpl_y = DEFAULT_albumExpl_Y;
 }
 
 // アルバム詳細 更新
@@ -251,20 +256,40 @@ void albumExpl_Draw()
 		}
 	}
 
+	auto rect = rect_albumExpl;
+	auto height = texts.size()*font_albumExpl.height;
+	if (height > rect.h)
+	{
+		if (!draw_albumExpl_stayFlag)
+		{
+			if (draw_albumExpl_y + height > rect.y + rect.h) { draw_albumExpl_y -= 0.5; }
+			else
+			{
+				draw_albumExpl_startMSec = draw_albumExpl_stayMSec = Time::GetMillisec64();
+				draw_albumExpl_stayFlag = true;
+			}
+		}
+		if (draw_albumExpl_stayFlag)
+		{
+			if (draw_albumExpl_stayMSec - draw_albumExpl_startMSec >= DRAW_STAYMSEC)
+			{
+				draw_albumExpl_startMSec = draw_albumExpl_stayMSec;
+				if (draw_albumExpl_y == DEFAULT_albumExpl_Y) { draw_albumExpl_stayFlag = false; }
+				else { draw_albumExpl_y = DEFAULT_albumExpl_Y; }
+			}
+			else { draw_albumExpl_stayMSec = Time::GetMillisec64(); }
+		}
+	}
+	RasterizerState rasterizer = RasterizerState::Default2D;
+	rasterizer.scissorEnable = true;
+	Graphics2D::SetRasterizerState(rasterizer);
+	Graphics2D::SetScissorRect(Rect((int)rect.x, (int)rect.y, (int)rect.w, (int)rect.h));
 	for (size_t i = 0; i < texts.size(); ++i)
 	{
-		const int32 y = static_cast<int32>(rect_albumExpl.y + 10 + i * font_albumExpl.height);
-		const bool overflow = (i + 1 < texts.size())
-			&& (y + font_albumExpl.height * 2 + 10 > rect_albumExpl.y + rect_albumExpl.h);
-		if (overflow)
-		{
-			if (texts[i].length > 2) { texts[i].resize(texts[i].length - (texts[i].length > 2 ? 2 : 1)); }
-			if (texts[i][texts[i].length - 1] == L'\n') { texts[i][texts[i].length - 1] = L'\0'; }
-			texts[i].append(L"...");
-		}
+		const int32 y = static_cast<int32>(draw_albumExpl_y + i * font_albumExpl.height);
 		font_albumExpl(texts[i]).draw(rect_albumExpl.x + 10, y);
-		if (overflow) { break; }
 	}
+	Graphics2D::SetScissorRect(Rect(0, 0, Window::Width(), Window::Height()));
 }
 
 // アルバム・曲情報 受け渡し（flag == 1 -> 次 : -1 -> 前）
