@@ -14,3 +14,9 @@ void Bar_Draw();
 
 // 再生中か取得
 bool is_nowMusicPlaying();
+
+// 曲詳細データ受け渡し
+void giveMusicData(String albumName, String musicName, Sound musicData);
+
+// 停止フラグ 設定
+void set_stopFlag(bool flag);
