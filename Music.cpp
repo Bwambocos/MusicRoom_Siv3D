@@ -23,11 +23,12 @@ static RoundRect rect_music_isFav(698, 25 + BAR_HEIGHT, 48, 48, 10);
 static RoundRect rect_musicBar(127, 91 + BAR_HEIGHT, 565, 21, 5);
 static RoundRect rect_musicExp(25, 130 + BAR_HEIGHT, 718, 357, 10);
 static FFTResult fft;
-static int32_t music_musicTime;
-static int32_t draw_musicName_x;
-static int64 draw_musicName_startMSec, draw_musicName_stayMSec;
+static int music_musicTime;
+static int draw_musicName_x;
+static int draw_musicName_startMSec, draw_musicName_stayMSec;
 static bool draw_musicName_stayFlag;
-static bool favLoop_flag = false, stop_flag = false;
+static bool favLoop_flag = false, stop_flag = false, still_flag = true;
+static int prev_or_next;
 
 // 曲 初期化
 void Music_Init()
@@ -69,14 +70,14 @@ void Music_Init()
 			break;
 
 		case Scene_Music:
-			if (!favLoop_flag) { setAlbumMusicName(1, music_albumName, music_musicName, music_Music); }
-			else { setFavMusicName(1, music_albumName, music_musicName, music_Music); }
+			if (!favLoop_flag) { setAlbumMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
+			else { setFavMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
 			break;
 		}
 		TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
 		music_reader.readAll(music_musicExp);
 		music_musicExp += L'\n';
-		music_musicTime = (int32_t)music_Music.lengthSec();
+		music_musicTime = (int)music_Music.lengthSec();
 		faved = Texture(L"data\\Music\\fav.png");
 		not_faved = Texture(L"data\\Music\\not_fav.png");
 		music_NameTime = Font(18);
@@ -84,23 +85,25 @@ void Music_Init()
 	}
 
 	// 描画位置 初期化
-	draw_musicName_startMSec = Time::GetMillisec64();
+	draw_musicName_startMSec = (int)Time::GetMillisec();
 	draw_musicName_stayFlag = true;
 	draw_musicName_x = DEFAULT_musicName_X;
 
+	giveMusicData(music_albumName, music_musicName, music_Music);
 	music_Music.play();
+	if (!still_flag) { SceneMgr_ChangeScene(get_prevScene()); }
 }
 
 // 曲 更新
 void Music_Update()
 {
-	if (Input::KeyB.clicked) { SceneMgr_ChangeScene((favLoop_flag ? Scene_Fav : Scene_Detail)); }
-	if (!music_Music.isPlaying() && !stop_flag
-		&& music_Music.samplesPlayed() % music_Music.lengthSample() == 0)
+	if (Input::KeyB.clicked)
 	{
-		favLoop_flag = (get_prevScene() == Scene_Fav || favLoop_flag);
-		SceneMgr_ChangeScene(Scene_Music);
+		SceneMgr_ChangeScene((favLoop_flag ? Scene_Fav : Scene_Detail));
+		still_flag = false;
 	}
+	if (!music_Music.isPlaying() && !stop_flag
+		&& music_Music.samplesPlayed() % music_Music.lengthSample() == 0) { changeMusic(1); }
 	
 	// 再生バー 更新
 	{
@@ -108,7 +111,7 @@ void Music_Update()
 		if (rect_musicBar.leftPressed)
 		{
 			const Point tmpPoint = Mouse::Pos();
-			music_Music.setPosSample(music_Music.lengthSample()*(tmpPoint.x - (int64)rect_musicBar.x) / (int64)rect_musicBar.w);
+			music_Music.setPosSample(music_Music.lengthSample()*(tmpPoint.x - (int)rect_musicBar.x) / (int)rect_musicBar.w);
 		}
 
 		// ボタン
@@ -119,17 +122,19 @@ void Music_Update()
 		{
 			(music_Music.isPlaying() ? music_Music.pause() : music_Music.play());
 			stop_flag = false;
+			set_stopFlag(stop_flag);
 		}
 		tmpCircle = Circle(90, rect_musicBar.y + rect_musicBar.h / 2, 15);
 		displayRep = originRep[((tmpCircle.mouseOver || music_Music.isLoop()) ? 1 : 0)];
 		if (tmpCircle.leftClicked || Input::KeyShift.clicked)
 		{
-			const int64 tmpTime = music_Music.streamPosSample();
+			const int tmpTime = (int)music_Music.streamPosSample();
 			music_Music.pause();
 			music_Music.setLoop(music_Music.isLoop() ? false : true);
 			music_Music.play();
 			music_Music.setPosSample(tmpTime);
 			stop_flag = false;
+			set_stopFlag(stop_flag);
 		}
 		tmpCircle = Circle(723, rect_musicBar.y + rect_musicBar.h / 2, 15);
 		displayStop = originStop[(tmpCircle.mouseOver ? 1 : 0)];
@@ -137,6 +142,7 @@ void Music_Update()
 		{
 			music_Music.stop();
 			stop_flag = true;
+			set_stopFlag(stop_flag);
 		}
 	}
 
@@ -219,7 +225,7 @@ void musicExpl_Draw()
 
 	while (pos < music_musicExp.length)
 	{
-		for (int32_t i = 0; i + pos < music_musicExp.length; ++i)
+		for (int i = 0; i + pos < music_musicExp.length; ++i)
 		{
 			if (music_Exp(music_musicExp.substr(pos, i)).region().w >= w)
 			{
@@ -264,7 +270,7 @@ void Update_drawMusicDetailStrings()
 			if (draw_musicName_x + width > rect.x + rect.w) { --draw_musicName_x; }
 			else
 			{
-				draw_musicName_startMSec = draw_musicName_stayMSec = Time::GetMillisec64();
+				draw_musicName_startMSec = draw_musicName_stayMSec = (int)Time::GetMillisec64();
 				draw_musicName_stayFlag = true;
 			}
 		}
@@ -276,7 +282,63 @@ void Update_drawMusicDetailStrings()
 				if (draw_musicName_x == DEFAULT_musicName_X) { draw_musicName_stayFlag = false; }
 				else { draw_musicName_x = DEFAULT_musicName_X; }
 			}
-			else { draw_musicName_stayMSec = Time::GetMillisec64(); }
+			else { draw_musicName_stayMSec = (int)Time::GetMillisec(); }
 		}
 	}
+}
+
+// 曲手動遷移
+void changeMusic(int flag)
+{
+	favLoop_flag = (get_prevScene() == Scene_Fav || favLoop_flag);
+	prev_or_next = flag;
+	music_Music.stop();
+	if (!favLoop_flag) { setAlbumMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
+	else { setFavMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
+	TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
+	music_reader.readAll(music_musicExp);
+	music_musicExp += L'\n';
+	music_musicTime = (int)music_Music.lengthSec();
+
+	draw_musicName_startMSec = (int)Time::GetMillisec();
+	draw_musicName_stayFlag = true;
+	draw_musicName_x = DEFAULT_musicName_X;
+
+	giveMusicData(music_albumName, music_musicName, music_Music);
+	music_Music.play();
+}
+
+// 曲操作
+// kind: 0->一時停止, 1->再生, 2->停止, 3->繰り返し切り替え
+void changeMusicStats(int kind)
+{
+	switch (kind)
+	{
+	case 0:
+		music_Music.pause();
+		stop_flag = false;
+		break;
+	case 1:
+		music_Music.play();
+		stop_flag = false;
+		break;
+	case 2:
+		music_Music.stop();
+		stop_flag = true;
+		break;
+	case 3:
+		const int tmpTime = (int)music_Music.streamPosSample();
+		music_Music.pause();
+		music_Music.setLoop(music_Music.isLoop() ? false : true);
+		music_Music.play();
+		music_Music.setPosSample(tmpTime);
+		stop_flag = false;
+		break;
+	}
+}
+
+// 他画面中フラグセット
+void set_stillFlag(bool flag)
+{
+	still_flag = flag;
 }

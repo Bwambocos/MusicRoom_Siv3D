@@ -19,7 +19,7 @@ struct Album
 };
 
 // グローバル定数・変数
-static std::vector<std::pair<int64_t, int64_t>>comTime;
+static std::vector<std::pair<int, int>>comTime;
 static std::vector<Album> AlbumList;
 static Image main_tmp;
 static Texture main, no_img;
@@ -30,9 +30,9 @@ static Grid<double_t> z;
 static TextReader reader;
 static Triangle goUp({ 384,75 }, { 414,85 }, { 354,85 });
 static Triangle goDown({ 354,560 }, { 414,560 }, { 384,570 });
-static int64_t startTime;
-static int64_t nowTime;
-static int32_t first_cou;
+static int startTime;
+static int nowTime;
+static int first_cou;
 static bool scr_flag = true;
 
 // アルバム選択 初期化
@@ -70,14 +70,14 @@ void Select_Init()
 		z = Grid<double>(3, (AlbumList.size() + 2) / 3 + 1);
 	}
 
-	startTime = Time::GetMillisec64();
+	startTime = (int)Time::GetMillisec();
 	comTime.resize(AlbumList.size() + 2);
 }
 
 // アルバム選択 更新
 void Select_Update()
 {
-	nowTime = Time::GetMillisec64();
+	nowTime = (int)Time::GetMillisec();
 
 	// スクロール 更新
 	{
@@ -86,14 +86,14 @@ void Select_Update()
 		scr_flag = ((first_cou + 5 <= (signed)AlbumList.size()) || (first_cou > 0) ? true : false);
 		if (scr_flag) { first_cou += Mouse::Wheel() * 3; }
 		first_cou = Max(first_cou, 0);
-		first_cou = Min<int32_t>(first_cou, AlbumList.size() / 3 * 3);
+		first_cou = Min<int>(first_cou, (int)AlbumList.size() / 3 * 3);
 	}
 
 	// album_list 更新
-	int32_t cou = first_cou;
-	for (int32_t y = 0; y < (signed)z.height; ++y)
+	int cou = first_cou;
+	for (int y = 0; y < (signed)z.height; ++y)
 	{
-		for (int32_t x = 0; x < (signed)z.width; ++x)
+		for (int x = 0; x < (signed)z.width; ++x)
 		{
 			const Rect rect = MakeRect(x, y);
 			if (cou == (signed)AlbumList.size() + 2) { break; }
@@ -148,10 +148,10 @@ void Select_Draw()
 
 	// album_list 描画
 	{
-		int32_t cou = first_cou;
-		for (int32_t y = 0; y < (signed)z.height; ++y)
+		int cou = first_cou;
+		for (int y = 0; y < (signed)z.height; ++y)
 		{
-			for (int32_t x = 0; x < (signed)z.width; ++x)
+			for (int x = 0; x < (signed)z.width; ++x)
 			{
 				const Rect rect = MakeRect(x, y);
 				if (cou == (signed)AlbumList.size() + 2) { break; }
@@ -166,9 +166,9 @@ void Select_Draw()
 			if (cou == (signed)AlbumList.size() + 2) { break; }
 		}
 		cou = first_cou;
-		for (int32_t y = 0; y < (signed)z.height; ++y)
+		for (int y = 0; y < (signed)z.height; ++y)
 		{
-			for (int32_t x = 0; x < (signed)z.width; ++x)
+			for (int x = 0; x < (signed)z.width; ++x)
 			{
 				const Rect rect = MakeRect(x, y);
 				if (rect.mouseOver || z[y][x])
@@ -185,16 +185,16 @@ void Select_Draw()
 			if (cou == (signed)AlbumList.size() + 2) { break; }
 		}
 		cou = first_cou;
-		for (int32_t y = 0; y < (signed)z.height; ++y)
+		for (int y = 0; y < (signed)z.height; ++y)
 		{
-			for (int32_t x = 0; x < (signed)z.width; ++x)
+			for (int x = 0; x < (signed)z.width; ++x)
 			{
 				const Rect rect = MakeRect(x, y);
 				if (cou == (signed)AlbumList.size() + 2) { break; }
 				if (rect.mouseOver)
 				{
-					comTime[cou].first = (comTime[cou].first == 0 ? Time::GetMillisec64() : comTime[cou].first);
-					comTime[cou].second = Time::GetMillisec64();
+					comTime[cou].first = (comTime[cou].first == 0 ? (int)Time::GetMillisec() : comTime[cou].first);
+					comTime[cou].second = (int)Time::GetMillisec();
 					if (comTime[cou].second - comTime[cou].first >= COM_MESSAGE_MILLISEC) { DrawDetails(cou); }
 				}
 				else { comTime[cou].first = comTime[cou].second = 0; }
@@ -206,13 +206,13 @@ void Select_Draw()
 }
 
 // アルバム一覧 正方形区画を作成
-Rect MakeRect(int32_t x, int32_t y)
+Rect MakeRect(int x, int y)
 {
 	return { 30 + x * 246,BAR_HEIGHT + 30 + y * 246,216,216 };
 }
 
 // アルバム画像を返す
-Texture SelectImage(int32_t cou)
+Texture SelectImage(int cou)
 {
 	Texture res;
 
@@ -235,7 +235,7 @@ String getSetAlbum()
 }
 
 // アルバム詳細 描画
-void DrawDetails(int32_t cou)
+void DrawDetails(int cou)
 {
 	const Point pos = Mouse::Pos();
 	static Font font(16);
@@ -259,7 +259,7 @@ void DrawDetails(int32_t cou)
 	const auto creator_width = font(creator).region();
 	const auto width = Max(name_width.w, creator_width.w);
 
-	static int32_t x_addtion;
+	static int x_addtion;
 	if (cou % 3 == 0) { x_addtion = 13; }
 	if (cou % 3 == 1) { x_addtion = (-width / 2); }
 	if (cou % 3 == 2) { x_addtion = -width; }
