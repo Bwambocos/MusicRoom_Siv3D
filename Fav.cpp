@@ -3,6 +3,7 @@
 #include "SceneMgr.h"
 #include "Bar.h"
 #include "Fav.h"
+#include "Music.h"
 
 // define
 #define MAX_CELL_NUM 12
@@ -14,7 +15,7 @@ struct List_fav
 	String albumName;
 	String musicDisplayName;
 	String musicOriginName;
-	int32_t totalTime;
+	int totalTime;
 };
 
 // グローバル変数
@@ -31,7 +32,7 @@ static RoundRect rect_albumListCell(64, 25 + BAR_HEIGHT, 582, 36, 5);
 static Triangle goUp({ 384,75 }, { 414,85 }, { 354,85 });
 static Triangle goDown({ 354,560 }, { 414,560 }, { 384,570 });
 static Sound selectedMusic;
-static int32_t albumList_begin;
+static int albumList_begin;
 static int selectedMusic_num;
 
 // お気に入り 初期化
@@ -63,9 +64,9 @@ void Fav_Update()
 			if (scr_flag) { albumList_begin += Mouse::Wheel(); }
 		}
 		albumList_begin = Max(albumList_begin, 0);
-		albumList_begin = Min<int32_t>(albumList_begin, Max<int>(musics.size() - MAX_CELL_NUM, 0));
+		albumList_begin = Min<int>(albumList_begin, Max<int>((int)musics.size() - MAX_CELL_NUM, 0));
 
-		for (int32_t i = albumList_begin; ((i - albumList_begin) < Min<int32_t>(MAX_CELL_NUM, (signed)musics.size())) && (i < (signed)musics.size()); ++i)
+		for (int i = albumList_begin; ((i - albumList_begin) < Min<int>(MAX_CELL_NUM, (signed)musics.size())) && (i < (signed)musics.size()); ++i)
 		{
 			auto num = i - albumList_begin;
 			auto music = musics[i];
@@ -83,6 +84,7 @@ void Fav_Update()
 				selectedAlbumName = music.albumName;
 				selectedMusicName = music.musicOriginName;
 				selectedMusic = music.music;
+				set_stillFlag(true);
 				SceneMgr_ChangeScene(Scene_Music);
 			}
 		}
@@ -98,14 +100,14 @@ void Fav_Draw()
 	{
 		if (albumList_begin > 0) { goUp.draw((goUp.mouseOver ? Palette::Orange : Palette::White)); }
 		if (albumList_begin + MAX_CELL_NUM < (signed)musics.size()) { goDown.draw((goDown.mouseOver ? Palette::Orange : Palette::White)); }
-		for (int32_t i = 0; i < MAX_CELL_NUM; ++i)
+		for (int i = 0; i < MAX_CELL_NUM; ++i)
 		{
 			RoundRect(rect_albumList_Flag.x, rect_albumList_Flag.y + i * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r).draw(Color(32, 32, 32, 200));
 			RoundRect(rect_albumList_Name.x, rect_albumList_Name.y + i * 39, rect_albumList_Name.w, rect_albumList_Name.h, rect_albumList_Name.r).draw(Color(32, 32, 32, 200));
 			RoundRect(rect_albumList_Time.x, rect_albumList_Time.y + i * 39, rect_albumList_Time.w, rect_albumList_Time.h, rect_albumList_Time.r).draw(Color(32, 32, 32, 200));
 			RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + i * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r).draw(Color(32, 32, 32, 200));
 		}
-		for (int32_t i = albumList_begin; (i - albumList_begin) < Min<int32_t>(MAX_CELL_NUM, musics.size() - albumList_begin); ++i)
+		for (int i = albumList_begin; (i - albumList_begin) < Min<int>(MAX_CELL_NUM, (int)musics.size() - albumList_begin); ++i)
 		{
 			auto num = i - albumList_begin;
 			auto tmp = musics[i];
@@ -134,14 +136,14 @@ bool isFav(String albumName, String musicName)
 // お気に入りに追加する
 void addFav(String albumName, String musicName, Sound music)
 {
-	auto temp_totalTime = (int32_t)music.lengthSec();
+	auto temp_totalTime = (int)music.lengthSec();
 	musics.push_back({ music,albumName,Fav_musicNameBeShort(musicName),musicName,temp_totalTime });
 }
 
 // お気に入りから削除する
 void removeFav(String albumName, String musicName)
 {
-	for (int32_t i = 0; i < (signed)musics.size(); ++i)
+	for (int i = 0; i < (signed)musics.size(); ++i)
 	{
 		if (musics[i].albumName == albumName && musics[i].musicOriginName == musicName)
 		{
@@ -160,7 +162,7 @@ void setFavMusicName(String& album_Name, String& musicName, Sound& music)
 }
 void setFavMusicName(int flag, String& album_Name, String& musicName, Sound& music)
 {
-	selectedMusic_num = (selectedMusic_num + flag + musics.size()) % musics.size();
+	selectedMusic_num = (selectedMusic_num + flag + (int)musics.size()) % (int)musics.size();
 	const auto data = musics[selectedMusic_num];
 	album_Name = data.albumName;
 	musicName = data.musicOriginName;

@@ -12,13 +12,13 @@ void Select_Update();
 void Select_Draw();
 
 // アルバム一覧 正方形区画を作成
-Rect MakeRect(int32_t x, int32_t y);
+Rect MakeRect(int x, int y);
 
 // アルバム画像を返す
-Texture SelectImage(int32_t cou);
+Texture SelectImage(int cou);
 
 // 選択されたアルバム名を返す
 String getSetAlbum();
 
 // アルバム詳細 描画
-void DrawDetails(int32_t cou);
+void DrawDetails(int cou);
