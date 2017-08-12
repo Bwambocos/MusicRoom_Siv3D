@@ -21,3 +21,7 @@ void Update_drawAlbumDetailStrings();
 
 // ‹È–¼’Zk
 String Detail_musicNameBeShort(String text);
+
+// ‹È‘€ì
+// kind: 0->ˆê’â~, 1->Ä¶
+void setMusicStats(int kind);
