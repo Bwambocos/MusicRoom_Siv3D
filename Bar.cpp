@@ -13,8 +13,8 @@ struct Music
 	Sound music;
 	String albumName;
 	String musicName;
-	int32_t nowTime;
-	int32_t totalTime;
+	int nowTime;
+	int totalTime;
 };
 
 static Music music;
@@ -25,7 +25,7 @@ static RoundRect mainRect(256, 0, 256, BAR_HEIGHT, 16);
 static Sound nowMusic;
 static String mainText = L"";
 static Font mainFont, timeFont;
-static int32_t mainRectWidth = DEFAULT_mainRectWidth;
+static int mainRectWidth = DEFAULT_mainRectWidth;
 static bool stop_flag = false;
 
 // バー 初期化
@@ -74,8 +74,8 @@ void Bar_Update()
 	{
 		if (!music.music.isEmpty())
 		{
-			int32_t x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
-			for (int32_t cou = 0; cou < 5; ++cou)
+			int x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
+			for (int cou = 0; cou < 5; ++cou)
 			{
 				const Circle button(x + 20, 12 + 20, 20);
 				switch (cou)
@@ -175,8 +175,8 @@ void Bar_Draw()
 
 	// ボタン 描画
 	{
-		int32_t x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
-		for (int32_t cou = 0; cou < 5; ++cou)
+		int x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
+		for (int cou = 0; cou < 5; ++cou)
 		{
 			switch (cou)
 			{
