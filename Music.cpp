@@ -122,6 +122,7 @@ void Music_Update()
 		{
 			(music_Music.isPlaying() ? music_Music.pause() : music_Music.play());
 			stop_flag = false;
+			set_stopFlag(stop_flag);
 		}
 		tmpCircle = Circle(90, rect_musicBar.y + rect_musicBar.h / 2, 15);
 		displayRep = originRep[((tmpCircle.mouseOver || music_Music.isLoop()) ? 1 : 0)];
@@ -133,6 +134,7 @@ void Music_Update()
 			music_Music.play();
 			music_Music.setPosSample(tmpTime);
 			stop_flag = false;
+			set_stopFlag(stop_flag);
 		}
 		tmpCircle = Circle(723, rect_musicBar.y + rect_musicBar.h / 2, 15);
 		displayStop = originStop[(tmpCircle.mouseOver ? 1 : 0)];
@@ -140,6 +142,7 @@ void Music_Update()
 		{
 			music_Music.stop();
 			stop_flag = true;
+			set_stopFlag(stop_flag);
 		}
 	}
 
@@ -290,7 +293,19 @@ void changeMusic(int flag)
 	favLoop_flag = (get_prevScene() == Scene_Fav || favLoop_flag);
 	prev_or_next = flag;
 	music_Music.stop();
-	SceneMgr_ChangeScene(Scene_Music);
+	if (!favLoop_flag) { setAlbumMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
+	else { setFavMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
+	TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
+	music_reader.readAll(music_musicExp);
+	music_musicExp += L'\n';
+	music_musicTime = (int32_t)music_Music.lengthSec();
+
+	draw_musicName_startMSec = Time::GetMillisec64();
+	draw_musicName_stayFlag = true;
+	draw_musicName_x = DEFAULT_musicName_X;
+
+	giveMusicData(music_albumName, music_musicName, music_Music);
+	music_Music.play();
 }
 
 // ã»ëÄçÏ

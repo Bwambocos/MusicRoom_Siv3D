@@ -80,7 +80,11 @@ void Bar_Update()
 			case 0:
 				if (button.mouseOver) { displayPrev = originPrev[1]; }
 				else { displayPrev = originPrev[0]; }
-				if (button.leftClicked) { changeMusic(-1); }
+				if (button.leftClicked)
+				{
+					changeMusic(-1);
+					stop_flag = false;
+				}
 				break;
 			case 1:
 				if (music.music.isPlaying())
@@ -126,7 +130,11 @@ void Bar_Update()
 			case 4:
 				if (button.mouseOver) { displayNext = originNext[1]; }
 				else { displayNext = originNext[0]; }
-				if (button.leftClicked) { changeMusic(1); }
+				if (button.leftClicked)
+				{
+					changeMusic(1);
+					stop_flag = false;
+				}
 				break;
 			}
 			x += 40;
@@ -227,4 +235,10 @@ void giveMusicData(String albumName, String musicName, Sound musicData)
 	music.albumName = albumName;
 	music.musicName = musicName;
 	music.music = musicData;
+}
+
+// í‚é~ÉtÉâÉO ê›íË
+void set_stopFlag(bool flag)
+{
+	stop_flag = flag;
 }
