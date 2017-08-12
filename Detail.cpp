@@ -19,7 +19,7 @@ struct List_detail
 	Sound music;
 	String displayName;
 	String originName;
-	int32_t totalTime;
+	int totalTime;
 };
 
 // グローバル変数
@@ -42,8 +42,8 @@ static RoundRect rect_albumListCell(64, 300 + BAR_HEIGHT, 582, 36, 5);
 static Triangle goUp({ 384,350 }, { 414,360 }, { 354,360 });
 static Triangle goDown({ 354,560 }, { 414,560 }, { 384,570 });
 static Sound selectedMusic;
-static int32_t albumList_begin;
-static int32_t draw_albumName_x, draw_albumCreator_x;
+static int albumList_begin;
+static int draw_albumName_x, draw_albumCreator_x;
 static double draw_albumExpl_y;
 static int64 draw_albumName_startMSec, draw_albumCreator_startMSec, draw_albumExpl_startMSec, draw_albumName_stayMSec, draw_albumCreator_stayMSec, draw_albumExpl_stayMSec;
 static bool draw_albumName_stayFlag, draw_albumCreator_stayFlag, draw_albumExpl_stayFlag;
@@ -89,7 +89,7 @@ void Detail_Init()
 			font_albumList = Font(16);
 			const String extensions[] = { L".wav",L".ogg",L".mp3" };
 			TextReader reader(L"music\\" + temp_albumName + L"\\music_list.txt");
-			String tempName; Sound tempMusic; int32_t temp_totalTime;
+			String tempName; Sound tempMusic; int temp_totalTime;
 			while (reader.readLine(tempName))
 			{
 				for (auto ext : extensions)
@@ -101,7 +101,7 @@ void Detail_Init()
 					}
 				}
 				if (!tempMusic) { tempName = L"！読み込み失敗！"; }
-				temp_totalTime = (int32_t)tempMusic.lengthSec();
+				temp_totalTime = (int)tempMusic.lengthSec();
 				albumList.push_back({ tempMusic,Detail_musicNameBeShort(tempName),tempName,temp_totalTime });
 			}
 		}
@@ -139,9 +139,9 @@ void Detail_Update()
 			if (scr_flag) { albumList_begin += Mouse::Wheel(); }
 		}
 		albumList_begin = Max(albumList_begin, 0);
-		albumList_begin = Min<int32_t>(albumList_begin, Max<int>(albumList.size() - 5, 0));
+		albumList_begin = Min<int>(albumList_begin, Max<int>((int)albumList.size() - 5, 0));
 
-		for (int32_t i = albumList_begin; ((i - albumList_begin) < Min<int32_t>(5, (signed)albumList.size())) && (i < (signed)albumList.size()); ++i)
+		for (int i = albumList_begin; ((i - albumList_begin) < Min<int>(5, (signed)albumList.size())) && (i < (signed)albumList.size()); ++i)
 		{
 			auto num = i - albumList_begin;
 			auto music = albumList[i];
@@ -195,7 +195,7 @@ void Detail_Draw()
 		rect_albumExpl.draw(Color(32, 32, 32, 120));
 		if (albumList_begin > 0) { goUp.draw((goUp.mouseOver ? Palette::Orange : Palette::White)); }
 		if (albumList_begin + 5 < (signed)albumList.size()) { goDown.draw((goDown.mouseOver ? Palette::Orange : Palette::White)); }
-		for (int32_t i = 0; i < 5; ++i)
+		for (int i = 0; i < 5; ++i)
 		{
 			RoundRect(rect_albumList_Flag.x, rect_albumList_Flag.y + i * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r).draw(Color(32, 32, 32, 200));
 			RoundRect(rect_albumList_Name.x, rect_albumList_Name.y + i * 39, rect_albumList_Name.w, rect_albumList_Name.h, rect_albumList_Name.r).draw(Color(32, 32, 32, 200));
@@ -224,7 +224,7 @@ void Detail_Draw()
 
 	// 曲リスト 描画
 	{
-		for (int32_t i = albumList_begin; (i - albumList_begin) < Min<int32_t>(5, albumList.size() - albumList_begin); ++i)
+		for (int i = albumList_begin; (i - albumList_begin) < Min<int>(5, (int)albumList.size() - albumList_begin); ++i)
 		{
 			auto num = i - albumList_begin;
 			auto tmp = albumList[i];
@@ -250,7 +250,7 @@ void albumExpl_Draw()
 
 	while (pos < albumExpl.length)
 	{
-		for (int32_t i = 0; i + pos < albumExpl.length; ++i)
+		for (int i = 0; i + pos < albumExpl.length; ++i)
 		{
 			if (font_albumExpl(albumExpl.substr(pos, i)).region().w >= w)
 			{
@@ -312,7 +312,7 @@ void setAlbumMusicName(String& album_Name, String& musicName, Sound& musicData)
 }
 void setAlbumMusicName(int flag, String& album_Name, String& musicName, Sound& music)
 {
-	selectedMusic_num = (selectedMusic_num + flag + albumList.size()) % albumList.size();
+	selectedMusic_num = (selectedMusic_num + flag + (int)albumList.size()) % (int)albumList.size();
 	const auto data = albumList[selectedMusic_num];
 	album_Name = selectedAlbumName;
 	musicName = data.originName;

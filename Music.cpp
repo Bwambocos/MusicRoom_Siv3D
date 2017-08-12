@@ -23,9 +23,9 @@ static RoundRect rect_music_isFav(698, 25 + BAR_HEIGHT, 48, 48, 10);
 static RoundRect rect_musicBar(127, 91 + BAR_HEIGHT, 565, 21, 5);
 static RoundRect rect_musicExp(25, 130 + BAR_HEIGHT, 718, 357, 10);
 static FFTResult fft;
-static int32_t music_musicTime;
-static int32_t draw_musicName_x;
-static int64 draw_musicName_startMSec, draw_musicName_stayMSec;
+static int music_musicTime;
+static int draw_musicName_x;
+static int draw_musicName_startMSec, draw_musicName_stayMSec;
 static bool draw_musicName_stayFlag;
 static bool favLoop_flag = false, stop_flag = false, still_flag = true;
 static int prev_or_next;
@@ -77,7 +77,7 @@ void Music_Init()
 		TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
 		music_reader.readAll(music_musicExp);
 		music_musicExp += L'\n';
-		music_musicTime = (int32_t)music_Music.lengthSec();
+		music_musicTime = (int)music_Music.lengthSec();
 		faved = Texture(L"data\\Music\\fav.png");
 		not_faved = Texture(L"data\\Music\\not_fav.png");
 		music_NameTime = Font(18);
@@ -85,7 +85,7 @@ void Music_Init()
 	}
 
 	// ï`âÊà íu èâä˙âª
-	draw_musicName_startMSec = Time::GetMillisec64();
+	draw_musicName_startMSec = (int)Time::GetMillisec();
 	draw_musicName_stayFlag = true;
 	draw_musicName_x = DEFAULT_musicName_X;
 
@@ -111,7 +111,7 @@ void Music_Update()
 		if (rect_musicBar.leftPressed)
 		{
 			const Point tmpPoint = Mouse::Pos();
-			music_Music.setPosSample(music_Music.lengthSample()*(tmpPoint.x - (int64)rect_musicBar.x) / (int64)rect_musicBar.w);
+			music_Music.setPosSample(music_Music.lengthSample()*(tmpPoint.x - (int)rect_musicBar.x) / (int)rect_musicBar.w);
 		}
 
 		// É{É^Éì
@@ -128,7 +128,7 @@ void Music_Update()
 		displayRep = originRep[((tmpCircle.mouseOver || music_Music.isLoop()) ? 1 : 0)];
 		if (tmpCircle.leftClicked || Input::KeyShift.clicked)
 		{
-			const int64 tmpTime = music_Music.streamPosSample();
+			const int tmpTime = (int)music_Music.streamPosSample();
 			music_Music.pause();
 			music_Music.setLoop(music_Music.isLoop() ? false : true);
 			music_Music.play();
@@ -225,7 +225,7 @@ void musicExpl_Draw()
 
 	while (pos < music_musicExp.length)
 	{
-		for (int32_t i = 0; i + pos < music_musicExp.length; ++i)
+		for (int i = 0; i + pos < music_musicExp.length; ++i)
 		{
 			if (music_Exp(music_musicExp.substr(pos, i)).region().w >= w)
 			{
@@ -270,7 +270,7 @@ void Update_drawMusicDetailStrings()
 			if (draw_musicName_x + width > rect.x + rect.w) { --draw_musicName_x; }
 			else
 			{
-				draw_musicName_startMSec = draw_musicName_stayMSec = Time::GetMillisec64();
+				draw_musicName_startMSec = draw_musicName_stayMSec = (int)Time::GetMillisec64();
 				draw_musicName_stayFlag = true;
 			}
 		}
@@ -282,7 +282,7 @@ void Update_drawMusicDetailStrings()
 				if (draw_musicName_x == DEFAULT_musicName_X) { draw_musicName_stayFlag = false; }
 				else { draw_musicName_x = DEFAULT_musicName_X; }
 			}
-			else { draw_musicName_stayMSec = Time::GetMillisec64(); }
+			else { draw_musicName_stayMSec = (int)Time::GetMillisec(); }
 		}
 	}
 }
@@ -298,9 +298,9 @@ void changeMusic(int flag)
 	TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
 	music_reader.readAll(music_musicExp);
 	music_musicExp += L'\n';
-	music_musicTime = (int32_t)music_Music.lengthSec();
+	music_musicTime = (int)music_Music.lengthSec();
 
-	draw_musicName_startMSec = Time::GetMillisec64();
+	draw_musicName_startMSec = (int)Time::GetMillisec();
 	draw_musicName_stayFlag = true;
 	draw_musicName_x = DEFAULT_musicName_X;
 
@@ -327,7 +327,7 @@ void changeMusicStats(int kind)
 		stop_flag = true;
 		break;
 	case 3:
-		const int64 tmpTime = music_Music.streamPosSample();
+		const int tmpTime = (int)music_Music.streamPosSample();
 		music_Music.pause();
 		music_Music.setLoop(music_Music.isLoop() ? false : true);
 		music_Music.play();
