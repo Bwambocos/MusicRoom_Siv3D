@@ -146,7 +146,16 @@ void Detail_Update()
 			auto num = i - albumList_begin;
 			auto music = albumList[i];
 			RoundRect rect(rect_albumList_Flag.x, rect_albumList_Flag.y + num * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r);
-			if (rect.leftClicked) { (music.music.isPlaying() ? music.music.pause() : music.music.play()); }
+			if (rect.leftClicked)
+			{
+				albumList[selectedMusic_num].music.stop();
+				giveMusicData(albumName, music.originName, music.music);
+				selectedMusic_num = i;
+				selectedAlbumName = albumName;
+				selectedMusicName = music.originName;
+				selectedMusic = music.music;
+				(music.music.isPlaying() ? music.music.pause() : music.music.play());
+			}
 			rect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (rect.leftClicked)
 			{
@@ -373,4 +382,19 @@ String Detail_musicNameBeShort(String text)
 	if (font_albumList(text).region().w <= rect_albumList_Name.w) { return text; }
 	if (dotsWidth > rect_albumList_Name.w) { return String(); }
 	return text.substr(0, num_chars) + dots;
+}
+
+// 曲操作
+// kind: 0->一時停止, 1->再生
+void setMusicStats(int kind)
+{
+	switch (kind)
+	{
+	case 0:
+		albumList[selectedMusic_num].music.pause();
+		break;
+	case 1:
+		albumList[selectedMusic_num].music.play();
+		break;
+	}
 }

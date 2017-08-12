@@ -3,6 +3,7 @@
 #include "SceneMgr.h"
 #include "Bar.h"
 #include "Music.h"
+#include "Detail.h"
 
 // define
 #define DEFAULT_mainRectWidth 256
@@ -71,73 +72,76 @@ void Bar_Update()
 	
 	// ボタン 更新
 	{
-		int32_t x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
-		for (int32_t cou = 0; cou < 5; ++cou)
+		if (!music.music.isEmpty())
 		{
-			const Circle button(x + 20, 12 + 20, 20);
-			switch (cou)
+			int32_t x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
+			for (int32_t cou = 0; cou < 5; ++cou)
 			{
-			case 0:
-				if (button.mouseOver) { displayPrev = originPrev[1]; }
-				else { displayPrev = originPrev[0]; }
-				if (button.leftClicked)
+				const Circle button(x + 20, 12 + 20, 20);
+				switch (cou)
 				{
-					changeMusic(-1);
-					stop_flag = false;
-				}
-				break;
-			case 1:
-				if (music.music.isPlaying())
-				{
-					if (button.mouseOver) { displayBrief = originBrief[1]; }
-					else { displayBrief = originBrief[0]; }
+				case 0:
+					if (button.mouseOver) { displayPrev = originPrev[1]; }
+					else { displayPrev = originPrev[0]; }
 					if (button.leftClicked)
 					{
-						changeMusicStats(0);
+						changeMusic(-1);
 						stop_flag = false;
 					}
-				}
-				else
-				{
-					if (button.mouseOver) { displayPlay = originPlay[1]; }
-					else { displayPlay = originPlay[0]; }
+					break;
+				case 1:
+					if (music.music.isPlaying())
+					{
+						if (button.mouseOver) { displayBrief = originBrief[1]; }
+						else { displayBrief = originBrief[0]; }
+						if (button.leftClicked)
+						{
+							(get_nowScene() == Scene_Detail ? setMusicStats(0) : changeMusicStats(0));
+							stop_flag = false;
+						}
+					}
+					else
+					{
+						if (button.mouseOver) { displayPlay = originPlay[1]; }
+						else { displayPlay = originPlay[0]; }
+						if (button.leftClicked)
+						{
+							(get_nowScene() == Scene_Detail ? setMusicStats(1) : changeMusicStats(1));
+							stop_flag = false;
+						}
+					}
+					break;
+				case 2:
+					if (button.mouseOver) { displayRep = originRep[1]; }
+					else { displayRep = originRep[0]; }
 					if (button.leftClicked)
 					{
-						changeMusicStats(1);
+						changeMusicStats(3);
 						stop_flag = false;
 					}
+					x += mainRectWidth;
+					break;
+				case 3:
+					if (button.mouseOver) { displayStop = originStop[1]; }
+					else { displayStop = originStop[0]; }
+					if (button.leftClicked)
+					{
+						changeMusicStats(2);
+						stop_flag = true;
+					}
+					break;
+				case 4:
+					if (button.mouseOver) { displayNext = originNext[1]; }
+					else { displayNext = originNext[0]; }
+					if (button.leftClicked)
+					{
+						changeMusic(1);
+						stop_flag = false;
+					}
+					break;
 				}
-				break;
-			case 2:
-				if (button.mouseOver) { displayRep = originRep[1]; }
-				else { displayRep = originRep[0]; }
-				if (button.leftClicked)
-				{
-					changeMusicStats(3);
-					stop_flag = false;
-				}
-				x += mainRectWidth;
-				break;
-			case 3:
-				if (button.mouseOver) { displayStop = originStop[1]; }
-				else { displayStop = originStop[0]; }
-				if (button.leftClicked)
-				{
-					changeMusicStats(2);
-					stop_flag = true;
-				}
-				break;
-			case 4:
-				if (button.mouseOver) { displayNext = originNext[1]; }
-				else { displayNext = originNext[0]; }
-				if (button.leftClicked)
-				{
-					changeMusic(1);
-					stop_flag = false;
-				}
-				break;
+				x += 40;
 			}
-			x += 40;
 		}
 	}
 
@@ -160,15 +164,6 @@ void Bar_Update()
 			}
 		}
 		else { mainText = L"『" + music.albumName + L"』" + music.musicName; }
-	}
-
-	// 再生位置テキスト 更新
-	{
-		if (nowMusic.isPlaying())
-		{
-			music.totalTime = (int32_t)nowMusic.lengthSec();
-			music.nowTime = (int32_t)nowMusic.streamPosSec();
-		}
 	}
 }
 
@@ -211,15 +206,6 @@ void Bar_Draw()
 	{
 		const Rect rect = mainFont(mainText).region();
 		mainFont.draw(mainText, 768 / 2 - rect.w / 2, 15);
-	}
-
-	// 再生位置テキスト 描画
-	{
-		if (nowMusic.isPlaying())
-		{
-			const Rect rect = timeFont(music.nowTime + L":" + music.totalTime).region();
-			timeFont.draw(music.nowTime + L":" + music.totalTime, (768 / 2 + mainRectWidth / 2) - rect.w, 12, Color(0, 0, 0));
-		}
 	}
 }
 
