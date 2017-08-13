@@ -6,13 +6,15 @@
 #include "Detail.h"
 
 // define
-#define DEFAULT_mainRectWidth 256
+#define mainRectWidth 384
+#define DRAW_STAYMSEC 3500
+#define DEFAULT_mainText_X 200
 
 struct Music
 {
 	Sound music;
 	String albumName;
-	String musicName;
+	String mainText;
 	int nowTime;
 	int totalTime;
 };
@@ -20,13 +22,15 @@ struct Music
 static Music music;
 static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2], originPrev[2], originNext[2];
 static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep, displayPrev, displayNext;
-static RoundRect fieldRect(0, 0, 768, BAR_HEIGHT, 16);
-static RoundRect mainRect(256, 0, 256, BAR_HEIGHT, 16);
+static Rect fieldRect(0, 0, 768, BAR_HEIGHT);
+static RoundRect mainRect(192, 0, mainRectWidth, BAR_HEIGHT, 16);
 static Sound nowMusic;
 static String mainText = L"";
 static Font mainFont, timeFont;
-static int mainRectWidth = DEFAULT_mainRectWidth;
 static bool stop_flag = false;
+static int draw_mainText_x;
+static int draw_mainText_startMSec, draw_mainText_stayMSec;
+static bool draw_mainText_stayFlag;
 
 // バー 初期化
 void Bar_Init()
@@ -63,10 +67,6 @@ void Bar_Init()
 // バー 更新
 void Bar_Update()
 {
-	const Rect rect = mainFont(mainText).region();
-	mainRectWidth = Max(DEFAULT_mainRectWidth, rect.w + 18 * 2);
-	mainRect = RoundRect(256 - (mainRectWidth - DEFAULT_mainRectWidth) / 2, 0, mainRectWidth, BAR_HEIGHT, 16);
-
 	if (!music.music.isEmpty() && !music.music.isPlaying() && !stop_flag
 		&& music.music.samplesPlayed() % music.music.lengthSample() == 0) { changeMusic(1); }
 	
@@ -163,8 +163,10 @@ void Bar_Update()
 				break;
 			}
 		}
-		else { mainText = L"『" + music.albumName + L"』" + music.musicName; }
+		else { mainText = L"『" + music.albumName + L"』" + music.mainText; }
 	}
+
+	Update_drawMainText();
 }
 
 // バー 描画
@@ -204,8 +206,12 @@ void Bar_Draw()
 
 	// メインテキスト 描画
 	{
-		const Rect rect = mainFont(mainText).region();
-		mainFont.draw(mainText, 768 / 2 - rect.w / 2, 15);
+		RasterizerState rasterizer = RasterizerState::Default2D;
+		rasterizer.scissorEnable = true;
+		Graphics2D::SetRasterizerState(rasterizer);
+		Graphics2D::SetScissorRect(Rect((int)mainRect.x, (int)mainRect.y, (int)mainRect.w, (int)mainRect.h));
+		mainFont(mainText).draw(draw_mainText_x, 15);
+		Graphics2D::SetScissorRect(Rect(0, 0, Window::Width(), Window::Height()));
 	}
 }
 
@@ -216,15 +222,55 @@ bool is_nowMusicPlaying()
 }
 
 // 曲詳細データ受け渡し
-void giveMusicData(String albumName, String musicName, Sound musicData)
+void giveMusicData(String albumName, String mainText, Sound musicData)
 {
 	music.albumName = albumName;
-	music.musicName = musicName;
+	music.mainText = mainText;
 	music.music = musicData;
+
+	// 描画位置 初期化
+	draw_mainText_startMSec = (int)Time::GetMillisec();
+	draw_mainText_stayFlag = true;
+	draw_mainText_x = DEFAULT_mainText_X;
 }
 
 // 停止フラグ 設定
 void set_stopFlag(bool flag)
 {
 	stop_flag = flag;
+}
+
+// 曲名描画位置 更新
+void Update_drawMainText()
+{
+	auto rect = mainRect;
+	auto width = mainFont(mainText).region().w + rect.r;
+	if (width > rect.w)
+	{
+		if (!draw_mainText_stayFlag)
+		{
+			if (draw_mainText_x + width > rect.x + rect.w) { --draw_mainText_x; }
+			else
+			{
+				draw_mainText_startMSec = draw_mainText_stayMSec = (int)Time::GetMillisec64();
+				draw_mainText_stayFlag = true;
+			}
+		}
+		if (draw_mainText_stayFlag)
+		{
+			if (draw_mainText_stayMSec - draw_mainText_startMSec >= DRAW_STAYMSEC)
+			{
+				draw_mainText_startMSec = draw_mainText_stayMSec;
+				const Rect tmpRect = mainFont(mainText).region();
+				if (draw_mainText_x == DEFAULT_mainText_X) { draw_mainText_stayFlag = false; }
+				else { draw_mainText_x = DEFAULT_mainText_X; }
+			}
+			else { draw_mainText_stayMSec = (int)Time::GetMillisec(); }
+		}
+	}
+	else
+	{
+		const Rect rect = mainFont(mainText).region();
+		draw_mainText_x = mainRect.center.x - rect.w / 2;
+	}
 }
