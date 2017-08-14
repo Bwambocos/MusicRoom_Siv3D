@@ -4,25 +4,26 @@
 #include "Bar.h"
 #include "Music.h"
 #include "Detail.h"
+#include "Main.h"
 
 // define
 #define mainRectWidth 384
-#define DRAW_STAYMSEC 3500
+#define BAR_DRAW_STAYMSEC 3500
 #define DEFAULT_mainText_X 200
 
-struct Music
+struct Bar_Music
 {
 	Sound music;
 	String albumName;
-	String mainText;
+	String text;
 	int nowTime;
 	int totalTime;
 };
 
-static Music music;
+static Bar_Music music;
 static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2], originPrev[2], originNext[2];
 static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep, displayPrev, displayNext;
-static Rect fieldRect(0, 0, 768, BAR_HEIGHT);
+static Rect fieldRect;
 static RoundRect mainRect(192, 0, mainRectWidth, BAR_HEIGHT, 16);
 static Sound nowMusic;
 static String mainText = L"";
@@ -60,6 +61,7 @@ void Bar_Init()
 		displayNext = originNext[0];
 	}
 
+	fieldRect = Rect(0, 0, WINDOW_WIDTH, BAR_HEIGHT);
 	mainFont = Font(18);
 	timeFont = Font(12);
 }
@@ -68,8 +70,10 @@ void Bar_Init()
 void Bar_Update()
 {
 	if (!music.music.isEmpty() && !music.music.isPlaying() && !stop_flag
-		&& music.music.samplesPlayed() % music.music.lengthSample() == 0) { changeMusic(1); }
-	
+		&& music.music.samplesPlayed() % music.music.lengthSample() == 0) {
+		changeMusic(1);
+	}
+
 	// ボタン 更新
 	{
 		if (!music.music.isEmpty())
@@ -163,7 +167,7 @@ void Bar_Update()
 				break;
 			}
 		}
-		else { mainText = L"『" + music.albumName + L"』" + music.mainText; }
+		else { mainText = L"『" + music.albumName + L"』" + music.text; }
 	}
 
 	Update_drawMainText();
@@ -222,10 +226,10 @@ bool is_nowMusicPlaying()
 }
 
 // 曲詳細データ受け渡し
-void giveMusicData(String albumName, String mainText, Sound musicData)
+void giveMusicData(String albumName, String musicName, Sound musicData)
 {
 	music.albumName = albumName;
-	music.mainText = mainText;
+	music.text = musicName;
 	music.music = musicData;
 
 	// 描画位置 初期化
@@ -258,7 +262,7 @@ void Update_drawMainText()
 		}
 		if (draw_mainText_stayFlag)
 		{
-			if (draw_mainText_stayMSec - draw_mainText_startMSec >= DRAW_STAYMSEC)
+			if (draw_mainText_stayMSec - draw_mainText_startMSec >= BAR_DRAW_STAYMSEC)
 			{
 				draw_mainText_startMSec = draw_mainText_stayMSec;
 				const Rect tmpRect = mainFont(mainText).region();
@@ -270,7 +274,7 @@ void Update_drawMainText()
 	}
 	else
 	{
-		const Rect rect = mainFont(mainText).region();
-		draw_mainText_x = mainRect.center.x - rect.w / 2;
+		const Rect tempRect = mainFont(mainText).region();
+		draw_mainText_x = 384 - (int)tempRect.w / 2;
 	}
 }
