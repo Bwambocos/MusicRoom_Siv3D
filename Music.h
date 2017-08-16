@@ -24,3 +24,6 @@ void changeMusicStats(int kind);
 
 // 他画面中フラグセット
 void set_stillFlag(bool flag);
+
+// お気に入りループ中か否か
+bool isFavLooping();
