@@ -6,6 +6,7 @@ typedef enum
 	Scene_Select,
 	Scene_Detail,
 	Scene_Music,
+	Scene_Fav,
 }Scene_S;
 
 // 更新
@@ -19,3 +20,6 @@ void SceneMgr_ChangeScene(Scene_S);
 
 // 前のシーンを取得
 Scene_S get_prevScene();
+
+// 今のシーンを取得
+Scene_S get_nowScene();
