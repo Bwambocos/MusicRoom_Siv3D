@@ -4,29 +4,36 @@
 #include "Bar.h"
 #include "Music.h"
 #include "Detail.h"
+#include "Main.h"
 
 // define
-#define DEFAULT_mainRectWidth 256
+#define mainRectWidth 384
+#define BAR_DRAW_STAYMSEC 3500
+#define DEFAULT_mainText_X 200
 
-struct Music
+struct Bar_Music
 {
 	Sound music;
 	String albumName;
-	String musicName;
+	String text;
 	int nowTime;
 	int totalTime;
 };
 
-static Music music;
+static Bar_Music music;
 static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2], originPrev[2], originNext[2];
 static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep, displayPrev, displayNext;
-static RoundRect fieldRect(0, 0, 768, BAR_HEIGHT, 16);
-static RoundRect mainRect(256, 0, 256, BAR_HEIGHT, 16);
+static Texture originBack[2], originGo[2], displayBack, displayGo;
+static Rect fieldRect;
+static RoundRect mainRect(192, 0, mainRectWidth, BAR_HEIGHT, 16);
 static Sound nowMusic;
 static String mainText = L"";
 static Font mainFont, timeFont;
-static int mainRectWidth = DEFAULT_mainRectWidth;
 static bool stop_flag = false;
+static int draw_mainText_x;
+static int draw_mainText_startMSec, draw_mainText_stayMSec;
+static bool draw_mainText_stayFlag;
+static bool draw_back_flag = false, draw_go_flag = false;
 
 // バー 初期化
 void Bar_Init()
@@ -47,6 +54,10 @@ void Bar_Init()
 		originPrev[1] = Texture(L"data\\Bar\\prev\\active.png");
 		originNext[0] = Texture(L"data\\Bar\\next\\normal.png");
 		originNext[1] = Texture(L"data\\Bar\\next\\active.png");
+		originBack[0] = Texture(L"data\\Bar\\Back\\normal.png");
+		originBack[1] = Texture(L"data\\Bar\\Back\\active.png");
+		originGo[0] = Texture(L"data\\Bar\\Go\\normal.png");
+		originGo[1] = Texture(L"data\\Bar\\Go\\active.png");
 		displayPlay = originPlay[0];
 		displayBrief = originBrief[0];
 		displayStop = originStop[0];
@@ -54,8 +65,11 @@ void Bar_Init()
 		displayRep = originRep[0];
 		displayPrev = originPrev[0];
 		displayNext = originNext[0];
+		displayBack = originBack[0];
+		displayGo = originGo[0];
 	}
 
+	fieldRect = Rect(0, 0, WINDOW_WIDTH, BAR_HEIGHT);
 	mainFont = Font(18);
 	timeFont = Font(12);
 }
@@ -63,15 +77,44 @@ void Bar_Init()
 // バー 更新
 void Bar_Update()
 {
-	const Rect rect = mainFont(mainText).region();
-	mainRectWidth = Max(DEFAULT_mainRectWidth, rect.w + 18 * 2);
-	mainRect = RoundRect(256 - (mainRectWidth - DEFAULT_mainRectWidth) / 2, 0, mainRectWidth, BAR_HEIGHT, 16);
-
 	if (!music.music.isEmpty() && !music.music.isPlaying() && !stop_flag
-		&& music.music.samplesPlayed() % music.music.lengthSample() == 0) { changeMusic(1); }
-	
+		&& music.music.samplesPlayed() % music.music.lengthSample() == 0) {
+		changeMusic(1);
+	}
+
 	// ボタン 更新
 	{
+		const Rect backRect(10, 10, 44, 44);
+		const Rect goRect(WINDOW_WIDTH - 54, 10, 44, 44);
+		switch (get_nowScene())
+		{
+		case Scene_Select:
+			draw_back_flag = draw_go_flag = false;
+			break;
+
+		case Scene_Detail:
+			draw_back_flag = true;
+			draw_go_flag = music.music.isPlaying();
+			if (backRect.leftClicked) { SceneMgr_ChangeScene(Scene_Select); }
+			if (draw_go_flag && goRect.leftClicked) { SceneMgr_ChangeScene(Scene_Music); }
+			break;
+
+		case Scene_Music:
+			draw_back_flag = true;
+			draw_go_flag = false;
+			if (backRect.leftClicked) { SceneMgr_ChangeScene((get_prevScene() == Scene_Fav || isFavLooping() ? Scene_Fav : Scene_Detail)); }
+			break;
+
+		case Scene_Fav:
+			draw_back_flag = true;
+			draw_go_flag = music.music.isPlaying();
+			if (backRect.leftClicked) { SceneMgr_ChangeScene(Scene_Select); }
+			if (draw_go_flag && goRect.leftClicked) { SceneMgr_ChangeScene(Scene_Music); }
+			break;
+		}
+		displayBack = originBack[(backRect.mouseOver ? 1 : 0)];
+		displayGo = originGo[(goRect.mouseOver ? 1 : 0)];
+		
 		if (!music.music.isEmpty())
 		{
 			int x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
@@ -163,18 +206,22 @@ void Bar_Update()
 				break;
 			}
 		}
-		else { mainText = L"『" + music.albumName + L"』" + music.musicName; }
+		else { mainText = L"『" + music.albumName + L"』" + music.text; }
 	}
+
+	Update_drawMainText();
 }
 
 // バー 描画
 void Bar_Draw()
 {
 	fieldRect.draw(Color(200, 200, 200));
-	mainRect.draw(Color(125, 125, 125));
+	mainRect.draw(Color(618888));
 
 	// ボタン 描画
 	{
+		if (draw_back_flag) { displayBack.draw(10, 10); }
+		if (draw_go_flag) { displayGo.draw(WINDOW_WIDTH - 10 - displayGo.width, 10); }
 		int x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
 		for (int cou = 0; cou < 5; ++cou)
 		{
@@ -204,8 +251,12 @@ void Bar_Draw()
 
 	// メインテキスト 描画
 	{
-		const Rect rect = mainFont(mainText).region();
-		mainFont.draw(mainText, 768 / 2 - rect.w / 2, 15);
+		RasterizerState rasterizer = RasterizerState::Default2D;
+		rasterizer.scissorEnable = true;
+		Graphics2D::SetRasterizerState(rasterizer);
+		Graphics2D::SetScissorRect(Rect((int)mainRect.x, (int)mainRect.y, (int)mainRect.w, (int)mainRect.h));
+		mainFont(mainText).draw(draw_mainText_x, 15);
+		Graphics2D::SetScissorRect(Rect(0, 0, Window::Width(), Window::Height()));
 	}
 }
 
@@ -219,12 +270,52 @@ bool is_nowMusicPlaying()
 void giveMusicData(String albumName, String musicName, Sound musicData)
 {
 	music.albumName = albumName;
-	music.musicName = musicName;
+	music.text = musicName;
 	music.music = musicData;
+
+	// 描画位置 初期化
+	draw_mainText_startMSec = (int)Time::GetMillisec();
+	draw_mainText_stayFlag = true;
+	draw_mainText_x = DEFAULT_mainText_X;
 }
 
 // 停止フラグ 設定
 void set_stopFlag(bool flag)
 {
 	stop_flag = flag;
+}
+
+// 曲名描画位置 更新
+void Update_drawMainText()
+{
+	auto rect = mainRect;
+	auto width = mainFont(mainText).region().w + rect.r;
+	if (width > rect.w)
+	{
+		if (!draw_mainText_stayFlag)
+		{
+			if (draw_mainText_x + width > rect.x + rect.w) { --draw_mainText_x; }
+			else
+			{
+				draw_mainText_startMSec = draw_mainText_stayMSec = (int)Time::GetMillisec64();
+				draw_mainText_stayFlag = true;
+			}
+		}
+		if (draw_mainText_stayFlag)
+		{
+			if (draw_mainText_stayMSec - draw_mainText_startMSec >= BAR_DRAW_STAYMSEC)
+			{
+				draw_mainText_startMSec = draw_mainText_stayMSec;
+				const Rect tmpRect = mainFont(mainText).region();
+				if (draw_mainText_x == DEFAULT_mainText_X) { draw_mainText_stayFlag = false; }
+				else { draw_mainText_x = DEFAULT_mainText_X; }
+			}
+			else { draw_mainText_stayMSec = (int)Time::GetMillisec(); }
+		}
+	}
+	else
+	{
+		const Rect tempRect = mainFont(mainText).region();
+		draw_mainText_x = 384 - (int)tempRect.w / 2;
+	}
 }

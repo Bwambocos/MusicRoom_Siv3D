@@ -21,10 +21,8 @@ struct Album
 // グローバル定数・変数
 static std::vector<std::pair<int, int>>comTime;
 static std::vector<Album> AlbumList;
-static Image main_tmp;
 static Texture main, no_img;
 static Texture fav, power;
-static Texture Gaussian;
 static String setAlbum = L"";
 static Grid<double_t> z;
 static TextReader reader;
@@ -38,13 +36,11 @@ static bool scr_flag = true;
 // アルバム選択 初期化
 void Select_Init()
 {
-	if (main_tmp) { return; }
-
+	if (main) { return; }
 	// メイン背景
 	{
-		main_tmp = Image(L"data\\Select\\main.png");
-		main = Texture(main_tmp);
-		Gaussian = Texture(main_tmp.gaussianBlurred(20, 20));
+		main = Texture(L"data\\Select\\main.png");
+		fav = Texture(L"data\\Detail\\fav.png");
 	}
 
 	fav = Texture(L"data\\Select\\fav.png");
@@ -102,6 +98,8 @@ void Select_Update()
 				if (cou == (signed)AlbumList.size()) { SceneMgr_ChangeScene(Scene_Fav); }
 				else if (cou == (signed)AlbumList.size() + 1)
 				{
+					Bar_Draw();
+					main.draw(0, BAR_HEIGHT);
 					GUI gui(GUIStyle::Default);
 					gui.setTitle(L"終了確認");
 					gui.addln(GUIText::Create(L"終了しますか？"));
@@ -110,6 +108,8 @@ void Select_Update()
 					gui.setCenter(Window::Center());
 					while (System::Update())
 					{
+						Bar_Draw();
+						main.draw(0, BAR_HEIGHT);
 						gui.show();
 						if (gui.button(L"yes").pushed)
 						{
@@ -126,6 +126,13 @@ void Select_Update()
 				else
 				{
 					setAlbum = AlbumList[cou].name;
+					const Rect temprect(0, BAR_HEIGHT, Window::Width(), Window::Height());
+					const Font tempfont(32, Typeface::Bold);
+					Bar_Draw();
+					main.draw(0, BAR_HEIGHT);
+					temprect.draw(Color(64, 64, 64, 100));
+					tempfont(L"読み込み中・・・").drawCenter(Window::Height() / 2);
+					System::Update();
 					SceneMgr_ChangeScene(Scene_Detail);
 				}
 			}
@@ -141,9 +148,16 @@ void Select_Draw()
 	// メイン背景
 	{
 		main.draw(0, BAR_HEIGHT);
-		Gaussian.draw(0, BAR_HEIGHT);
-		if (first_cou > 0) { goUp.draw((goUp.mouseOver ? Palette::Orange : Palette::White)); }
-		if (first_cou + 5 <= (signed)AlbumList.size()) { goDown.draw((goDown.mouseOver ? Palette::Orange : Palette::White)); }
+		if (first_cou > 0)
+		{
+			goUp.draw((goUp.mouseOver ? Palette::Orange : Palette::White));
+			goUp.drawFrame(2, Palette::Black);
+		}
+		if (first_cou + 5 <= (signed)AlbumList.size())
+		{
+			goDown.draw((goDown.mouseOver ? Palette::Orange : Palette::White));
+			goDown.drawFrame(2, Palette::Black);
+		}
 	}
 
 	// album_list 描画
