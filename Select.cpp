@@ -45,6 +45,7 @@ void Select_Init()
 		main_tmp = Image(L"data\\Select\\main.png");
 		main = Texture(main_tmp);
 		Gaussian = Texture(main_tmp.gaussianBlurred(20, 20));
+		fav = Texture(L"data\\Detail\\fav.png");
 	}
 
 	fav = Texture(L"data\\Select\\fav.png");
@@ -126,6 +127,13 @@ void Select_Update()
 				else
 				{
 					setAlbum = AlbumList[cou].name;
+					const Rect temprect(0, BAR_HEIGHT, Window::Width(), Window::Height());
+					const Font tempfont(32, Typeface::Bold);
+					Bar_Draw();
+					main.draw(0, BAR_HEIGHT);
+					temprect.draw(Color(64, 64, 64, 100));
+					tempfont(L"ì«Ç›çûÇ›íÜÅEÅEÅE").drawCenter(Window::Height() / 2);
+					System::Update();
 					SceneMgr_ChangeScene(Scene_Detail);
 				}
 			}
