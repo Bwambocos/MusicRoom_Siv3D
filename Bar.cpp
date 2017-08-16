@@ -216,7 +216,7 @@ void Bar_Update()
 void Bar_Draw()
 {
 	fieldRect.draw(Color(200, 200, 200));
-	mainRect.draw(Color(125, 125, 125));
+	mainRect.draw(Color(618888));
 
 	// ƒ{ƒ^ƒ“ •`‰æ
 	{

@@ -7,8 +7,8 @@
 
 void Main()
 {
-	Window::SetStyle(WindowStyle::NonFrame);
 	Window::Resize({ WINDOW_WIDTH,WINDOW_HEIGHT + BAR_HEIGHT }, true);
+	Window::SetStyle(WindowStyle::NonFrame);
 	Window::SetTitle(L"MusicRoom v2.0");
 
 	Bar_Init(); Fav_Init();
