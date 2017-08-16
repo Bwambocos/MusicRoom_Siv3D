@@ -1,13 +1,14 @@
 // include
 #include <Siv3D.hpp>
+#include "Main.h"
 #include "SceneMgr.h"
 #include "Bar.h"
 #include "Fav.h"
 
 void Main()
 {
+	Window::Resize({ WINDOW_WIDTH,WINDOW_HEIGHT + BAR_HEIGHT }, true);
 	Window::SetStyle(WindowStyle::NonFrame);
-	Window::Resize({ 768,512 + BAR_HEIGHT }, true);
 	Window::SetTitle(L"MusicRoom v2.0");
 
 	Bar_Init(); Fav_Init();

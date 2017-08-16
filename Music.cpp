@@ -164,7 +164,7 @@ void Music_Draw()
 	{
 		music_Main.draw(0, BAR_HEIGHT);
 		fft = FFT::Analyze(music_Music);
-		for (auto i : step(51)) { RectF(1 + i * 15, Window::Height(), 15, -Pow(fft.buffer[i], 0.8) * 750).draw(Color(200, 200, 200)); }
+		for (auto i : step(51)) { RectF(1 + i * 15, Window::Height(), 15, -Pow(fft.buffer[i], 0.8) * 750).draw(Color(200, 200, 200, 200)); }
 		rect_musicName.drawShadow({ 0,15 }, 32, 10);
 		rect_musicName.drawFrame(3);
 		rect_musicName.draw(Color(32, 32, 32, 120));
@@ -341,4 +341,10 @@ void changeMusicStats(int kind)
 void set_stillFlag(bool flag)
 {
 	still_flag = flag;
+}
+
+// Ç®ãCÇ…ì¸ÇËÉãÅ[ÉvíÜÇ©î€Ç©
+bool isFavLooping()
+{
+	return favLoop_flag;
 }
