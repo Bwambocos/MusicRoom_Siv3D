@@ -40,7 +40,7 @@ void Fav_Init()
 {
 	if (!main)
 	{
-		main = Texture(L"data\\Detail\\main.png");
+		main = Texture(L"data\\Fav\\main.png");
 		playing = Texture(L"data\\Detail\\playing.png");
 		pausing = Texture(L"data\\Detail\\pausing.png");
 		not_fav = Texture(L"data\\Detail\\not_fav.png");
