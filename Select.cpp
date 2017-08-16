@@ -37,10 +37,10 @@ static bool scr_flag = true;
 void Select_Init()
 {
 	if (main) { return; }
-
 	// メイン背景
 	{
 		main = Texture(L"data\\Select\\main.png");
+		fav = Texture(L"data\\Detail\\fav.png");
 	}
 
 	fav = Texture(L"data\\Select\\fav.png");
@@ -98,7 +98,7 @@ void Select_Update()
 				if (cou == (signed)AlbumList.size()) { SceneMgr_ChangeScene(Scene_Fav); }
 				else if (cou == (signed)AlbumList.size() + 1)
 				{
-					Bar_Update(); Bar_Draw();
+					Bar_Draw();
 					main.draw(0, BAR_HEIGHT);
 					GUI gui(GUIStyle::Default);
 					gui.setTitle(L"終了確認");
@@ -108,7 +108,7 @@ void Select_Update()
 					gui.setCenter(Window::Center());
 					while (System::Update())
 					{
-						Bar_Update(); Bar_Draw();
+						Bar_Draw();
 						main.draw(0, BAR_HEIGHT);
 						gui.show();
 						if (gui.button(L"yes").pushed)
@@ -126,6 +126,13 @@ void Select_Update()
 				else
 				{
 					setAlbum = AlbumList[cou].name;
+					const Rect temprect(0, BAR_HEIGHT, Window::Width(), Window::Height());
+					const Font tempfont(32, Typeface::Bold);
+					Bar_Draw();
+					main.draw(0, BAR_HEIGHT);
+					temprect.draw(Color(64, 64, 64, 100));
+					tempfont(L"読み込み中・・・").drawCenter(Window::Height() / 2);
+					System::Update();
 					SceneMgr_ChangeScene(Scene_Detail);
 				}
 			}
