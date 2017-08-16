@@ -141,8 +141,16 @@ void Select_Draw()
 	// ƒƒCƒ“”wŒi
 	{
 		main.draw(0, BAR_HEIGHT);
-		if (first_cou > 0) { goUp.draw((goUp.mouseOver ? Palette::Orange : Palette::White)); }
-		if (first_cou + 5 <= (signed)AlbumList.size()) { goDown.draw((goDown.mouseOver ? Palette::Orange : Palette::White)); }
+		if (first_cou > 0)
+		{
+			goUp.draw((goUp.mouseOver ? Palette::Orange : Palette::White));
+			goUp.drawFrame(2, Palette::Black);
+		}
+		if (first_cou + 5 <= (signed)AlbumList.size())
+		{
+			goDown.draw((goDown.mouseOver ? Palette::Orange : Palette::White));
+			goDown.drawFrame(2, Palette::Black);
+		}
 	}
 
 	// album_list •`‰æ

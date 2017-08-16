@@ -342,3 +342,9 @@ void set_stillFlag(bool flag)
 {
 	still_flag = flag;
 }
+
+// ‚¨‹C‚É“ü‚èƒ‹[ƒv’†‚©”Û‚©
+bool isFavLooping()
+{
+	return favLoop_flag;
+}
