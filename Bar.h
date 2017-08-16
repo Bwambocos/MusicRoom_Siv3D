@@ -20,3 +20,6 @@ void giveMusicData(String albumName, String musicName, Sound musicData);
 
 // 停止フラグ 設定
 void set_stopFlag(bool flag);
+
+// 曲名描画位置 更新
+void Update_drawMainText();
