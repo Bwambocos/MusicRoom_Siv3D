@@ -98,8 +98,16 @@ void Fav_Draw()
 
 	// ‹ÈƒŠƒXƒg •`‰æ
 	{
-		if (albumList_begin > 0) { goUp.draw((goUp.mouseOver ? Palette::Orange : Palette::White)); }
-		if (albumList_begin + MAX_CELL_NUM < (signed)musics.size()) { goDown.draw((goDown.mouseOver ? Palette::Orange : Palette::White)); }
+		if (albumList_begin > 0)
+		{
+			goUp.draw((goUp.mouseOver ? Palette::Orange : Palette::White));
+			goUp.drawFrame(2, Palette::Black);
+		}
+		if (albumList_begin + MAX_CELL_NUM < (signed)musics.size())
+		{
+			goDown.draw((goDown.mouseOver ? Palette::Orange : Palette::White));
+			goDown.drawFrame(2, Palette::Black);
+		}
 		for (int i = 0; i < MAX_CELL_NUM; ++i)
 		{
 			RoundRect(rect_albumList_Flag.x, rect_albumList_Flag.y + i * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r).draw(Color(32, 32, 32, 200));
