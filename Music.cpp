@@ -110,9 +110,11 @@ void Music_Update()
 		// バー
 		if (rect_musicBar.leftPressed)
 		{
+			music_Music.pause();
 			const Point tmpPoint = Mouse::Pos();
 			music_Music.setPosSample(music_Music.lengthSample()*(tmpPoint.x - (int)rect_musicBar.x) / (int)rect_musicBar.w);
 		}
+		else { music_Music.play(); }
 
 		// ボタン
 		Circle tmpCircle(45, rect_musicBar.y + rect_musicBar.h / 2, 15);
