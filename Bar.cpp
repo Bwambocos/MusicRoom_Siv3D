@@ -95,7 +95,12 @@ void Bar_Update()
 		case Scene_Detail:
 			draw_back_flag = true;
 			draw_go_flag = music.music.isPlaying();
-			if (backRect.leftClicked) { SceneMgr_ChangeScene(Scene_Select); }
+			if (backRect.leftClicked)
+			{
+				music.music.stop();
+				stop_flag = true;
+				SceneMgr_ChangeScene(Scene_Select);
+			}
 			if (draw_go_flag && goRect.leftClicked) { SceneMgr_ChangeScene(Scene_Music); }
 			break;
 
