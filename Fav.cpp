@@ -71,7 +71,16 @@ void Fav_Update()
 			auto num = i - albumList_begin;
 			auto music = musics[i];
 			RoundRect rect(rect_albumList_Flag.x, rect_albumList_Flag.y + num * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r);
-			if (rect.leftClicked) { (music.music.isPlaying() ? music.music.pause() : music.music.play()); }
+			if (rect.leftClicked)
+			{
+				(music.music.isPlaying() ? music.music.pause() : music.music.play());
+				if (selectedMusic_num != i) { musics[selectedMusic_num].music.stop(); }
+				selectedMusic_num = i;
+				selectedAlbumName = music.albumName;
+				selectedMusicName = music.musicOriginName;
+				selectedMusic = music.music;
+				giveMusicData(music.albumName, music.musicOriginName, music.music);
+			}
 			rect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (rect.leftClicked)
 			{
@@ -80,6 +89,7 @@ void Fav_Update()
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if (rect.leftClicked)
 			{
+				if (selectedMusic_num != i) { musics[selectedMusic_num].music.stop(); }
 				selectedMusic_num = i;
 				selectedAlbumName = music.albumName;
 				selectedMusicName = music.musicOriginName;
