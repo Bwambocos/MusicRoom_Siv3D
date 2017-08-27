@@ -113,14 +113,19 @@ void Bar_Update()
 		case Scene_Fav:
 			draw_back_flag = true;
 			draw_go_flag = music.music.isPlaying();
-			if (backRect.leftClicked) { SceneMgr_ChangeScene(Scene_Select); }
+			if (backRect.leftClicked)
+			{
+				music.music.stop();
+				stop_flag = true;
+				SceneMgr_ChangeScene(Scene_Select);
+			}
 			if (draw_go_flag && goRect.leftClicked) { SceneMgr_ChangeScene(Scene_Music); }
 			break;
 		}
 		displayBack = originBack[(backRect.mouseOver ? 1 : 0)];
 		displayGo = originGo[(goRect.mouseOver ? 1 : 0)];
 		
-		if (!music.music.isEmpty())
+		if (get_nowScene() != Scene_Select)
 		{
 			int x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
 			for (int cou = 0; cou < 5; ++cou)
@@ -133,6 +138,8 @@ void Bar_Update()
 					else { displayPrev = originPrev[0]; }
 					if (button.leftClicked)
 					{
+						changeMusicStats(3);
+						setMusicStats(0);
 						changeMusic(-1);
 						stop_flag = false;
 					}
@@ -162,9 +169,14 @@ void Bar_Update()
 				case 2:
 					if (button.mouseOver) { displayRep = originRep[1]; }
 					else { displayRep = originRep[0]; }
+					if (music.music.isLoop()) { displayRep = originRep[1]; }
 					if (button.leftClicked)
 					{
-						changeMusicStats(3);
+						const int tmpTime = (int)music.music.streamPosSample();
+						music.music.pause();
+						music.music.setLoop(music.music.isLoop() ? false : true);
+						music.music.play();
+						music.music.setPosSample(tmpTime);
 						stop_flag = false;
 					}
 					x += mainRectWidth;
@@ -183,6 +195,8 @@ void Bar_Update()
 					else { displayNext = originNext[0]; }
 					if (button.leftClicked)
 					{
+						changeMusicStats(3);
+						setMusicStats(0);
 						changeMusic(1);
 						stop_flag = false;
 					}
