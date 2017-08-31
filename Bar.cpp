@@ -125,7 +125,7 @@ void Bar_Update()
 		displayBack = originBack[(backRect.mouseOver ? 1 : 0)];
 		displayGo = originGo[(goRect.mouseOver ? 1 : 0)];
 		
-		if (get_nowScene() != Scene_Select)
+		if (music.music.isPaused() || music.music.isPlaying())
 		{
 			int x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
 			for (int cou = 0; cou < 5; ++cou)
@@ -138,7 +138,7 @@ void Bar_Update()
 					else { displayPrev = originPrev[0]; }
 					if (button.leftClicked)
 					{
-						changeMusicStats(3);
+						changeMusicStats(0);
 						setMusicStats(0);
 						changeMusic(-1);
 						stop_flag = false;
@@ -195,7 +195,7 @@ void Bar_Update()
 					else { displayNext = originNext[0]; }
 					if (button.leftClicked)
 					{
-						changeMusicStats(3);
+						changeMusicStats(0);
 						setMusicStats(0);
 						changeMusic(1);
 						stop_flag = false;
