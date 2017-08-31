@@ -148,7 +148,7 @@ void Detail_Update()
 			RoundRect rect(rect_albumList_Flag.x, rect_albumList_Flag.y + num * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r);
 			if (rect.leftClicked)
 			{
-				if (selectedMusic_num != i && selectedMusic_num < albumList.size()) { albumList[selectedMusic_num].music.stop(); }
+				if (selectedMusic_num != i && selectedMusic_num < (signed)albumList.size()) { albumList[selectedMusic_num].music.stop(); }
 				(music.music.isPlaying() ? music.music.pause() : music.music.play());
 				selectedMusic_num = i;
 				selectedAlbumName = albumName;
@@ -164,7 +164,7 @@ void Detail_Update()
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if(rect.leftClicked)
 			{
-				if (selectedMusic_num != i && selectedMusic_num < albumList.size()) { albumList[selectedMusic_num].music.stop(); }
+				if (selectedMusic_num != i && selectedMusic_num < (signed)albumList.size()) { albumList[selectedMusic_num].music.stop(); }
 				selectedMusic_num = i;
 				selectedAlbumName = albumName;
 				selectedMusicName = music.originName;
