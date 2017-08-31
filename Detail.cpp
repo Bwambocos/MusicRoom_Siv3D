@@ -148,8 +148,8 @@ void Detail_Update()
 			RoundRect rect(rect_albumList_Flag.x, rect_albumList_Flag.y + num * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r);
 			if (rect.leftClicked)
 			{
-				(music.music.isPlaying() ? music.music.pause() : music.music.play());
 				if (selectedMusic_num != i) { albumList[selectedMusic_num].music.stop(); }
+				(music.music.isPlaying() ? music.music.pause() : music.music.play());
 				selectedMusic_num = i;
 				selectedAlbumName = albumName;
 				selectedMusicName = music.originName;
