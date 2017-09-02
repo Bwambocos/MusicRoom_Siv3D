@@ -74,7 +74,17 @@ void Select_Init()
 void Select_Update()
 {
 	nowTime = (int)Time::GetMillisec();
-
+	if (Input::KeyF5.pressed)
+	{
+		const Rect temprect(0, BAR_HEIGHT, Window::Width(), Window::Height());
+		const Font tempfont(32, Typeface::Bold);
+		Bar_Draw();
+		main.draw(0, BAR_HEIGHT);
+		temprect.draw(Color(64, 64, 64, 100));
+		tempfont(L"再読み込み中・・・").drawCenter(Window::Height() / 2);
+		System::Update();
+		Select_Init();
+	}
 	// スクロール 更新
 	{
 		if (goUp.leftClicked) { first_cou -= 3; }
