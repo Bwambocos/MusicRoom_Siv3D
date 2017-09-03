@@ -102,6 +102,17 @@ void Music_Update()
 		SceneMgr_ChangeScene((favLoop_flag ? Scene_Fav : Scene_Detail));
 		still_flag = false;
 	}
+	if (Input::KeyF5.clicked)
+	{
+		const Rect temprect(0, BAR_HEIGHT, Window::Width(), Window::Height());
+		const Font tempfont(32, Typeface::Bold);
+		Bar_Draw();
+		music_Main.draw(0, BAR_HEIGHT);
+		temprect.draw(Color(64, 64, 64, 100));
+		tempfont(L"çƒì«Ç›çûÇ›íÜÅEÅEÅE").drawCenter(Window::Height() / 2);
+		System::Update();
+		Music_Init();
+	}
 	if (!music_Music.isPlaying() && !stop_flag
 		&& music_Music.samplesPlayed() % music_Music.lengthSample() == 0) { changeMusic(1); }
 	

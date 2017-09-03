@@ -48,6 +48,7 @@ static double draw_albumExpl_y;
 static int64 draw_albumName_startMSec, draw_albumCreator_startMSec, draw_albumExpl_startMSec, draw_albumName_stayMSec, draw_albumCreator_stayMSec, draw_albumExpl_stayMSec;
 static bool draw_albumName_stayFlag, draw_albumCreator_stayFlag, draw_albumExpl_stayFlag;
 static int selectedMusic_num;
+static bool reloadFlag = false;
 
 // アルバム詳細 初期化
 void Detail_Init()
@@ -82,7 +83,7 @@ void Detail_Init()
 	}
 
 	// まだ読み込まれていないアルバム
-	if (albums.find(temp_albumName) == albums.end())
+	if (albums.find(temp_albumName) == albums.end() || reloadFlag)
 	{
 		// 曲リスト 初期化
 		{
@@ -119,12 +120,25 @@ void Detail_Init()
 	draw_albumName_x = DEFAULT_albumName_X;
 	draw_albumCreator_x = DEFAULT_albumCreator_X;
 	draw_albumExpl_y = DEFAULT_albumExpl_Y;
+	reloadFlag = false;
 }
 
 // アルバム詳細 更新
 void Detail_Update()
 {
 	if (Input::KeyB.pressed) { SceneMgr_ChangeScene(Scene_Select); }
+	if (Input::KeyF5.pressed)
+	{
+		const Rect temprect(0, BAR_HEIGHT, Window::Width(), Window::Height());
+		const Font tempfont(32, Typeface::Bold);
+		Bar_Draw();
+		main.draw(0, BAR_HEIGHT);
+		temprect.draw(Color(64, 64, 64, 100));
+		tempfont(L"再読み込み中・・・").drawCenter(Window::Height() / 2);
+		System::Update();
+		reloadFlag = true;
+		Detail_Init();
+	}
 
 	// アルバム情報 更新
 	Update_drawAlbumDetailStrings();
@@ -148,8 +162,8 @@ void Detail_Update()
 			RoundRect rect(rect_albumList_Flag.x, rect_albumList_Flag.y + num * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r);
 			if (rect.leftClicked)
 			{
+				if (selectedMusic_num != i && selectedMusic_num < (signed)albumList.size()) { albumList[selectedMusic_num].music.stop(); }
 				(music.music.isPlaying() ? music.music.pause() : music.music.play());
-				if (selectedMusic_num != i) { albumList[selectedMusic_num].music.stop(); }
 				selectedMusic_num = i;
 				selectedAlbumName = albumName;
 				selectedMusicName = music.originName;
@@ -164,7 +178,7 @@ void Detail_Update()
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if(rect.leftClicked)
 			{
-				if (selectedMusic_num != i) { albumList[selectedMusic_num].music.stop(); }
+				if (selectedMusic_num != i && selectedMusic_num < (signed)albumList.size()) { albumList[selectedMusic_num].music.stop(); }
 				selectedMusic_num = i;
 				selectedAlbumName = albumName;
 				selectedMusicName = music.originName;
