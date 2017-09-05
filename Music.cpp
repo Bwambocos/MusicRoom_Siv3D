@@ -27,7 +27,7 @@ static int music_musicTime;
 static int draw_musicName_x;
 static int draw_musicName_startMSec, draw_musicName_stayMSec;
 static bool draw_musicName_stayFlag;
-static bool favLoop_flag = false, stop_flag = false, still_flag = true;
+static bool favLoop_flag = false, stop_flag = false, still_flag = true, button_flag = false;
 static int prev_or_next;
 
 // 曲 初期化
@@ -102,6 +102,17 @@ void Music_Update()
 		SceneMgr_ChangeScene((favLoop_flag ? Scene_Fav : Scene_Detail));
 		still_flag = false;
 	}
+	if (Input::KeyF5.clicked)
+	{
+		const Rect temprect(0, BAR_HEIGHT, Window::Width(), Window::Height());
+		const Font tempfont(32, Typeface::Bold);
+		Bar_Draw();
+		music_Main.draw(0, BAR_HEIGHT);
+		temprect.draw(Color(64, 64, 64, 100));
+		tempfont(L"再読み込み中・・・").drawCenter(Window::Height() / 2);
+		System::Update();
+		Music_Init();
+	}
 	if (!music_Music.isPlaying() && !stop_flag
 		&& music_Music.samplesPlayed() % music_Music.lengthSample() == 0) { changeMusic(1); }
 	
@@ -110,8 +121,15 @@ void Music_Update()
 		// バー
 		if (rect_musicBar.leftPressed)
 		{
+			button_flag = true;
+			music_Music.pause();
 			const Point tmpPoint = Mouse::Pos();
 			music_Music.setPosSample(music_Music.lengthSample()*(tmpPoint.x - (int)rect_musicBar.x) / (int)rect_musicBar.w);
+		}
+		else if (button_flag)
+		{
+			music_Music.play();
+			button_flag = false;
 		}
 
 		// ボタン

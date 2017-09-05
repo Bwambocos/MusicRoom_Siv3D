@@ -21,8 +21,8 @@ struct Bar_Music
 };
 
 static Bar_Music music;
-static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2], originPrev[2], originNext[2];
-static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep, displayPrev, displayNext;
+static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2], originPrev[2], originNext[2], originShare[2];
+static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep, displayPrev, displayNext, displayShare;
 static Texture originBack[2], originGo[2], displayBack, displayGo;
 static Rect fieldRect;
 static RoundRect mainRect(192, 0, mainRectWidth, BAR_HEIGHT, 16);
@@ -58,6 +58,8 @@ void Bar_Init()
 		originBack[1] = Texture(L"data\\Bar\\Back\\active.png");
 		originGo[0] = Texture(L"data\\Bar\\Go\\normal.png");
 		originGo[1] = Texture(L"data\\Bar\\Go\\active.png");
+		originShare[0] = Texture(L"data\\Bar\\Share\\normal.png");
+		originShare[1] = Texture(L"data\\Bar\\Share\\active.png");
 		displayPlay = originPlay[0];
 		displayBrief = originBrief[0];
 		displayStop = originStop[0];
@@ -67,6 +69,7 @@ void Bar_Init()
 		displayNext = originNext[0];
 		displayBack = originBack[0];
 		displayGo = originGo[0];
+		displayShare = originShare[0];
 	}
 
 	fieldRect = Rect(0, 0, WINDOW_WIDTH, BAR_HEIGHT);
@@ -95,7 +98,12 @@ void Bar_Update()
 		case Scene_Detail:
 			draw_back_flag = true;
 			draw_go_flag = music.music.isPlaying();
-			if (backRect.leftClicked) { SceneMgr_ChangeScene(Scene_Select); }
+			if (backRect.leftClicked)
+			{
+				music.music.stop();
+				stop_flag = true;
+				SceneMgr_ChangeScene(Scene_Select);
+			}
 			if (draw_go_flag && goRect.leftClicked) { SceneMgr_ChangeScene(Scene_Music); }
 			break;
 
@@ -108,17 +116,22 @@ void Bar_Update()
 		case Scene_Fav:
 			draw_back_flag = true;
 			draw_go_flag = music.music.isPlaying();
-			if (backRect.leftClicked) { SceneMgr_ChangeScene(Scene_Select); }
+			if (backRect.leftClicked)
+			{
+				music.music.stop();
+				stop_flag = true;
+				SceneMgr_ChangeScene(Scene_Select);
+			}
 			if (draw_go_flag && goRect.leftClicked) { SceneMgr_ChangeScene(Scene_Music); }
 			break;
 		}
 		displayBack = originBack[(backRect.mouseOver ? 1 : 0)];
 		displayGo = originGo[(goRect.mouseOver ? 1 : 0)];
 		
-		if (!music.music.isEmpty())
+		if (music.music.isPaused() || music.music.isPlaying())
 		{
 			int x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
-			for (int cou = 0; cou < 5; ++cou)
+			for (int cou = 0; cou < 6; ++cou)
 			{
 				const Circle button(x + 20, 12 + 20, 20);
 				switch (cou)
@@ -128,6 +141,8 @@ void Bar_Update()
 					else { displayPrev = originPrev[0]; }
 					if (button.leftClicked)
 					{
+						changeMusicStats(0);
+						setMusicStats(0);
 						changeMusic(-1);
 						stop_flag = false;
 					}
@@ -157,9 +172,14 @@ void Bar_Update()
 				case 2:
 					if (button.mouseOver) { displayRep = originRep[1]; }
 					else { displayRep = originRep[0]; }
+					if (music.music.isLoop()) { displayRep = originRep[1]; }
 					if (button.leftClicked)
 					{
-						changeMusicStats(3);
+						const int tmpTime = (int)music.music.streamPosSample();
+						music.music.pause();
+						music.music.setLoop(music.music.isLoop() ? false : true);
+						music.music.play();
+						music.music.setPosSample(tmpTime);
 						stop_flag = false;
 					}
 					x += mainRectWidth;
@@ -174,10 +194,20 @@ void Bar_Update()
 					}
 					break;
 				case 4:
+					if (button.mouseOver) { displayShare = originShare[1]; }
+					else { displayShare = originShare[0]; }
+					if (button.leftClicked)
+					{
+						Twitter::OpenTweetWindow(L"アルバム『" + music.albumName + L"』の曲「" + music.text + L"」を聴いています！ #MusicRoom");
+					}
+					break;
+				case 5:
 					if (button.mouseOver) { displayNext = originNext[1]; }
 					else { displayNext = originNext[0]; }
 					if (button.leftClicked)
 					{
+						changeMusicStats(0);
+						setMusicStats(0);
 						changeMusic(1);
 						stop_flag = false;
 					}
@@ -223,7 +253,7 @@ void Bar_Draw()
 		if (draw_back_flag) { displayBack.draw(10, 10); }
 		if (draw_go_flag) { displayGo.draw(WINDOW_WIDTH - 10 - displayGo.width, 10); }
 		int x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
-		for (int cou = 0; cou < 5; ++cou)
+		for (int cou = 0; cou < 6; ++cou)
 		{
 			switch (cou)
 			{
@@ -242,6 +272,9 @@ void Bar_Draw()
 				displayStop.draw(x, 12);
 				break;
 			case 4:
+				displayShare.draw(x, 12);
+				break;
+			case 5:
 				displayNext.draw(x, 12);
 				break;
 			}
