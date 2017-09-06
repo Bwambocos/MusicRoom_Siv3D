@@ -12,6 +12,8 @@
 #define DEFAULT_albumCreator_X 333
 #define DEFAULT_albumExpl_Y 143 + BAR_HEIGHT
 #define DRAW_STAYMSEC 3500
+#define DRAW_MOVE_X_PER_SEC 48
+#define DRAW_MOVE_Y_PER_SEC 12
 
 // 曲リスト 構造体
 struct List_detail
@@ -43,11 +45,10 @@ static Triangle goUp({ 384,350 }, { 414,360 }, { 354,360 });
 static Triangle goDown({ 354,560 }, { 414,560 }, { 384,570 });
 static Sound selectedMusic;
 static int albumList_begin;
-static int draw_albumName_x, draw_albumCreator_x;
-static double draw_albumExpl_y;
+static int draw_albumName_x, draw_albumCreator_x, draw_albumExpl_y;
 static int64 draw_albumName_startMSec, draw_albumCreator_startMSec, draw_albumExpl_startMSec, draw_albumName_stayMSec, draw_albumCreator_stayMSec, draw_albumExpl_stayMSec;
 static bool draw_albumName_stayFlag, draw_albumCreator_stayFlag, draw_albumExpl_stayFlag;
-static int selectedMusic_num;
+static int selectedMusic_num, albumExplRows;
 static bool reloadFlag = false;
 
 // アルバム詳細 初期化
@@ -270,6 +271,7 @@ void albumExpl_Draw()
 	const int32 w = (int32)rect_albumExpl.w - 10;
 	const int32 h = (int32)rect_albumExpl.h;
 	size_t pos = 0;
+	auto rect = rect_albumExpl;
 
 	while (pos < albumExpl.length)
 	{
@@ -289,31 +291,7 @@ void albumExpl_Draw()
 			}
 		}
 	}
-
-	auto rect = rect_albumExpl;
-	auto height = texts.size()*font_albumExpl.height;
-	if (height > rect.h)
-	{
-		if (!draw_albumExpl_stayFlag)
-		{
-			if (draw_albumExpl_y + height > rect.y + rect.h) { draw_albumExpl_y -= 0.5; }
-			else
-			{
-				draw_albumExpl_startMSec = draw_albumExpl_stayMSec = Time::GetMillisec64();
-				draw_albumExpl_stayFlag = true;
-			}
-		}
-		if (draw_albumExpl_stayFlag)
-		{
-			if (draw_albumExpl_stayMSec - draw_albumExpl_startMSec >= DRAW_STAYMSEC)
-			{
-				draw_albumExpl_startMSec = draw_albumExpl_stayMSec;
-				if (draw_albumExpl_y == DEFAULT_albumExpl_Y) { draw_albumExpl_stayFlag = false; }
-				else { draw_albumExpl_y = DEFAULT_albumExpl_Y; }
-			}
-			else { draw_albumExpl_stayMSec = Time::GetMillisec64(); }
-		}
-	}
+	albumExplRows = texts.size();
 	RasterizerState rasterizer = RasterizerState::Default2D;
 	rasterizer.scissorEnable = true;
 	Graphics2D::SetRasterizerState(rasterizer);
@@ -351,7 +329,7 @@ void Update_drawAlbumDetailStrings()
 	{
 		if (!draw_albumName_stayFlag)
 		{
-			if (draw_albumName_x + width > rect.x + rect.w) { --draw_albumName_x; }
+			if (draw_albumName_x + width > rect.x + rect.w) { draw_albumName_x -= DRAW_MOVE_X_PER_SEC*(Time::GetMillisec64() - draw_albumName_stayMSec) / 1000; }
 			else
 			{
 				draw_albumName_startMSec = draw_albumName_stayMSec = Time::GetMillisec64();
@@ -366,8 +344,8 @@ void Update_drawAlbumDetailStrings()
 				if (draw_albumName_x == DEFAULT_albumName_X) { draw_albumName_stayFlag = false; }
 				else { draw_albumName_x = DEFAULT_albumName_X; }
 			}
-			else { draw_albumName_stayMSec = Time::GetMillisec64(); }
 		}
+		draw_albumName_stayMSec = Time::GetMillisec64();
 	}
 	rect = rect_albumCreator;
 	width = font_albumCreator(albumCreator).region().w + rect.r;
@@ -375,7 +353,7 @@ void Update_drawAlbumDetailStrings()
 	{
 		if (!draw_albumCreator_stayFlag)
 		{
-			if (draw_albumCreator_x + width > rect.x + rect.w) { --draw_albumCreator_x; }
+			if (draw_albumCreator_x + width > rect.x + rect.w) { draw_albumCreator_x -= DRAW_MOVE_X_PER_SEC*(Time::GetMillisec64() - draw_albumCreator_stayMSec) / 1000; }
 			else
 			{
 				draw_albumCreator_startMSec = draw_albumCreator_stayMSec = Time::GetMillisec64();
@@ -390,8 +368,38 @@ void Update_drawAlbumDetailStrings()
 				if (draw_albumCreator_x == DEFAULT_albumCreator_X) { draw_albumCreator_stayFlag = false; }
 				else { draw_albumCreator_x = DEFAULT_albumCreator_X; }
 			}
-			else { draw_albumCreator_stayMSec = Time::GetMillisec64(); }
 		}
+		draw_albumCreator_stayMSec = Time::GetMillisec64();
+	}
+	rect = rect_albumExpl;
+	auto height = font_albumExpl.height*albumExplRows;
+	if (rect.h < height)
+	{
+		if (!draw_albumExpl_stayFlag)
+		{
+			if (draw_albumExpl_y + height > rect.y + rect.h)
+			{
+				ClearPrint();
+				Println(draw_albumExpl_y);
+				Println(DRAW_MOVE_Y_PER_SEC*(Time::GetMillisec64() - draw_albumExpl_stayMSec) / 1000);
+				draw_albumExpl_y -= DRAW_MOVE_Y_PER_SEC*(Time::GetMillisec64() - draw_albumExpl_stayMSec) / 1000;
+			}
+			else
+			{
+				draw_albumExpl_startMSec = draw_albumExpl_stayMSec = Time::GetMillisec64();
+				draw_albumExpl_stayFlag = true;
+			}
+		}
+		if (draw_albumExpl_stayFlag)
+		{
+			if (draw_albumExpl_stayMSec - draw_albumExpl_startMSec >= DRAW_STAYMSEC)
+			{
+				draw_albumExpl_startMSec = draw_albumExpl_stayMSec;
+				if (draw_albumExpl_y == DEFAULT_albumExpl_Y) { draw_albumExpl_stayFlag = false; }
+				else { draw_albumExpl_y = DEFAULT_albumExpl_Y; }
+			}
+		}
+		draw_albumExpl_stayMSec = Time::GetMillisec64();
 	}
 }
 
