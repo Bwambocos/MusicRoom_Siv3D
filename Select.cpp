@@ -22,7 +22,7 @@ struct Album
 static std::vector<std::pair<int, int>>comTime;
 static std::vector<Album> AlbumList;
 static Texture main, no_img;
-static Texture fav, power;
+static Texture fav;
 static String setAlbum = L"";
 static Grid<double_t> z;
 static TextReader reader;
@@ -44,7 +44,6 @@ void Select_Init()
 	}
 
 	fav = Texture(L"data\\Select\\fav.png");
-	power = Texture(L"data\\Select\\power.png");
 	no_img = Texture(L"data\\Select\\no_img.png");
 
 	// album_list 読み込み
@@ -63,7 +62,7 @@ void Select_Init()
 			if (!image) { image = no_img; }
 			AlbumList.push_back({ name,creator,comment,image });
 		}
-		z = Grid<double>(3, (AlbumList.size() + 2) / 3 + 1);
+		z = Grid<double>(3, (AlbumList.size() + 1) / 3 + 1);
 	}
 
 	startTime = (int)Time::GetMillisec();
@@ -106,33 +105,6 @@ void Select_Update()
 			if (Input::MouseL.clicked && rect.mouseOver)
 			{
 				if (cou == (signed)AlbumList.size()) { SceneMgr_ChangeScene(Scene_Fav); }
-				else if (cou == (signed)AlbumList.size() + 1)
-				{
-					Bar_Draw();
-					main.draw(0, BAR_HEIGHT);
-					GUI gui(GUIStyle::Default);
-					gui.setTitle(L"終了確認");
-					gui.addln(GUIText::Create(L"終了しますか？"));
-					gui.add(L"yes", GUIButton::Create(L"はい"));
-					gui.add(L"no", GUIButton::Create(L"いいえ"));
-					gui.setCenter(Window::Center());
-					while (System::Update())
-					{
-						Bar_Draw();
-						main.draw(0, BAR_HEIGHT);
-						gui.show();
-						if (gui.button(L"yes").pushed)
-						{
-							System::Exit();
-							break;
-						}
-						else if (gui.button(L"no").pushed)
-						{
-							gui.hide();
-							break;
-						}
-					}
-				}
 				else
 				{
 					setAlbum = AlbumList[cou].name;
@@ -148,7 +120,7 @@ void Select_Update()
 			}
 			++cou;
 		}
-		if (cou == (signed)AlbumList.size() + 2) { break; }
+		if (cou == (signed)AlbumList.size() + 1) { break; }
 	}
 }
 
@@ -178,7 +150,7 @@ void Select_Draw()
 			for (int x = 0; x < (signed)z.width; ++x)
 			{
 				const Rect rect = MakeRect(x, y);
-				if (cou == (signed)AlbumList.size() + 2) { break; }
+				if (cou == (signed)AlbumList.size() + 1) { break; }
 				if (!rect.mouseOver)
 				{
 					rect(SelectImage(cou).resize(216, 216)).draw();
@@ -187,7 +159,7 @@ void Select_Draw()
 				}
 				++cou;
 			}
-			if (cou == (signed)AlbumList.size() + 2) { break; }
+			if (cou == (signed)AlbumList.size() + 1) { break; }
 		}
 		cou = first_cou;
 		for (int y = 0; y < (signed)z.height; ++y)
@@ -200,13 +172,13 @@ void Select_Draw()
 					if (rect.mouseOver) { z[y][x] = Min(z[y][x] + 0.05, 0.5); }
 				}
 				const double s = z[y][x];
-				if (cou == (signed)AlbumList.size() + 2) { break; }
+				if (cou == (signed)AlbumList.size() + 1) { break; }
 				RectF(rect).stretched(s * 2).drawShadow({ 0,15 * s }, 32 * s, 10 * s);
 				RectF(rect).stretched(s * 2)(SelectImage(cou).resize(216, 216)).draw();
 				RectF(rect).stretched(s * 2).drawFrame(3, 0, Color(0, 0, 0));
 				++cou;
 			}
-			if (cou == (signed)AlbumList.size() + 2) { break; }
+			if (cou == (signed)AlbumList.size() + 1) { break; }
 		}
 		cou = first_cou;
 		for (int y = 0; y < (signed)z.height; ++y)
@@ -214,7 +186,7 @@ void Select_Draw()
 			for (int x = 0; x < (signed)z.width; ++x)
 			{
 				const Rect rect = MakeRect(x, y);
-				if (cou == (signed)AlbumList.size() + 2) { break; }
+				if (cou == (signed)AlbumList.size() + 1) { break; }
 				if (rect.mouseOver)
 				{
 					comTime[cou].first = (comTime[cou].first == 0 ? (int)Time::GetMillisec() : comTime[cou].first);
@@ -224,7 +196,7 @@ void Select_Draw()
 				else { comTime[cou].first = comTime[cou].second = 0; }
 				++cou;
 			}
-			if (cou == (signed)AlbumList.size() + 2) { break; }
+			if (cou == (signed)AlbumList.size() + 1) { break; }
 		}
 	}
 }
@@ -246,9 +218,6 @@ Texture SelectImage(int cou)
 	// お気に入り
 	else if (cou == (signed)AlbumList.size()) { res = fav; }
 
-	// 終了
-	else if (cou == (signed)AlbumList.size() + 1) { res = power; }
-
 	return res;
 }
 
@@ -268,11 +237,6 @@ void DrawDetails(int cou)
 	{
 		name = L"お気に入り";
 		creator = L"お気に入り登録した曲を表示します。";
-	}
-	else if (cou == (signed)AlbumList.size() + 1)
-	{
-		name = L"終了";
-		creator = L"MusicRoom v2.0 を終了します。";
 	}
 	else
 	{
