@@ -9,6 +9,7 @@
 // define
 #define DEFAULT_musicName_X 33
 #define DRAW_STAYMSEC 3500
+#define DRAW_MUSICNAME_MOVE_X 48
 
 // ƒOƒ[ƒoƒ‹•Ï”
 static Texture music_Main, faved, not_faved;
@@ -24,7 +25,7 @@ static RoundRect rect_musicBar(127, 91 + BAR_HEIGHT, 565, 21, 5);
 static RoundRect rect_musicExp(25, 130 + BAR_HEIGHT, 718, 357, 10);
 static FFTResult fft;
 static int music_musicTime;
-static int draw_musicName_x;
+static double draw_musicName_x;
 static int draw_musicName_startMSec, draw_musicName_stayMSec;
 static bool draw_musicName_stayFlag;
 static bool favLoop_flag = false, stop_flag = false, still_flag = true, button_flag = false;
@@ -285,7 +286,7 @@ void Update_drawMusicDetailStrings()
 	{
 		if (!draw_musicName_stayFlag)
 		{
-			if (draw_musicName_x + width > rect.x + rect.w) { --draw_musicName_x; }
+			if (draw_musicName_x + width > rect.x + rect.w) { draw_musicName_x -= (double)DRAW_MUSICNAME_MOVE_X*(Time::GetMillisec64() - draw_musicName_stayMSec) / 1000; }
 			else
 			{
 				draw_musicName_startMSec = draw_musicName_stayMSec = (int)Time::GetMillisec64();
@@ -300,8 +301,8 @@ void Update_drawMusicDetailStrings()
 				if (draw_musicName_x == DEFAULT_musicName_X) { draw_musicName_stayFlag = false; }
 				else { draw_musicName_x = DEFAULT_musicName_X; }
 			}
-			else { draw_musicName_stayMSec = (int)Time::GetMillisec(); }
 		}
+		draw_musicName_stayMSec = (int)Time::GetMillisec();
 	}
 }
 
