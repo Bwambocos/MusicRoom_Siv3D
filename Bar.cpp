@@ -10,6 +10,7 @@
 #define mainRectWidth 384
 #define BAR_DRAW_STAYMSEC 3500
 #define DEFAULT_mainText_X 200
+#define DRAW_mainText_MOVE_X 48
 
 struct Bar_Music
 {
@@ -327,7 +328,7 @@ void Update_drawMainText()
 	{
 		if (!draw_mainText_stayFlag)
 		{
-			if (draw_mainText_x + width > rect.x + rect.w) { --draw_mainText_x; }
+			if (draw_mainText_x + width > rect.x + rect.w) { draw_mainText_x -= (double)DRAW_mainText_MOVE_X*(Time::GetMillisec64() - draw_mainText_stayMSec) / 1000; }
 			else
 			{
 				draw_mainText_startMSec = draw_mainText_stayMSec = (int)Time::GetMillisec64();
@@ -343,8 +344,8 @@ void Update_drawMainText()
 				if (draw_mainText_x == DEFAULT_mainText_X) { draw_mainText_stayFlag = false; }
 				else { draw_mainText_x = DEFAULT_mainText_X; }
 			}
-			else { draw_mainText_stayMSec = (int)Time::GetMillisec(); }
 		}
+		draw_mainText_stayMSec = (int)Time::GetMillisec();
 	}
 	else
 	{
