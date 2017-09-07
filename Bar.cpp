@@ -31,7 +31,7 @@ static Sound nowMusic;
 static String mainText = L"";
 static Font mainFont, timeFont;
 static bool stop_flag = false;
-static int draw_mainText_x;
+static double draw_mainText_x;
 static int draw_mainText_startMSec, draw_mainText_stayMSec;
 static bool draw_mainText_stayFlag;
 static bool draw_back_flag = false, draw_go_flag = false;
