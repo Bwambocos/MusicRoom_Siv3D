@@ -27,7 +27,7 @@ static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep, 
 static Texture originBack[2], originGo[2], displayBack, displayGo;
 static Rect fieldRect;
 static RoundRect mainRect(192, 0, mainRectWidth, BAR_HEIGHT, 16);
-static Sound nowMusic;
+static Sound nowMusic, dog;
 static String mainText = L"";
 static Font mainFont, timeFont;
 static bool stop_flag = false;
@@ -76,6 +76,7 @@ void Bar_Init()
 	fieldRect = Rect(0, 0, WINDOW_WIDTH, BAR_HEIGHT);
 	mainFont = Font(18);
 	timeFont = Font(12);
+	dog = Sound(L"data\\Bar\\dog.mp3");
 }
 
 // バー 更新
@@ -85,6 +86,7 @@ void Bar_Update()
 		&& music.music.samplesPlayed() % music.music.lengthSample() == 0) {
 		changeMusic(1);
 	}
+	if (Input::KeyShift.pressed&&Input::KeyD.pressed&&Input::KeyO.pressed&&Input::KeyG.pressed) { dog.play(); }
 
 	// ボタン 更新
 	{
@@ -128,7 +130,7 @@ void Bar_Update()
 		}
 		displayBack = originBack[(backRect.mouseOver ? 1 : 0)];
 		displayGo = originGo[(goRect.mouseOver ? 1 : 0)];
-		
+
 		if (music.music.isPaused() || music.music.isPlaying())
 		{
 			int x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
