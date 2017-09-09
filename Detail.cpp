@@ -91,20 +91,22 @@ void Detail_Init()
 			font_albumList = Font(16);
 			const String extensions[] = { L".wav",L".ogg",L".mp3" };
 			TextReader reader(L"music\\" + temp_albumName + L"\\music_list.txt");
-			String tempName; Sound tempMusic; int temp_totalTime;
-			while (reader.readLine(tempName))
+			String fileName, tempName; Sound tempMusic; int temp_totalTime;
+			while (reader.readLine(fileName))
 			{
 				for (auto ext : extensions)
 				{
-					if (FileSystem::IsFile(L"music\\" + temp_albumName + L"\\" + tempName + L"\\" + tempName + ext))
+					if (FileSystem::IsFile(L"music\\" + temp_albumName + L"\\" + fileName + L"\\" + fileName + ext))
 					{
-						tempMusic = Sound(L"music\\" + temp_albumName + L"\\" + tempName + L"\\" + tempName + ext);
+						tempMusic = Sound(L"music\\" + temp_albumName + L"\\" + fileName + L"\\" + fileName + ext);
 						break;
 					}
 				}
+				TextReader tempReader(L"music\\" + temp_albumName + L"\\" + fileName + L"\\" + fileName + L".txt");
+				tempReader.readLine(tempName);
 				if (!tempMusic) { tempName = L"！読み込み失敗！"; }
 				temp_totalTime = (int)tempMusic.lengthSec();
-				albumList.push_back({ tempMusic,Detail_musicNameBeShort(tempName),tempName,temp_totalTime });
+				albumList.push_back({ tempMusic,Detail_musicNameBeShort(tempName),fileName,temp_totalTime });
 			}
 		}
 		albums[temp_albumName] = albumList;
