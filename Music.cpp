@@ -15,7 +15,7 @@
 static Texture music_Main, faved, not_faved;
 static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2];
 static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep;
-static String music_albumName = L"", music_musicName = L"", music_musicExp = L"", music_musicLength = L"";
+static String music_albumName = L"", music_musicName = L"", music_musicFileName = L"", music_musicExp = L"", music_musicLength = L"";
 static Sound music_Music;
 static Font music_NameTime, music_Exp;
 static RoundRect rect_musicName(25, 25 + BAR_HEIGHT, 468, 48, 10);
@@ -76,6 +76,7 @@ void Music_Init()
 			break;
 		}
 		TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
+		music_musicFileName = music_musicFileName;
 		music_reader.readLine(music_musicName);
 		music_musicExp.clear();
 		String temp;
@@ -92,6 +93,7 @@ void Music_Init()
 	draw_musicName_stayFlag = true;
 	draw_musicName_x = DEFAULT_musicName_X;
 
+	setAlbumMusicName(music_albumName, music_musicName, music_Music);
 	giveMusicData(music_albumName, music_musicName, music_Music);
 	music_Music.play();
 	if (!still_flag) { SceneMgr_ChangeScene(get_prevScene()); }
@@ -173,7 +175,7 @@ void Music_Update()
 		music_musicLength = Format(Pad(music_musicTime / 60, { 2,L'0' }), L":", Pad(music_musicTime % 60, { 2,L'0' }));
 		if (rect_music_isFav.leftClicked)
 		{
-			(isFav(music_albumName, music_musicName) ? removeFav(music_albumName, music_musicName) : addFav(music_albumName, music_musicName, music_Music));
+			(isFav(music_albumName, music_musicName) ? removeFav(music_albumName, music_musicName) : addFav(music_albumName, music_musicName, music_musicFileName = music_musicFileName, music_Music));
 		}
 	}
 }
@@ -317,6 +319,7 @@ void changeMusic(int flag)
 	if (!favLoop_flag) { setAlbumMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
 	else { setFavMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
 	TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
+	music_musicFileName = music_musicFileName;
 	music_reader.readLine(music_musicName);
 	String temp;
 	music_musicExp.clear();

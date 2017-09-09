@@ -20,5 +20,8 @@ Texture SelectImage(int cou);
 // 選択されたアルバム名を返す
 String getSetAlbum();
 
+// 次のアルバムを返す
+void getNextAlbum();
+
 // アルバム詳細 描画
 void DrawDetails(int cou);
