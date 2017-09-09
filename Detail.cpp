@@ -21,6 +21,7 @@ struct List_detail
 	Sound music;
 	String displayName;
 	String originName;
+	String fileName;
 	int totalTime;
 };
 
@@ -106,7 +107,7 @@ void Detail_Init()
 				tempReader.readLine(tempName);
 				if (!tempMusic) { tempName = L"！読み込み失敗！"; }
 				temp_totalTime = (int)tempMusic.lengthSec();
-				albumList.push_back({ tempMusic,Detail_musicNameBeShort(tempName),fileName,temp_totalTime });
+				albumList.push_back({ tempMusic,Detail_musicNameBeShort(tempName),tempName,fileName,temp_totalTime });
 			}
 		}
 		albums[temp_albumName] = albumList;
@@ -169,14 +170,14 @@ void Detail_Update()
 				(music.music.isPlaying() ? music.music.pause() : music.music.play());
 				selectedMusic_num = i;
 				selectedAlbumName = albumName;
-				selectedMusicName = music.originName;
+				selectedMusicName = music.fileName;
 				selectedMusic = music.music;
 				giveMusicData(albumName, music.originName, music.music);
 			}
 			rect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (rect.leftClicked)
 			{
-				(isFav(albumName, music.originName) ? removeFav(albumName, music.originName) : addFav(albumName, music.displayName, music.originName, music.music));
+				(isFav(albumName, music.fileName) ? removeFav(albumName, music.fileName) : addFav(albumName, music.displayName, music.fileName, music.music));
 			}
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if (rect.leftClicked)
@@ -184,7 +185,7 @@ void Detail_Update()
 				if (selectedMusic_num != i && selectedMusic_num < (signed)albumList.size()) { albumList[selectedMusic_num].music.stop(); }
 				selectedMusic_num = i;
 				selectedAlbumName = albumName;
-				selectedMusicName = music.originName;
+				selectedMusicName = music.fileName;
 				selectedMusic = music.music;
 				set_stillFlag(true);
 				SceneMgr_ChangeScene(Scene_Music);
@@ -261,7 +262,7 @@ void Detail_Draw()
 			auto str = Format(Pad(tmp.totalTime / 60, { 2,L'0' }), L":", Pad(tmp.totalTime % 60, { 2,L'0' }));
 			font_albumList(str).draw(610, 304 + BAR_HEIGHT + num * 39);
 			tmpRRect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
-			((isFav(albumName, tmp.originName) || tmpRRect.mouseOver) ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
+			((isFav(albumName, tmp.fileName) || tmpRRect.mouseOver) ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
 		}
 	}
 }
@@ -356,8 +357,8 @@ void setAlbumMusicName(int flag, String& album_Name, String& musicName, Sound& m
 	selectedMusic_num = (selectedMusic_num + flag + (int)albumList.size()) % (int)albumList.size();
 	const auto data = albumList[selectedMusic_num];
 	album_Name = selectedAlbumName;
-	musicName = data.displayName;
-	music = data.music;
+	musicName = selectedMusicName = data.fileName;
+	music = selectedMusic = data.music;
 }
 
 // 各文字列 描画
