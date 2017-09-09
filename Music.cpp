@@ -15,7 +15,7 @@
 static Texture music_Main, faved, not_faved;
 static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2];
 static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep;
-static String music_albumName = L"", music_musicName = L"", music_musicExp = L"", music_musicLength = L"";
+static String music_albumName = L"", music_musicName = L"", music_musicFileName = L"", music_musicExp = L"", music_musicLength = L"";
 static Sound music_Music;
 static Font music_NameTime, music_Exp;
 static RoundRect rect_musicName(25, 25 + BAR_HEIGHT, 468, 48, 10);
@@ -76,8 +76,11 @@ void Music_Init()
 			break;
 		}
 		TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
-		music_reader.readAll(music_musicExp);
-		music_musicExp += L'\n';
+		music_musicFileName = music_musicFileName;
+		music_reader.readLine(music_musicName);
+		music_musicExp.clear();
+		String temp;
+		while (music_reader.readLine(temp)) { music_musicExp += temp + L"\n"; }
 		music_musicTime = (int)music_Music.lengthSec();
 		faved = Texture(L"data\\Music\\fav.png");
 		not_faved = Texture(L"data\\Music\\not_fav.png");
@@ -90,6 +93,7 @@ void Music_Init()
 	draw_musicName_stayFlag = true;
 	draw_musicName_x = DEFAULT_musicName_X;
 
+	setAlbumMusicName(music_albumName, music_musicName, music_Music);
 	giveMusicData(music_albumName, music_musicName, music_Music);
 	music_Music.play();
 	if (!still_flag) { SceneMgr_ChangeScene(get_prevScene()); }
@@ -171,7 +175,7 @@ void Music_Update()
 		music_musicLength = Format(Pad(music_musicTime / 60, { 2,L'0' }), L":", Pad(music_musicTime % 60, { 2,L'0' }));
 		if (rect_music_isFav.leftClicked)
 		{
-			(isFav(music_albumName, music_musicName) ? removeFav(music_albumName, music_musicName) : addFav(music_albumName, music_musicName, music_Music));
+			(isFav(music_albumName, music_musicName) ? removeFav(music_albumName, music_musicName) : addFav(music_albumName, music_musicName, music_musicFileName = music_musicFileName, music_Music));
 		}
 	}
 }
@@ -185,13 +189,10 @@ void Music_Draw()
 		fft = FFT::Analyze(music_Music);
 		for (auto i : step(51)) { RectF(1 + i * 15, Window::Height(), 15, -Pow(fft.buffer[i], 0.8) * 750).draw(Color(200, 200, 200, 200)); }
 		rect_musicName.drawShadow({ 0,15 }, 32, 10);
-		rect_musicName.drawFrame(3);
 		rect_musicName.draw(Color(32, 32, 32, 120));
 		rect_musicTime.drawShadow({ 0,15 }, 32, 10);
-		rect_musicTime.drawFrame(3);
 		rect_musicTime.draw(Color(32, 32, 32, 120));
 		rect_music_isFav.drawShadow({ 0,15 }, 32, 10);
-		rect_music_isFav.drawFrame(3);
 		rect_music_isFav.draw(Color(32, 32, 32, 120));
 
 		// çƒê∂ÉoÅ[
@@ -231,6 +232,9 @@ void Music_Draw()
 		music_NameTime(music_musicLength).draw(504, 31 + BAR_HEIGHT);
 		((isFav(music_albumName, music_musicName) || rect_music_isFav.mouseOver) ? faved : not_faved).drawAt(722, 49 + BAR_HEIGHT);
 		musicExpl_Draw();
+		rect_musicName.drawFrame(0, 2, Palette::Gray);
+		rect_musicTime.drawFrame(0, 2, Palette::Gray);
+		rect_music_isFav.drawFrame(0, 2, Palette::Gray);
 	}
 }
 
@@ -315,8 +319,11 @@ void changeMusic(int flag)
 	if (!favLoop_flag) { setAlbumMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
 	else { setFavMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
 	TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
-	music_reader.readAll(music_musicExp);
-	music_musicExp += L'\n';
+	music_musicFileName = music_musicFileName;
+	music_reader.readLine(music_musicName);
+	String temp;
+	music_musicExp.clear();
+	while (music_reader.readLine(temp)) { music_musicExp += temp + L"\n"; }
 	music_musicTime = (int)music_Music.lengthSec();
 
 	draw_musicName_startMSec = (int)Time::GetMillisec();

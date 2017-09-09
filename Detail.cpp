@@ -48,7 +48,7 @@ static int albumList_begin;
 static double draw_albumName_x, draw_albumCreator_x, draw_albumExpl_y;
 static int64 draw_albumName_startMSec, draw_albumCreator_startMSec, draw_albumExpl_startMSec, draw_albumName_stayMSec, draw_albumCreator_stayMSec, draw_albumExpl_stayMSec;
 static bool draw_albumName_stayFlag, draw_albumCreator_stayFlag, draw_albumExpl_stayFlag;
-static int selectedMusic_num, albumExplRows;
+static int selectedMusic_num;
 static bool reloadFlag = false;
 
 // アルバム詳細 初期化
@@ -91,20 +91,22 @@ void Detail_Init()
 			font_albumList = Font(16);
 			const String extensions[] = { L".wav",L".ogg",L".mp3" };
 			TextReader reader(L"music\\" + temp_albumName + L"\\music_list.txt");
-			String tempName; Sound tempMusic; int temp_totalTime;
-			while (reader.readLine(tempName))
+			String fileName, tempName; Sound tempMusic; int temp_totalTime;
+			while (reader.readLine(fileName))
 			{
 				for (auto ext : extensions)
 				{
-					if (FileSystem::IsFile(L"music\\" + temp_albumName + L"\\" + tempName + L"\\" + tempName + ext))
+					if (FileSystem::IsFile(L"music\\" + temp_albumName + L"\\" + fileName + L"\\" + fileName + ext))
 					{
-						tempMusic = Sound(L"music\\" + temp_albumName + L"\\" + tempName + L"\\" + tempName + ext);
+						tempMusic = Sound(L"music\\" + temp_albumName + L"\\" + fileName + L"\\" + fileName + ext);
 						break;
 					}
 				}
+				TextReader tempReader(L"music\\" + temp_albumName + L"\\" + fileName + L"\\" + fileName + L".txt");
+				tempReader.readLine(tempName);
 				if (!tempMusic) { tempName = L"！読み込み失敗！"; }
 				temp_totalTime = (int)tempMusic.lengthSec();
-				albumList.push_back({ tempMusic,Detail_musicNameBeShort(tempName),tempName,temp_totalTime });
+				albumList.push_back({ tempMusic,Detail_musicNameBeShort(tempName),fileName,temp_totalTime });
 			}
 		}
 		albums[temp_albumName] = albumList;
@@ -174,7 +176,7 @@ void Detail_Update()
 			rect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (rect.leftClicked)
 			{
-				(isFav(albumName, music.originName) ? removeFav(albumName, music.originName) : addFav(albumName, music.originName, music.music));
+				(isFav(albumName, music.originName) ? removeFav(albumName, music.originName) : addFav(albumName, music.displayName, music.originName, music.music));
 			}
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if (rect.leftClicked)
@@ -198,16 +200,13 @@ void Detail_Draw()
 	{
 		main.draw(0, BAR_HEIGHT);
 		rect_albumImage.drawShadow({ 0,15 }, 32, 10);
-		rect_albumImage.drawFrame(3);
+		rect_albumImage.drawFrame(0, 3, Palette::Gray);
 		rect_albumImage.draw(Color(32, 32, 32, 120));
 		rect_albumName.drawShadow({ 0,15 }, 32, 10);
-		rect_albumName.drawFrame(3);
 		rect_albumName.draw(Color(32, 32, 32, 120));
 		rect_albumCreator.drawShadow({ 0,15 }, 32, 10);
-		rect_albumCreator.drawFrame(3);
 		rect_albumCreator.draw(Color(32, 32, 32, 120));
 		rect_albumExpl.drawShadow({ 0,15 }, 32, 10);
-		rect_albumExpl.drawFrame(3);
 		rect_albumExpl.draw(Color(32, 32, 32, 120));
 		if (albumList_begin > 0)
 		{
@@ -237,13 +236,16 @@ void Detail_Draw()
 			RasterizerState rasterizer = RasterizerState::Default2D;
 			rasterizer.scissorEnable = true;
 			Graphics2D::SetRasterizerState(rasterizer);
-			Graphics2D::SetScissorRect(Rect((int)rect_albumName.x + rect_albumName.r, (int)rect_albumName.y + rect_albumName.r, (int)rect_albumName.w - 2 * rect_albumName.r, (int)rect_albumName.h - 2 * rect_albumName.r));
+			Graphics2D::SetScissorRect(Rect((int)rect_albumName.x, (int)rect_albumName.y, (int)rect_albumName.w, (int)rect_albumName.h));
 			font_albumName(albumName).draw(draw_albumName_x, 27 + BAR_HEIGHT);
-			Graphics2D::SetScissorRect(Rect((int)rect_albumCreator.x + rect_albumCreator.r, (int)rect_albumCreator.y + rect_albumCreator.r, (int)rect_albumCreator.w - 2 * rect_albumCreator.r, (int)rect_albumCreator.h - 2 * rect_albumCreator.r));
+			Graphics2D::SetScissorRect(Rect((int)rect_albumCreator.x, (int)rect_albumCreator.y, (int)rect_albumCreator.w, (int)rect_albumCreator.h));
 			font_albumCreator(albumCreator).draw(draw_albumCreator_x, 88 + BAR_HEIGHT);
 			Graphics2D::SetScissorRect(Rect(0, 0, Window::Width(), Window::Height()));
 		}
 		albumExpl_Draw();
+		rect_albumName.drawFrame(0, 2, Palette::Gray);
+		rect_albumCreator.drawFrame(0, 2, Palette::Gray);
+		rect_albumExpl.drawFrame(0, 2, Palette::Gray);
 	}
 
 	// 曲リスト 描画
@@ -292,8 +294,7 @@ void albumExpl_Draw()
 		}
 	}
 
-	albumExplRows = texts.size();
-	auto height = font_albumExpl.height*albumExplRows;
+	auto height = font_albumExpl.height*texts.size();
 	if (rect.h < height)
 	{
 		if (!draw_albumExpl_stayFlag)
@@ -320,7 +321,7 @@ void albumExpl_Draw()
 	RasterizerState rasterizer = RasterizerState::Default2D;
 	rasterizer.scissorEnable = true;
 	Graphics2D::SetRasterizerState(rasterizer);
-	Graphics2D::SetScissorRect(Rect((int)rect.x + rect.r, (int)rect.y + rect.r, (int)rect.w - 2 * rect.r, (int)rect.h - 2 * rect.r));
+	Graphics2D::SetScissorRect(Rect((int)rect.x, (int)rect.y, (int)rect.w, (int)rect.h));
 	for (size_t i = 0; i < texts.size(); ++i)
 	{
 		const int32 y = static_cast<int32>(draw_albumExpl_y + i * font_albumExpl.height);
@@ -338,10 +339,24 @@ void setAlbumMusicName(String& album_Name, String& musicName, Sound& musicData)
 }
 void setAlbumMusicName(int flag, String& album_Name, String& musicName, Sound& music)
 {
+	if (selectedMusic_num + flag >= (int)albumList.size())
+	{
+		const Rect temprect(0, BAR_HEIGHT, Window::Width(), Window::Height());
+		const Font tempfont(32, Typeface::Bold);
+		Bar_Draw();
+		main.draw(0, BAR_HEIGHT);
+		temprect.draw(Color(64, 64, 64, 100));
+		tempfont(L"読み込み中・・・").drawCenter(Window::Height() / 2);
+		System::Update();
+		getNextAlbum();
+		selectedAlbumName = getSetAlbum();
+		selectedMusic_num = -1;
+		Detail_Init();
+	}
 	selectedMusic_num = (selectedMusic_num + flag + (int)albumList.size()) % (int)albumList.size();
 	const auto data = albumList[selectedMusic_num];
 	album_Name = selectedAlbumName;
-	musicName = data.originName;
+	musicName = data.displayName;
 	music = data.music;
 }
 
@@ -354,7 +369,7 @@ void Update_drawAlbumDetailStrings()
 	{
 		if (!draw_albumName_stayFlag)
 		{
-			if (draw_albumName_x + width > rect.x + rect.w) { draw_albumName_x -= DRAW_MOVE_X_PER_SEC*(Time::GetMillisec64() - draw_albumName_stayMSec) / 1000; }
+			if (draw_albumName_x + width > rect.x + rect.w) { draw_albumName_x -= (double)DRAW_MOVE_X_PER_SEC*(Time::GetMillisec64() - draw_albumName_stayMSec) / 1000; }
 			else
 			{
 				draw_albumName_startMSec = draw_albumName_stayMSec = Time::GetMillisec64();
@@ -378,7 +393,7 @@ void Update_drawAlbumDetailStrings()
 	{
 		if (!draw_albumCreator_stayFlag)
 		{
-			if (draw_albumCreator_x + width > rect.x + rect.w) { draw_albumCreator_x -= DRAW_MOVE_X_PER_SEC*(Time::GetMillisec64() - draw_albumCreator_stayMSec) / 1000; }
+			if (draw_albumCreator_x + width > rect.x + rect.w) { draw_albumCreator_x -= (double)DRAW_MOVE_X_PER_SEC*(Time::GetMillisec64() - draw_albumCreator_stayMSec) / 1000; }
 			else
 			{
 				draw_albumCreator_startMSec = draw_albumCreator_stayMSec = Time::GetMillisec64();
