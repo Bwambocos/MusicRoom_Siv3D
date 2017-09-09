@@ -84,7 +84,7 @@ void Fav_Update()
 			rect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (rect.leftClicked)
 			{
-				(isFav(music.albumName, music.musicOriginName) ? removeFav(music.albumName, music.musicOriginName) : addFav(music.albumName, music.musicOriginName, music.music));
+				(isFav(music.albumName, music.musicOriginName) ? removeFav(music.albumName, music.musicOriginName) : addFav(music.albumName, music.musicDisplayName, music.musicOriginName, music.music));
 			}
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if (rect.leftClicked)
@@ -152,10 +152,10 @@ bool isFav(String albumName, String musicName)
 }
 
 // Ç®ãCÇ…ì¸ÇËÇ…í«â¡Ç∑ÇÈ
-void addFav(String albumName, String musicName, Sound music)
+void addFav(String albumName, String musicName, String fileName, Sound music)
 {
 	auto temp_totalTime = (int)music.lengthSec();
-	musics.push_back({ music,albumName,Fav_musicNameBeShort(musicName),musicName,temp_totalTime });
+	musics.push_back({ music,albumName,Fav_musicNameBeShort(musicName),fileName,temp_totalTime });
 }
 
 // Ç®ãCÇ…ì¸ÇËÇ©ÇÁçÌèúÇ∑ÇÈ
