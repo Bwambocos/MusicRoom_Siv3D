@@ -187,13 +187,10 @@ void Music_Draw()
 		fft = FFT::Analyze(music_Music);
 		for (auto i : step(51)) { RectF(1 + i * 15, Window::Height(), 15, -Pow(fft.buffer[i], 0.8) * 750).draw(Color(200, 200, 200, 200)); }
 		rect_musicName.drawShadow({ 0,15 }, 32, 10);
-		rect_musicName.drawFrame(3);
 		rect_musicName.draw(Color(32, 32, 32, 120));
 		rect_musicTime.drawShadow({ 0,15 }, 32, 10);
-		rect_musicTime.drawFrame(3);
 		rect_musicTime.draw(Color(32, 32, 32, 120));
 		rect_music_isFav.drawShadow({ 0,15 }, 32, 10);
-		rect_music_isFav.drawFrame(3);
 		rect_music_isFav.draw(Color(32, 32, 32, 120));
 
 		// çƒê∂ÉoÅ[
@@ -233,6 +230,9 @@ void Music_Draw()
 		music_NameTime(music_musicLength).draw(504, 31 + BAR_HEIGHT);
 		((isFav(music_albumName, music_musicName) || rect_music_isFav.mouseOver) ? faved : not_faved).drawAt(722, 49 + BAR_HEIGHT);
 		musicExpl_Draw();
+		rect_musicName.drawFrame(0, 2, Palette::Gray);
+		rect_musicTime.drawFrame(0, 2, Palette::Gray);
+		rect_music_isFav.drawFrame(0, 2, Palette::Gray);
 	}
 }
 
