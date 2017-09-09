@@ -339,10 +339,24 @@ void setAlbumMusicName(String& album_Name, String& musicName, Sound& musicData)
 }
 void setAlbumMusicName(int flag, String& album_Name, String& musicName, Sound& music)
 {
+	if (selectedMusic_num + flag >= (int)albumList.size())
+	{
+		const Rect temprect(0, BAR_HEIGHT, Window::Width(), Window::Height());
+		const Font tempfont(32, Typeface::Bold);
+		Bar_Draw();
+		main.draw(0, BAR_HEIGHT);
+		temprect.draw(Color(64, 64, 64, 100));
+		tempfont(L"読み込み中・・・").drawCenter(Window::Height() / 2);
+		System::Update();
+		getNextAlbum();
+		selectedAlbumName = getSetAlbum();
+		selectedMusic_num = -1;
+		Detail_Init();
+	}
 	selectedMusic_num = (selectedMusic_num + flag + (int)albumList.size()) % (int)albumList.size();
 	const auto data = albumList[selectedMusic_num];
 	album_Name = selectedAlbumName;
-	musicName = data.originName;
+	musicName = data.displayName;
 	music = data.music;
 }
 

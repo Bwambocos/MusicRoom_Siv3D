@@ -31,6 +31,7 @@ static Triangle goDown({ 354,560 }, { 414,560 }, { 384,570 });
 static int startTime;
 static int nowTime;
 static int first_cou;
+static int selectedAlbumNum;
 static bool scr_flag = true;
 
 // アルバム選択 初期化
@@ -108,6 +109,7 @@ void Select_Update()
 				else
 				{
 					setAlbum = AlbumList[cou].name;
+					selectedAlbumNum = cou;
 					const Rect temprect(0, BAR_HEIGHT, Window::Width(), Window::Height());
 					const Font tempfont(32, Typeface::Bold);
 					Bar_Draw();
@@ -225,6 +227,13 @@ Texture SelectImage(int cou)
 String getSetAlbum()
 {
 	return setAlbum;
+}
+
+// 次のアルバムを返す
+void getNextAlbum()
+{
+	++selectedAlbumNum;
+	setAlbum = AlbumList[selectedAlbumNum % AlbumList.size()].name;
 }
 
 // アルバム詳細 描画
