@@ -76,8 +76,10 @@ void Music_Init()
 			break;
 		}
 		TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
-		music_reader.readAll(music_musicExp);
-		music_musicExp += L'\n';
+		music_reader.readLine(music_musicName);
+		music_musicExp.clear();
+		String temp;
+		while (music_reader.readLine(temp)) { music_musicExp += temp + L"\n"; }
 		music_musicTime = (int)music_Music.lengthSec();
 		faved = Texture(L"data\\Music\\fav.png");
 		not_faved = Texture(L"data\\Music\\not_fav.png");
@@ -315,8 +317,10 @@ void changeMusic(int flag)
 	if (!favLoop_flag) { setAlbumMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
 	else { setFavMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
 	TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
-	music_reader.readAll(music_musicExp);
-	music_musicExp += L'\n';
+	music_reader.readLine(music_musicName);
+	String temp;
+	music_musicExp.clear();
+	while (music_reader.readLine(temp)) { music_musicExp += temp + L"\n"; }
 	music_musicTime = (int)music_Music.lengthSec();
 
 	draw_musicName_startMSec = (int)Time::GetMillisec();
