@@ -339,7 +339,7 @@ void setAlbumMusicName(String& album_Name, String& musicName, Sound& musicData)
 }
 void setAlbumMusicName(int flag, String& album_Name, String& musicName, Sound& music)
 {
-	if (selectedMusic_num + flag >= albumList.size())
+	if (selectedMusic_num + flag >= (int)albumList.size())
 	{
 		const Rect temprect(0, BAR_HEIGHT, Window::Width(), Window::Height());
 		const Font tempfont(32, Typeface::Bold);
