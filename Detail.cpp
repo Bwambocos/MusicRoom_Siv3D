@@ -200,16 +200,13 @@ void Detail_Draw()
 	{
 		main.draw(0, BAR_HEIGHT);
 		rect_albumImage.drawShadow({ 0,15 }, 32, 10);
-		rect_albumImage.drawFrame(3);
+		rect_albumImage.drawFrame(0, 3, Palette::Gray);
 		rect_albumImage.draw(Color(32, 32, 32, 120));
 		rect_albumName.drawShadow({ 0,15 }, 32, 10);
-		rect_albumName.drawFrame(3);
 		rect_albumName.draw(Color(32, 32, 32, 120));
 		rect_albumCreator.drawShadow({ 0,15 }, 32, 10);
-		rect_albumCreator.drawFrame(3);
 		rect_albumCreator.draw(Color(32, 32, 32, 120));
 		rect_albumExpl.drawShadow({ 0,15 }, 32, 10);
-		rect_albumExpl.drawFrame(3);
 		rect_albumExpl.draw(Color(32, 32, 32, 120));
 		if (albumList_begin > 0)
 		{
@@ -239,13 +236,16 @@ void Detail_Draw()
 			RasterizerState rasterizer = RasterizerState::Default2D;
 			rasterizer.scissorEnable = true;
 			Graphics2D::SetRasterizerState(rasterizer);
-			Graphics2D::SetScissorRect(Rect((int)rect_albumName.x + (int)rect_albumName.r, (int)rect_albumName.y + (int)rect_albumName.r, (int)rect_albumName.w - 2 * (int)rect_albumName.r, (int)rect_albumName.h - 2 * (int)rect_albumName.r));
+			Graphics2D::SetScissorRect(Rect((int)rect_albumName.x, (int)rect_albumName.y, (int)rect_albumName.w, (int)rect_albumName.h));
 			font_albumName(albumName).draw(draw_albumName_x, 27 + BAR_HEIGHT);
-			Graphics2D::SetScissorRect(Rect((int)rect_albumCreator.x + (int)rect_albumCreator.r, (int)rect_albumCreator.y + (int)rect_albumCreator.r, (int)rect_albumCreator.w - 2 * (int)rect_albumCreator.r, (int)rect_albumCreator.h - 2 * (int)rect_albumCreator.r));
+			Graphics2D::SetScissorRect(Rect((int)rect_albumCreator.x, (int)rect_albumCreator.y, (int)rect_albumCreator.w, (int)rect_albumCreator.h));
 			font_albumCreator(albumCreator).draw(draw_albumCreator_x, 88 + BAR_HEIGHT);
 			Graphics2D::SetScissorRect(Rect(0, 0, Window::Width(), Window::Height()));
 		}
 		albumExpl_Draw();
+		rect_albumName.drawFrame(0, 2, Palette::Gray);
+		rect_albumCreator.drawFrame(0, 2, Palette::Gray);
+		rect_albumExpl.drawFrame(0, 2, Palette::Gray);
 	}
 
 	// 曲リスト 描画
@@ -321,7 +321,7 @@ void albumExpl_Draw()
 	RasterizerState rasterizer = RasterizerState::Default2D;
 	rasterizer.scissorEnable = true;
 	Graphics2D::SetRasterizerState(rasterizer);
-	Graphics2D::SetScissorRect(Rect((int)rect.x + (int)rect.r, (int)rect.y + (int)rect.r, (int)rect.w - 2 * (int)rect.r, (int)rect.h - 2 * (int)rect.r));
+	Graphics2D::SetScissorRect(Rect((int)rect.x, (int)rect.y, (int)rect.w, (int)rect.h));
 	for (size_t i = 0; i < texts.size(); ++i)
 	{
 		const int32 y = static_cast<int32>(draw_albumExpl_y + i * font_albumExpl.height);
