@@ -47,6 +47,7 @@ void Fav_Init()
 		fav = Texture(L"data\\Detail\\fav.png");
 		font_albumList = Font(16);
 	}
+	if (get_prevScene() != Scene_Music) { albumList_begin = 0; }
 }
 
 // お気に入り 更新
@@ -185,6 +186,7 @@ void setFavMusicName(int flag, String& album_Name, String& musicName, Sound& mus
 	album_Name = data.albumName;
 	musicName = data.musicOriginName;
 	music = data.music;
+	changeFavList_Begin();
 }
 
 // 曲名短縮
@@ -197,4 +199,11 @@ String Fav_musicNameBeShort(String text)
 	if (font_albumList(text).region().w <= rect_albumList_Name.w) { return text; }
 	if (dotsWidth > rect_albumList_Name.w) { return String(); }
 	return text.substr(0, num_chars) + dots;
+}
+
+// 曲リスト開始位置 操作
+void changeFavList_Begin()
+{
+	albumList_begin = Max(albumList_begin, selectedMusic_num - 4);
+	albumList_begin = Min(albumList_begin, selectedMusic_num);
 }

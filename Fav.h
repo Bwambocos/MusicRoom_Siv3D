@@ -24,3 +24,6 @@ void setFavMusicName(int flag, String& album_Name, String& musicName, Sound& mus
 
 // 曲名短縮
 String Fav_musicNameBeShort(String text);
+
+// 曲リスト開始位置 操作
+void changeFavList_Begin();
