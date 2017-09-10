@@ -173,7 +173,7 @@ void Music_Update()
 		music_musicLength = Format(Pad(music_musicTime / 60, { 2,L'0' }), L":", Pad(music_musicTime % 60, { 2,L'0' }));
 		if (rect_music_isFav.leftClicked)
 		{
-			(isFav(music_albumName, music_musicName) ? removeFav(music_albumName, music_musicName) : addFav(music_albumName, music_musicName, music_musicFileName = music_musicFileName, music_Music));
+			(isFav(music_albumName, music_musicFileName) ? removeFav(music_albumName, music_musicFileName) : addFav(music_albumName, music_musicName, music_musicFileName, music_Music));
 		}
 	}
 }
@@ -228,7 +228,7 @@ void Music_Draw()
 			Graphics2D::SetScissorRect(Rect(0, 0, Window::Width(), Window::Height()));
 		}
 		music_NameTime(music_musicLength).draw(504, 31 + BAR_HEIGHT);
-		((isFav(music_albumName, music_musicName) || rect_music_isFav.mouseOver) ? faved : not_faved).drawAt(722, 49 + BAR_HEIGHT);
+		((isFav(music_albumName, music_musicFileName) || rect_music_isFav.mouseOver) ? faved : not_faved).drawAt(722, 49 + BAR_HEIGHT);
 		musicExpl_Draw();
 		rect_musicName.drawFrame(0, 2, Palette::Gray);
 		rect_musicTime.drawFrame(0, 2, Palette::Gray);
