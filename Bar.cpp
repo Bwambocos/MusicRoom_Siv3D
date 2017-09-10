@@ -201,7 +201,7 @@ void Bar_Update()
 					else { displayShare = originShare[0]; }
 					if (button.leftClicked)
 					{
-						Twitter::OpenTweetWindow(L"アルバム『" + music.albumName + L"』の曲「" + music.text + L"」を聴いています！ #MusicRoom");
+						Twitter::OpenTweetWindow(L"#MusicRoom v2.2.5 でアルバム『" + music.albumName + L"』の曲「" + music.text + L"」を聴いています！");
 					}
 					break;
 				case 5:
