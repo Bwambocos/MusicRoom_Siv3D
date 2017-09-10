@@ -25,3 +25,6 @@ String Detail_musicNameBeShort(String text);
 // 曲操作
 // kind: 0->一時停止, 1->再生
 void setMusicStats(int kind);
+
+// 曲リスト開始位置 操作
+void changeMusicList_Begin();

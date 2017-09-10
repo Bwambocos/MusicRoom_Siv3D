@@ -81,7 +81,7 @@ void Detail_Init()
 		font_albumName = Font(24);
 		font_albumCreator = Font(18);
 		font_albumExpl = Font(12);
-		albumList_begin = 0;
+		if (get_prevScene() != Scene_Music) { albumList_begin = 0; }
 	}
 
 	// まだ読み込まれていないアルバム
@@ -359,6 +359,7 @@ void setAlbumMusicName(int flag, String& album_Name, String& musicName, Sound& m
 	album_Name = selectedAlbumName;
 	musicName = selectedMusicName = data.fileName;
 	music = selectedMusic = data.music;
+	changeMusicList_Begin();
 }
 
 // 各文字列 描画
@@ -439,4 +440,11 @@ void setMusicStats(int kind)
 		albumList[selectedMusic_num].music.play();
 		break;
 	}
+}
+
+// 曲リスト開始位置 操作
+void changeMusicList_Begin()
+{
+	albumList_begin = Max(albumList_begin, selectedMusic_num - 4);
+	albumList_begin = Min(albumList_begin, selectedMusic_num);
 }
