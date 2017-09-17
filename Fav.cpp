@@ -47,6 +47,7 @@ void Fav_Init()
 		fav = Texture(L"data\\Detail\\fav.png");
 		font_albumList = Font(16);
 	}
+	if (get_prevScene() != Scene_Music) { albumList_begin = 0; }
 }
 
 // お気に入り 更新
@@ -71,15 +72,25 @@ void Fav_Update()
 			auto num = i - albumList_begin;
 			auto music = musics[i];
 			RoundRect rect(rect_albumList_Flag.x, rect_albumList_Flag.y + num * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r);
-			if (rect.leftClicked) { (music.music.isPlaying() ? music.music.pause() : music.music.play()); }
+			if (rect.leftClicked)
+			{
+				(music.music.isPlaying() ? music.music.pause() : music.music.play());
+				if (selectedMusic_num != i) { musics[selectedMusic_num].music.stop(); }
+				selectedMusic_num = i;
+				selectedAlbumName = music.albumName;
+				selectedMusicName = music.musicOriginName;
+				selectedMusic = music.music;
+				giveMusicData(music.albumName, music.musicOriginName, music.music);
+			}
 			rect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (rect.leftClicked)
 			{
-				(isFav(music.albumName, music.musicOriginName) ? removeFav(music.albumName, music.musicOriginName) : addFav(music.albumName, music.musicOriginName, music.music));
+				(isFav(music.albumName, music.musicOriginName) ? removeFav(music.albumName, music.musicOriginName) : addFav(music.albumName, music.musicDisplayName, music.musicOriginName, music.music));
 			}
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if (rect.leftClicked)
 			{
+				if (selectedMusic_num != i) { musics[selectedMusic_num].music.stop(); }
 				selectedMusic_num = i;
 				selectedAlbumName = music.albumName;
 				selectedMusicName = music.musicOriginName;
@@ -142,10 +153,10 @@ bool isFav(String albumName, String musicName)
 }
 
 // お気に入りに追加する
-void addFav(String albumName, String musicName, Sound music)
+void addFav(String albumName, String musicName, String fileName, Sound music)
 {
 	auto temp_totalTime = (int)music.lengthSec();
-	musics.push_back({ music,albumName,Fav_musicNameBeShort(musicName),musicName,temp_totalTime });
+	musics.push_back({ music,albumName,Fav_musicNameBeShort(musicName),fileName,temp_totalTime });
 }
 
 // お気に入りから削除する
@@ -175,6 +186,7 @@ void setFavMusicName(int flag, String& album_Name, String& musicName, Sound& mus
 	album_Name = data.albumName;
 	musicName = data.musicOriginName;
 	music = data.music;
+	changeFavList_Begin();
 }
 
 // 曲名短縮
@@ -187,4 +199,11 @@ String Fav_musicNameBeShort(String text)
 	if (font_albumList(text).region().w <= rect_albumList_Name.w) { return text; }
 	if (dotsWidth > rect_albumList_Name.w) { return String(); }
 	return text.substr(0, num_chars) + dots;
+}
+
+// 曲リスト開始位置 操作
+void changeFavList_Begin()
+{
+	albumList_begin = Max(albumList_begin, selectedMusic_num - 4);
+	albumList_begin = Min(albumList_begin, selectedMusic_num);
 }

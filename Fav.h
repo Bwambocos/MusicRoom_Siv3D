@@ -13,7 +13,7 @@ void Fav_Draw();
 bool isFav(String albumName, String musicName);
 
 // お気に入りに追加する
-void addFav(String albumName, String musicName, Sound music);
+void addFav(String albumName, String musicName, String fileName, Sound music);
 
 // お気に入りから削除する
 void removeFav(String albumName, String musicName);
@@ -24,3 +24,6 @@ void setFavMusicName(int flag, String& album_Name, String& musicName, Sound& mus
 
 // 曲名短縮
 String Fav_musicNameBeShort(String text);
+
+// 曲リスト開始位置 操作
+void changeFavList_Begin();
