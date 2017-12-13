@@ -62,21 +62,20 @@ void Music_Init()
 		switch (get_prevScene())
 		{
 		case Scene_Detail:
-			setAlbumMusicName(music_albumName, music_musicName, music_Music);
+			setAlbumMusicName(music_albumName, music_musicFileName, music_Music);
 			favLoop_flag = false;
 			break;
 
 		case Scene_Fav:
-			setFavMusicName(music_albumName, music_musicName, music_Music);
+			setFavMusicName(music_albumName, music_musicFileName, music_Music);
 			break;
 
 		case Scene_Music:
-			if (!favLoop_flag) { setAlbumMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
-			else { setFavMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
+			if (!favLoop_flag) { setAlbumMusicName(prev_or_next, music_albumName, music_musicFileName, music_Music); }
+			else { setFavMusicName(prev_or_next, music_albumName, music_musicFileName, music_Music); }
 			break;
 		}
-		TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
-		music_musicFileName = music_musicFileName;
+		TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicFileName + L"\\" + music_musicFileName + L".txt");
 		music_reader.readLine(music_musicName);
 		music_musicExp.clear();
 		String temp;
@@ -93,7 +92,6 @@ void Music_Init()
 	draw_musicName_stayFlag = true;
 	draw_musicName_x = DEFAULT_musicName_X;
 
-	setAlbumMusicName(music_albumName, music_musicName, music_Music);
 	giveMusicData(music_albumName, music_musicName, music_Music);
 	music_Music.play();
 	if (!still_flag) { SceneMgr_ChangeScene(get_prevScene()); }
@@ -175,7 +173,7 @@ void Music_Update()
 		music_musicLength = Format(Pad(music_musicTime / 60, { 2,L'0' }), L":", Pad(music_musicTime % 60, { 2,L'0' }));
 		if (rect_music_isFav.leftClicked)
 		{
-			(isFav(music_albumName, music_musicName) ? removeFav(music_albumName, music_musicName) : addFav(music_albumName, music_musicName, music_musicFileName = music_musicFileName, music_Music));
+			(isFav(music_albumName, music_musicFileName) ? removeFav(music_albumName, music_musicFileName) : addFav(music_albumName, music_musicName, music_musicFileName, music_Music));
 		}
 	}
 }
@@ -230,7 +228,7 @@ void Music_Draw()
 			Graphics2D::SetScissorRect(Rect(0, 0, Window::Width(), Window::Height()));
 		}
 		music_NameTime(music_musicLength).draw(504, 31 + BAR_HEIGHT);
-		((isFav(music_albumName, music_musicName) || rect_music_isFav.mouseOver) ? faved : not_faved).drawAt(722, 49 + BAR_HEIGHT);
+		((isFav(music_albumName, music_musicFileName) || rect_music_isFav.mouseOver) ? faved : not_faved).drawAt(722, 49 + BAR_HEIGHT);
 		musicExpl_Draw();
 		rect_musicName.drawFrame(0, 2, Palette::Gray);
 		rect_musicTime.drawFrame(0, 2, Palette::Gray);
@@ -316,10 +314,9 @@ void changeMusic(int flag)
 	favLoop_flag = (get_prevScene() == Scene_Fav || favLoop_flag);
 	prev_or_next = flag;
 	music_Music.stop();
-	if (!favLoop_flag) { setAlbumMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
-	else { setFavMusicName(prev_or_next, music_albumName, music_musicName, music_Music); }
-	TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicName + L"\\" + music_musicName + L".txt");
-	music_musicFileName = music_musicFileName;
+	if (!favLoop_flag) { setAlbumMusicName(prev_or_next, music_albumName, music_musicFileName, music_Music); }
+	else { setFavMusicName(prev_or_next, music_albumName, music_musicFileName, music_Music); }
+	TextReader music_reader(L"music\\" + music_albumName + L"\\" + music_musicFileName + L"\\" + music_musicFileName + L".txt");
 	music_reader.readLine(music_musicName);
 	String temp;
 	music_musicExp.clear();
