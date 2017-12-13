@@ -13,8 +13,8 @@ void Detail_Draw();
 void albumExpl_Draw();
 
 // アルバム・曲情報 受け渡し（flag == 1 -> 次 : -1 -> 前）
-void setAlbumMusicName(String& album_Name, String& musicName, Sound& music);
-void setAlbumMusicName(int flag, String& album_Name, String& musicName, Sound& music);
+void setAlbumMusicName(String& album_Name, String& album_BName, String& musicName, Sound& music);
+void setAlbumMusicName(int flag, String& album_Name, String& album_BName, String& musicName, Sound& music);
 
 // 名前描画位置 更新
 void Update_drawAlbumDetailStrings();

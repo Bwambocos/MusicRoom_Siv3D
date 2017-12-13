@@ -31,7 +31,7 @@ static std::vector<List_detail>albumList;
 static Texture main, playing, pausing, not_fav, fav, albumImg;
 static Font font_albumName, font_albumCreator, font_albumExpl;
 static Font font_albumList;
-static String albumName = L"", albumCreator = L"", albumExpl = L"", selectedAlbumName = L"", selectedMusicName = L"";
+static String albumName = L"", albumBName = L"", albumCreator = L"", albumExpl = L"", selectedAlbumName = L"", selectedAlbumBName = L"", selectedMusicName = L"";
 static RoundRect rect_albumImage(25, 25 + BAR_HEIGHT, 250, 250, 12.5);
 static RoundRect rect_albumName(325, 25 + BAR_HEIGHT, 393, 54, 10);
 static RoundRect rect_albumCreator(325, 82 + BAR_HEIGHT, 393, 48, 10);
@@ -64,7 +64,7 @@ void Detail_Init()
 		fav = Texture(L"data\\Detail\\fav.png");
 	}
 
-	String temp_albumName = getSetAlbum();
+	albumBName = getSetAlbum().second;
 
 	// アルバム情報 初期化
 	{
@@ -72,10 +72,10 @@ void Detail_Init()
 		albumCreator.clear();
 		albumExpl.clear();
 		albumList.clear();
-		TextReader reader(L"music\\" + temp_albumName + L"\\" + temp_albumName + L".txt");
+		albumImg = Texture(L"music\\" + albumBName + L"\\" + albumBName + L".png");
+		TextReader reader(L"music\\" + albumBName + L"\\" + albumBName + L".txt");
 		reader.readLine(albumName);
 		reader.readLine(albumCreator);
-		albumImg = Texture(L"music\\" + temp_albumName + L"\\" + albumName + L".png");
 		String temp;
 		while (reader.readLine(temp)) { albumExpl += temp + L"\n"; }
 		font_albumName = Font(24);
@@ -85,34 +85,34 @@ void Detail_Init()
 	}
 
 	// まだ読み込まれていないアルバム
-	if (albums.find(temp_albumName) == albums.end() || reloadFlag)
+	if (albums.find(albumBName) == albums.end() || reloadFlag)
 	{
 		// 曲リスト 初期化
 		{
 			font_albumList = Font(16);
 			const String extensions[] = { L".wav",L".ogg",L".mp3" };
-			TextReader reader(L"music\\" + temp_albumName + L"\\music_list.txt");
+			TextReader reader(L"music\\" + albumBName + L"\\music_list.txt");
 			String fileName, tempName; Sound tempMusic; int temp_totalTime;
 			while (reader.readLine(fileName))
 			{
 				for (auto ext : extensions)
 				{
-					if (FileSystem::IsFile(L"music\\" + temp_albumName + L"\\" + fileName + L"\\" + fileName + ext))
+					if (FileSystem::IsFile(L"music\\" + albumBName + L"\\" + fileName + L"\\" + fileName + ext))
 					{
-						tempMusic = Sound(L"music\\" + temp_albumName + L"\\" + fileName + L"\\" + fileName + ext);
+						tempMusic = Sound(L"music\\" + albumBName + L"\\" + fileName + L"\\" + fileName + ext);
 						break;
 					}
 				}
-				TextReader tempReader(L"music\\" + temp_albumName + L"\\" + fileName + L"\\" + fileName + L".txt");
+				TextReader tempReader(L"music\\" + albumBName + L"\\" + fileName + L"\\" + fileName + L".txt");
 				tempReader.readLine(tempName);
 				if (!tempMusic) { tempName = L"！読み込み失敗！"; }
 				temp_totalTime = (int)tempMusic.lengthSec();
 				albumList.push_back({ tempMusic,Detail_musicNameBeShort(tempName),tempName,fileName,temp_totalTime });
 			}
 		}
-		albums[temp_albumName] = albumList;
+		albums[albumBName] = albumList;
 	}
-	else { albumList = albums[temp_albumName]; }
+	else { albumList = albums[albumBName]; }
 
 	// 描画位置 初期化
 	draw_albumName_startMSec = Time::GetMillisec64();
@@ -170,6 +170,7 @@ void Detail_Update()
 				(music.music.isPlaying() ? music.music.pause() : music.music.play());
 				selectedMusic_num = i;
 				selectedAlbumName = albumName;
+				selectedAlbumBName = albumBName;
 				selectedMusicName = music.fileName;
 				selectedMusic = music.music;
 				giveMusicData(albumName, music.originName, music.music);
@@ -177,7 +178,7 @@ void Detail_Update()
 			rect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (rect.leftClicked)
 			{
-				(isFav(albumName, music.fileName) ? removeFav(albumName, music.fileName) : addFav(albumName, music.displayName, music.fileName, music.music));
+				(isFav(albumName, music.fileName) ? removeFav(albumName, music.fileName) : addFav(albumName, albumBName, music.displayName, music.fileName, music.music));
 			}
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if (rect.leftClicked)
@@ -185,6 +186,7 @@ void Detail_Update()
 				if (selectedMusic_num != i && selectedMusic_num < (signed)albumList.size()) { albumList[selectedMusic_num].music.stop(); }
 				selectedMusic_num = i;
 				selectedAlbumName = albumName;
+				selectedAlbumBName = albumBName;
 				selectedMusicName = music.fileName;
 				selectedMusic = music.music;
 				set_stillFlag(true);
@@ -332,13 +334,14 @@ void albumExpl_Draw()
 }
 
 // アルバム・曲情報 受け渡し（flag == 1 -> 次 : -1 -> 前）
-void setAlbumMusicName(String& album_Name, String& musicName, Sound& musicData)
+void setAlbumMusicName(String& album_Name, String& album_BName, String& musicName, Sound& musicData)
 {
-	album_Name = selectedAlbumName;
+	album_Name = getSetAlbum().first;
+	album_BName = getSetAlbum().second;
 	musicName = selectedMusicName;
 	musicData = selectedMusic;
 }
-void setAlbumMusicName(int flag, String& album_Name, String& musicName, Sound& music)
+void setAlbumMusicName(int flag, String& album_Name, String& album_BName, String& musicName, Sound& music)
 {
 	if (selectedMusic_num + flag >= (int)albumList.size())
 	{
@@ -350,13 +353,15 @@ void setAlbumMusicName(int flag, String& album_Name, String& musicName, Sound& m
 		tempfont(L"読み込み中・・・").drawCenter(Window::Height() / 2);
 		System::Update();
 		getNextAlbum();
-		selectedAlbumName = getSetAlbum();
+		selectedAlbumName = getSetAlbum().first;
+		selectedAlbumBName = getSetAlbum().second;
 		selectedMusic_num = -1;
 		Detail_Init();
 	}
 	selectedMusic_num = (selectedMusic_num + flag + (int)albumList.size()) % (int)albumList.size();
 	const auto data = albumList[selectedMusic_num];
 	album_Name = selectedAlbumName;
+	album_BName = selectedAlbumBName;
 	musicName = selectedMusicName = data.fileName;
 	music = selectedMusic = data.music;
 	changeMusicList_Begin();
