@@ -14,8 +14,8 @@ struct List_fav
 	Sound music;
 	String albumName;
 	String albumBName;
-	String musicDisplayName;
 	String musicOriginName;
+	String musicBName;
 	int totalTime;
 };
 
@@ -23,7 +23,7 @@ struct List_fav
 static std::vector<List_fav>musics;
 static Texture main, playing, pausing, not_fav, fav;
 static Font font_albumList;
-static String selectedAlbumName = L"", selectedAlbumBName = L"", selectedMusicName = L"";
+static String selectedAlbumName = L"", selectedAlbumBName = L"", selectedMusicName = L"",selectedMusicBName=L"";
 static RoundRect rect_albumList_Flag(25, 25 + BAR_HEIGHT, 36, 36, 5);
 static RoundRect rect_albumList_Name(64, 25 + BAR_HEIGHT, 537, 36, 5);
 static RoundRect rect_albumList_Time(604, 25 + BAR_HEIGHT, 100, 36, 5);
@@ -47,6 +47,31 @@ void Fav_Init()
 		not_fav = Texture(L"data\\Detail\\not_fav.png");
 		fav = Texture(L"data\\Detail\\fav.png");
 		font_albumList = Font(16);
+		CSVReader csv(L"data\\Fav\\list.csv");
+		if (csv)
+		{
+			for (int i = 0; i < csv.rows; ++i)
+			{
+				auto albumDName = csv.get<String>(i, 0);
+				auto musicDName = csv.get<String>(i, 1);
+				String albumName, musicName;
+				Sound music;
+				TextReader albumTextReader(L"music\\" + albumDName + L"\\" + albumDName + L".txt");
+				TextReader musicTextReader(L"music\\" + albumDName + L"\\" + musicDName + L"\\" + musicDName + L".txt");
+				albumTextReader.readLine(albumName);
+				musicTextReader.readLine(musicName);
+				const String extensions[] = { L".wav",L".ogg",L".mp3" };
+				for (auto ext : extensions)
+				{
+					if (FileSystem::IsFile(L"music\\" + albumDName + L"\\" + musicDName + L"\\" + musicDName + ext))
+					{
+						music = Sound(L"music\\" + albumDName + L"\\" + musicDName + L"\\" + musicDName + ext);
+						break;
+					}
+				}
+				addFav(albumName, albumDName, musicName, musicDName, music);
+			}
+		}
 	}
 	if (get_prevScene() != Scene_Music) { albumList_begin = 0; }
 }
@@ -81,13 +106,14 @@ void Fav_Update()
 				selectedAlbumName = music.albumName;
 				selectedAlbumBName = music.albumBName;
 				selectedMusicName = music.musicOriginName;
+				selectedMusicBName = music.musicBName;
 				selectedMusic = music.music;
 				giveMusicData(music.albumName, music.musicOriginName, music.music);
 			}
 			rect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (rect.leftClicked)
 			{
-				(isFav(music.albumName, music.musicOriginName) ? removeFav(music.albumName, music.musicOriginName) : addFav(music.albumName, music.albumBName, music.musicDisplayName, music.musicOriginName, music.music));
+				(isFav(music.albumName, music.musicOriginName) ? removeFav(music.albumName, music.musicOriginName) : addFav(music.albumName, music.albumBName,  music.musicOriginName,music.musicBName, music.music));
 			}
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if (rect.leftClicked)
@@ -97,6 +123,7 @@ void Fav_Update()
 				selectedAlbumName = music.albumName;
 				selectedAlbumBName = music.albumBName;
 				selectedMusicName = music.musicOriginName;
+				selectedMusicBName = music.musicBName;
 				selectedMusic = music.music;
 				set_stillFlag(true);
 				SceneMgr_ChangeScene(Scene_Music);
@@ -136,7 +163,7 @@ void Fav_Draw()
 			RoundRect tmpRRect(rect_albumList_Flag.x, rect_albumList_Flag.y + num * 39, rect_albumList_Flag.w, rect_albumList_Flag.h, rect_albumList_Flag.r);
 			if (tmp.music.isPlaying()) { pausing.drawAt(43, 43 + BAR_HEIGHT + num * 39, (tmpRRect.mouseOver ? Palette::Orange : Palette::White)); }
 			else { playing.drawAt(43, 43 + BAR_HEIGHT + num * 39, (tmpRRect.mouseOver ? Palette::Orange : Palette::White)); }
-			font_albumList(tmp.musicDisplayName).draw(70, 29 + BAR_HEIGHT + num * 39);
+			font_albumList(Fav_musicNameBeShort( tmp.musicOriginName)).draw(70, 29 + BAR_HEIGHT + num * 39);
 			auto str = Format(Pad(tmp.totalTime / 60, { 2,L'0' }), L":", Pad(tmp.totalTime % 60, { 2,L'0' }));
 			font_albumList(str).draw(610, 29 + BAR_HEIGHT + num * 39);
 			tmpRRect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
@@ -159,7 +186,7 @@ bool isFav(String albumName, String musicName)
 void addFav(String albumName, String albumBName, String musicName, String fileName, Sound music)
 {
 	auto temp_totalTime = (int)music.lengthSec();
-	musics.push_back({ music,albumName,albumBName,Fav_musicNameBeShort(musicName),fileName,temp_totalTime });
+	musics.push_back({ music,albumName,albumBName,musicName,fileName,temp_totalTime });
 }
 
 // お気に入りから削除する
@@ -179,7 +206,7 @@ void removeFav(String albumName, String musicName)
 void setFavMusicName(String& album_Name, String& album_BName, String& musicName, Sound& music)
 {
 	album_Name = selectedAlbumName;
-	musicName = selectedMusicName;
+	musicName = selectedMusicBName;
 	album_BName = selectedAlbumBName;
 	music = selectedMusic;
 }
@@ -189,7 +216,7 @@ void setFavMusicName(int flag, String& album_Name, String& album_BName, String& 
 	const auto data = musics[selectedMusic_num];
 	album_Name = data.albumName;
 	album_BName = data.albumBName;
-	musicName = data.musicOriginName;
+	musicName = data.musicBName;
 	music = data.music;
 	changeFavList_Begin();
 }
@@ -211,4 +238,14 @@ void changeFavList_Begin()
 {
 	albumList_begin = Max(albumList_begin, selectedMusic_num - 4);
 	albumList_begin = Min(albumList_begin, selectedMusic_num);
+}
+
+// お気に入りリスト 保存
+void saveFavList()
+{
+	CSVWriter csv(L"data\\Fav\\list.csv");
+	for (auto i : musics)
+	{
+		csv.writeRow(i.albumBName, i.musicBName);
+	}
 }

@@ -178,7 +178,7 @@ void Detail_Update()
 			rect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
 			if (rect.leftClicked)
 			{
-				(isFav(albumName, music.fileName) ? removeFav(albumName, music.fileName) : addFav(albumName, albumBName, music.displayName, music.fileName, music.music));
+				(isFav(albumName, music.originName) ? removeFav(albumName, music.originName) : addFav(albumName, albumBName, music.originName, music.fileName, music.music));
 			}
 			rect = RoundRect(rect_albumListCell.x, rect_albumListCell.y + num * 39, rect_albumListCell.w, rect_albumListCell.h, rect_albumListCell.r);
 			if (rect.leftClicked)
@@ -264,7 +264,7 @@ void Detail_Draw()
 			auto str = Format(Pad(tmp.totalTime / 60, { 2,L'0' }), L":", Pad(tmp.totalTime % 60, { 2,L'0' }));
 			font_albumList(str).draw(610, 304 + BAR_HEIGHT + num * 39);
 			tmpRRect = RoundRect(rect_albumList_Fav.x, rect_albumList_Fav.y + num * 39, rect_albumList_Fav.w, rect_albumList_Fav.h, rect_albumList_Fav.r);
-			((isFav(albumName, tmp.fileName) || tmpRRect.mouseOver) ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
+			((isFav(albumName, tmp.originName) || tmpRRect.mouseOver) ? fav : not_fav).drawAt(725, 318 + BAR_HEIGHT + num * 39);
 		}
 	}
 }
@@ -436,6 +436,7 @@ String Detail_musicNameBeShort(String text)
 // kind: 0->一時停止, 1->再生
 void setMusicStats(int kind)
 {
+	if (albumList.empty()) { return; }
 	switch (kind)
 	{
 	case 0:
