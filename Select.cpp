@@ -13,6 +13,7 @@
 struct Album
 {
 	String name;
+	String dname;
 	String creator;
 	String comment;
 	Texture image;
@@ -23,7 +24,7 @@ static std::vector<std::pair<int, int>>comTime;
 static std::vector<Album> AlbumList;
 static Texture main, no_img;
 static Texture fav;
-static String setAlbum = L"";
+static String setAlbum = L"",setAlbumB=L"";
 static Grid<double_t> z;
 static TextReader reader;
 static Triangle goUp({ 384,75 }, { 414,85 }, { 354,85 });
@@ -61,7 +62,7 @@ void Select_Init()
 			while (text.readLine(temp_of_temp)) { comment += temp_of_temp; }
 			Texture image(L"music\\" + temp + L"\\" + temp + L".png");
 			if (!image) { image = no_img; }
-			AlbumList.push_back({ name,creator,comment,image });
+			AlbumList.push_back({ name,temp,creator,comment,image });
 		}
 		z = Grid<double>(3, (AlbumList.size() + 1) / 3 + 1);
 	}
@@ -109,6 +110,7 @@ void Select_Update()
 				else
 				{
 					setAlbum = AlbumList[cou].name;
+					setAlbumB = AlbumList[cou].dname;
 					selectedAlbumNum = cou;
 					const Rect temprect(0, BAR_HEIGHT, Window::Width(), Window::Height());
 					const Font tempfont(32, Typeface::Bold);
@@ -224,9 +226,9 @@ Texture SelectImage(int cou)
 }
 
 // 選択されたアルバムの名前を返す
-String getSetAlbum()
+std::pair<String, String> getSetAlbum()
 {
-	return setAlbum;
+	return std::make_pair(setAlbum, setAlbumB);
 }
 
 // 次のアルバムを返す
@@ -234,6 +236,7 @@ void getNextAlbum()
 {
 	++selectedAlbumNum;
 	setAlbum = AlbumList[selectedAlbumNum % AlbumList.size()].name;
+	setAlbumB = AlbumList[selectedAlbumNum % AlbumList.size()].dname;
 }
 
 // アルバム詳細 描画

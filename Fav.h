@@ -13,14 +13,14 @@ void Fav_Draw();
 bool isFav(String albumName, String musicName);
 
 // Ç®ãCÇ…ì¸ÇËÇ…í«â¡Ç∑ÇÈ
-void addFav(String albumName, String musicName, String fileName, Sound music);
+void addFav(String albumName, String albumBName, String musicName, String fileName, Sound music);
 
 // Ç®ãCÇ…ì¸ÇËÇ©ÇÁçÌèúÇ∑ÇÈ
 void removeFav(String albumName, String musicName);
 
 // ã»èÓïÒ éÛÇØìnÇµÅiflag == 1 -> éü : -1 -> ëOÅj
-void setFavMusicName(String& album_Name, String& musicName, Sound& music);
-void setFavMusicName(int flag, String& album_Name, String& musicName, Sound& music);
+void setFavMusicName(String& album_Name, String& album_BName, String& musicName, Sound& music);
+void setFavMusicName(int flag, String& album_Name, String& album_BName, String& musicName, Sound& music);
 
 // ã»ñºíZèk
 String Fav_musicNameBeShort(String text);
