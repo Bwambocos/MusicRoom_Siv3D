@@ -5,6 +5,7 @@
 #include "Music.h"
 #include "Detail.h"
 #include "Main.h"
+#include "Fav.h"
 
 // define
 #define mainRectWidth 384
@@ -146,6 +147,7 @@ void Bar_Update()
 					{
 						changeMusicStats(0);
 						setMusicStats(0);
+						changeFavMusicStats(0);
 						changeMusic(-1);
 						stop_flag = false;
 					}
@@ -211,6 +213,7 @@ void Bar_Update()
 					{
 						changeMusicStats(0);
 						setMusicStats(0);
+						changeFavMusicStats(0);
 						changeMusic(1);
 						stop_flag = false;
 					}

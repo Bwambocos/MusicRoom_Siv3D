@@ -27,3 +27,10 @@ String Fav_musicNameBeShort(String text);
 
 // 曲リスト開始位置 操作
 void changeFavList_Begin();
+
+// お気に入りリスト 保存
+void saveFavList();
+
+// 曲操作
+// kind: 0->一時停止, 1->再生, 2->停止, 3->繰り返し切り替え
+void changeFavMusicStats(int kind);
