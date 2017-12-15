@@ -30,3 +30,7 @@ void changeFavList_Begin();
 
 // ‚¨‹C‚É“ü‚èƒŠƒXƒg •Û‘¶
 void saveFavList();
+
+// ‹È‘€ì
+// kind: 0->ˆê’â~, 1->Ä¶, 2->’â~, 3->ŒJ‚è•Ô‚µØ‚è‘Ö‚¦
+void changeFavMusicStats(int kind);

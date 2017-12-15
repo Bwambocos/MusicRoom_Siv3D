@@ -249,3 +249,28 @@ void saveFavList()
 		csv.writeRow(i.albumBName, i.musicBName);
 	}
 }
+
+// ‹È‘€ì
+// kind: 0->ˆê’â~, 1->Ä¶, 2->’â~, 3->ŒJ‚è•Ô‚µØ‚è‘Ö‚¦
+void changeFavMusicStats(int kind)
+{
+	switch (kind)
+	{
+	case 0:
+		selectedMusic.pause();
+		break;
+	case 1:
+		selectedMusic.play();
+		break;
+	case 2:
+		selectedMusic.stop();
+		break;
+	case 3:
+		const int tmpTime = (int)selectedMusic.streamPosSample();
+		selectedMusic.pause();
+		selectedMusic.setLoop(selectedMusic.isLoop() ? false : true);
+		selectedMusic.play();
+		selectedMusic.setPosSample(tmpTime);
+		break;
+	}
+}
