@@ -50,7 +50,7 @@ void Fav_Init()
 		CSVReader csv(L"data\\Fav\\list.csv");
 		if (csv)
 		{
-			for (int i = 0; i < csv.rows; ++i)
+			for (int i = 0; i < (signed)csv.rows; ++i)
 			{
 				auto albumDName = csv.get<String>(i, 0);
 				auto musicDName = csv.get<String>(i, 1);
