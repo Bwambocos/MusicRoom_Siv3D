@@ -19,4 +19,5 @@ void Main()
 		SceneMgr_Draw();
 		Bar_Draw();
 	}
+	saveFavList();
 }
