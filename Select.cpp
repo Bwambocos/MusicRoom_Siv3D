@@ -6,8 +6,8 @@
 #include "Bar.h"
 
 // define
-#define WELCOME_MESSAGE_MILLISEC 3000
 #define COM_MESSAGE_MILLISEC 1000
+#define SCROLL_MSEC 1250
 
 // アルバム構造体
 struct Album
@@ -24,7 +24,7 @@ static std::vector<std::pair<int, int>>comTime;
 static std::vector<Album> AlbumList;
 static Texture main, no_img;
 static Texture fav;
-static String setAlbum = L"",setAlbumB=L"";
+static String setAlbum = L"", setAlbumB = L"";
 static Grid<double_t> z;
 static TextReader reader;
 static Triangle goUp({ 384,75 }, { 414,85 }, { 354,85 });
@@ -33,7 +33,10 @@ static int startTime;
 static int nowTime;
 static int first_cou;
 static int selectedAlbumNum;
-static bool scr_flag = true;
+static int scrollStartTime, scrollNowTime;
+static int scrollY;
+static bool scr_flag = false;
+static bool scr_upflag;
 
 // アルバム選択 初期化
 void Select_Init()
@@ -88,12 +91,54 @@ void Select_Update()
 	}
 	// スクロール 更新
 	{
-		if (goUp.leftClicked) { first_cou -= 3; }
-		if (goDown.leftClicked) { first_cou += 3; }
-		scr_flag = ((first_cou + 5 <= (signed)AlbumList.size()) || (first_cou > 0) ? true : false);
-		if (scr_flag) { first_cou += Mouse::Wheel() * 3; }
-		first_cou = Max(first_cou, 0);
-		first_cou = Min<int>(first_cou, (int)AlbumList.size() / 3 * 3);
+		if (!scr_flag)
+		{
+			if (goUp.leftClicked)
+			{
+				scr_flag = true;
+				scr_upflag = true;
+				scrollY = -246;
+			}
+			if (goDown.leftClicked)
+			{
+				scr_flag = true;
+				scr_upflag = false;
+				scrollY = 246;
+			}
+			bool flag = ((first_cou + 5 <= (signed)AlbumList.size()) || (first_cou > 0) ? true : false);
+			if (flag)
+			{
+				if (Mouse::Wheel() > 0)
+				{
+					scr_flag = true;
+					scr_upflag = true;
+					scrollY = 246;
+				}
+				if (Mouse::Wheel() < 0)
+				{
+					scr_flag = true;
+					scr_upflag = false;
+					scrollY = -246;
+				}
+			}
+			if (scr_flag) scrollNowTime = scrollStartTime = Time::GetMillisec();
+		}
+		else
+		{
+			if (scrollNowTime - scrollStartTime > SCROLL_MSEC)
+			{
+				first_cou += (!scr_upflag ? 3 : -3);
+				scr_flag = false;
+				scrollY = 0;
+				first_cou = Max(first_cou, 0);
+				first_cou = Min<int>(first_cou, (int)AlbumList.size() / 3 * 3);
+			}
+			else
+			{
+				scrollY = (!scr_upflag ? -246 * ((scrollNowTime - scrollStartTime)) / SCROLL_MSEC : 246 * ((scrollNowTime - scrollStartTime)) / SCROLL_MSEC);
+			}
+			scrollNowTime = Time::GetMillisec();
+		}
 	}
 
 	// album_list 更新
@@ -153,7 +198,8 @@ void Select_Draw()
 		{
 			for (int x = 0; x < (signed)z.width; ++x)
 			{
-				const Rect rect = MakeRect(x, y);
+				Rect rect = MakeRect(x, y);
+				if (scr_flag) rect.y += scrollY;
 				if (cou == (signed)AlbumList.size() + 1) { break; }
 				if (!rect.mouseOver)
 				{
@@ -170,7 +216,8 @@ void Select_Draw()
 		{
 			for (int x = 0; x < (signed)z.width; ++x)
 			{
-				const Rect rect = MakeRect(x, y);
+				Rect rect = MakeRect(x, y);
+				rect.y += scrollY;
 				if (rect.mouseOver || z[y][x])
 				{
 					if (rect.mouseOver) { z[y][x] = Min(z[y][x] + 0.05, 0.5); }
@@ -189,7 +236,8 @@ void Select_Draw()
 		{
 			for (int x = 0; x < (signed)z.width; ++x)
 			{
-				const Rect rect = MakeRect(x, y);
+				Rect rect = MakeRect(x, y);
+				rect.y += scrollY;
 				if (cou == (signed)AlbumList.size() + 1) { break; }
 				if (rect.mouseOver)
 				{
