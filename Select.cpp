@@ -7,7 +7,7 @@
 
 // define
 #define COM_MESSAGE_MILLISEC 1000
-#define SCROLL_MSEC 1250
+#define SCROLL_MSEC 500
 
 // アルバム構造体
 struct Album
@@ -71,7 +71,7 @@ void Select_Init()
 	}
 
 	startTime = (int)Time::GetMillisec();
-	comTime.resize(AlbumList.size() + 2);
+	comTime.resize(AlbumList.size() + 8);
 }
 
 // アルバム選択 更新
@@ -93,32 +93,31 @@ void Select_Update()
 	{
 		if (!scr_flag)
 		{
-			if (goUp.leftClicked)
-			{
-				scr_flag = true;
-				scr_upflag = true;
-				scrollY = -246;
-			}
-			if (goDown.leftClicked)
-			{
-				scr_flag = true;
-				scr_upflag = false;
-				scrollY = 246;
-			}
 			bool flag = ((first_cou + 5 <= (signed)AlbumList.size()) || (first_cou > 0) ? true : false);
-			if (flag)
+			if (first_cou > 0)
 			{
-				if (Mouse::Wheel() > 0)
+				if (goUp.leftClicked)
 				{
 					scr_flag = true;
 					scr_upflag = true;
-					scrollY = 246;
 				}
 				if (Mouse::Wheel() < 0)
 				{
 					scr_flag = true;
+					scr_upflag = true;
+				}
+			}
+			if (first_cou + 5 <= (signed)AlbumList.size())
+			{
+				if (goDown.leftClicked)
+				{
+					scr_flag = true;
 					scr_upflag = false;
-					scrollY = -246;
+				}
+				if (Mouse::Wheel() > 0)
+				{
+					scr_flag = true;
+					scr_upflag = false;
 				}
 			}
 			if (scr_flag) scrollNowTime = scrollStartTime = Time::GetMillisec();
@@ -193,59 +192,68 @@ void Select_Draw()
 
 	// album_list 描画
 	{
-		int cou = first_cou;
-		for (int y = 0; y < (signed)z.height; ++y)
+		int cou = first_cou - 3;
+		for (int y = -1; y <= (signed)z.height; ++y)
 		{
 			for (int x = 0; x < (signed)z.width; ++x)
 			{
 				Rect rect = MakeRect(x, y);
 				if (scr_flag) rect.y += scrollY;
 				if (cou == (signed)AlbumList.size() + 1) { break; }
-				if (!rect.mouseOver)
+				if (cou >= 0)
 				{
-					rect(SelectImage(cou).resize(216, 216)).draw();
-					rect.drawFrame(3, 0, Color(0, 0, 0));
-					z[y][x] = Max(z[y][x] - 0.02, 0.0);
+					if (!rect.mouseOver)
+					{
+						rect(SelectImage(cou).resize(216, 216)).draw();
+						rect.drawFrame(3, 0, Color(0, 0, 0));
+						z[y + 1][x + 1] = Max(z[y + 1][x + 1] - 0.02, 0.0);
+					}
 				}
 				++cou;
 			}
 			if (cou == (signed)AlbumList.size() + 1) { break; }
 		}
-		cou = first_cou;
-		for (int y = 0; y < (signed)z.height; ++y)
+		cou = first_cou - 3;
+		for (int y = -1; y <= (signed)z.height; ++y)
 		{
 			for (int x = 0; x < (signed)z.width; ++x)
 			{
 				Rect rect = MakeRect(x, y);
 				rect.y += scrollY;
-				if (rect.mouseOver || z[y][x])
+				if (rect.mouseOver || z[y + 1][x + 1])
 				{
-					if (rect.mouseOver) { z[y][x] = Min(z[y][x] + 0.05, 0.5); }
+					if (rect.mouseOver) { z[y + 1][x + 1] = Min(z[y + 1][x + 1] + 0.05, 0.5); }
 				}
-				const double s = z[y][x];
+				const double s = z[y + 1][x + 1];
 				if (cou == (signed)AlbumList.size() + 1) { break; }
-				RectF(rect).stretched(s * 2).drawShadow({ 0,15 * s }, 32 * s, 10 * s);
-				RectF(rect).stretched(s * 2)(SelectImage(cou).resize(216, 216)).draw();
-				RectF(rect).stretched(s * 2).drawFrame(3, 0, Color(0, 0, 0));
+				if (cou >= 0)
+				{
+					RectF(rect).stretched(s * 2).drawShadow({ 0,15 * s }, 32 * s, 10 * s);
+					RectF(rect).stretched(s * 2)(SelectImage(cou).resize(216, 216)).draw();
+					RectF(rect).stretched(s * 2).drawFrame(3, 0, Color(0, 0, 0));
+				}
 				++cou;
 			}
 			if (cou == (signed)AlbumList.size() + 1) { break; }
 		}
-		cou = first_cou;
-		for (int y = 0; y < (signed)z.height; ++y)
+		cou = first_cou - 3;
+		for (int y = -1; y <= (signed)z.height; ++y)
 		{
 			for (int x = 0; x < (signed)z.width; ++x)
 			{
 				Rect rect = MakeRect(x, y);
 				rect.y += scrollY;
 				if (cou == (signed)AlbumList.size() + 1) { break; }
-				if (rect.mouseOver)
+				if (cou >= 0)
 				{
-					comTime[cou].first = (comTime[cou].first == 0 ? (int)Time::GetMillisec() : comTime[cou].first);
-					comTime[cou].second = (int)Time::GetMillisec();
-					if (comTime[cou].second - comTime[cou].first >= COM_MESSAGE_MILLISEC) { DrawDetails(cou); }
+					if (rect.mouseOver)
+					{
+						comTime[cou].first = (comTime[cou].first == 0 ? (int)Time::GetMillisec() : comTime[cou].first);
+						comTime[cou].second = (int)Time::GetMillisec();
+						if (comTime[cou].second - comTime[cou].first >= COM_MESSAGE_MILLISEC) { DrawDetails(cou); }
+					}
+					else { comTime[cou].first = comTime[cou].second = 0; }
 				}
-				else { comTime[cou].first = comTime[cou].second = 0; }
 				++cou;
 			}
 			if (cou == (signed)AlbumList.size() + 1) { break; }
@@ -263,7 +271,7 @@ Rect MakeRect(int x, int y)
 Texture SelectImage(int cou)
 {
 	Texture res;
-
+	if (cou < 0)return res;
 	// アルバム
 	if (cou < (signed)AlbumList.size()) { res = AlbumList[cou].image; }
 
