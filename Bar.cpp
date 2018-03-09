@@ -7,35 +7,30 @@
 #include "Main.h"
 #include "Fav.h"
 
-// define
-#define mainRectWidth 384
-#define BAR_DRAW_STAYMSEC 3500
-#define DEFAULT_mainText_X 200
-#define DRAW_mainText_MOVE_X 48
+// const
+const int mainRectWidth = 384;
+const int BAR_DRAW_STAYMSEC = 3500;
+const int DEFAULT_mainText_X = 200;
+const int DRAW_mainText_MOVE_X = 48;
 
 struct Bar_Music
 {
 	Sound music;
-	String albumName;
-	String text;
-	int nowTime;
-	int totalTime;
+	String albumName, text;
+	int nowTime, totalTime;
 };
 
 static Bar_Music music;
-static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2], originPrev[2], originNext[2], originShare[2];
-static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep, displayPrev, displayNext, displayShare;
-static Texture originBack[2], originGo[2], displayBack, displayGo;
+static Texture originPlay[2], originBrief[2], originStop[2], originSeek[2], originRep[2], originPrev[2], originNext[2], originShare[2], originBack[2], originGo[2];
+static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep, displayPrev, displayNext, displayShare, displayBack, displayGo;
 static Rect fieldRect;
 static RoundRect mainRect(192, 0, mainRectWidth, BAR_HEIGHT, 16);
 static Sound nowMusic, dog;
 static String mainText = L"";
 static Font mainFont, timeFont;
-static bool stop_flag = false;
-static double draw_mainText_x;
+static bool stop_flag = false, draw_back_flag = false, draw_go_flag = false, draw_mainText_stayFlag;
 static int draw_mainText_startMSec, draw_mainText_stayMSec;
-static bool draw_mainText_stayFlag;
-static bool draw_back_flag = false, draw_go_flag = false;
+static double draw_mainText_x;
 
 // バー 初期化
 void Bar_Init()
@@ -73,7 +68,6 @@ void Bar_Init()
 		displayGo = originGo[0];
 		displayShare = originShare[0];
 	}
-
 	fieldRect = Rect(0, 0, WINDOW_WIDTH, BAR_HEIGHT);
 	mainFont = Font(18);
 	timeFont = Font(12);
@@ -84,10 +78,8 @@ void Bar_Init()
 void Bar_Update()
 {
 	if (!music.music.isEmpty() && !music.music.isPlaying() && !stop_flag
-		&& music.music.samplesPlayed() % music.music.lengthSample() == 0) {
-		changeMusic(1);
-	}
-	if (Input::KeyShift.pressed&&Input::KeyD.pressed&&Input::KeyO.pressed&&Input::KeyG.pressed) { dog.play(); }
+		&& music.music.samplesPlayed() % music.music.lengthSample() == 0) changeMusic(1);
+	if (Input::KeyShift.pressed&&Input::KeyD.pressed&&Input::KeyO.pressed&&Input::KeyG.pressed) dog.play();
 
 	// ボタン 更新
 	{
@@ -108,13 +100,13 @@ void Bar_Update()
 				stop_flag = true;
 				SceneMgr_ChangeScene(Scene_Select);
 			}
-			if (draw_go_flag && goRect.leftClicked) { SceneMgr_ChangeScene(Scene_Music); }
+			if (draw_go_flag && goRect.leftClicked) SceneMgr_ChangeScene(Scene_Music);
 			break;
 
 		case Scene_Music:
 			draw_back_flag = true;
 			draw_go_flag = false;
-			if (backRect.leftClicked) { SceneMgr_ChangeScene((get_prevScene() == Scene_Fav || isFavLooping() ? Scene_Fav : Scene_Detail)); }
+			if (backRect.leftClicked) SceneMgr_ChangeScene((get_prevScene() == Scene_Fav || isFavLooping() ? Scene_Fav : Scene_Detail));
 			break;
 
 		case Scene_Fav:
@@ -126,7 +118,7 @@ void Bar_Update()
 				stop_flag = true;
 				SceneMgr_ChangeScene(Scene_Select);
 			}
-			if (draw_go_flag && goRect.leftClicked) { SceneMgr_ChangeScene(Scene_Music); }
+			if (draw_go_flag && goRect.leftClicked) SceneMgr_ChangeScene(Scene_Music);
 			break;
 		}
 		displayBack = originBack[(backRect.mouseOver ? 1 : 0)];
@@ -141,8 +133,8 @@ void Bar_Update()
 				switch (cou)
 				{
 				case 0:
-					if (button.mouseOver) { displayPrev = originPrev[1]; }
-					else { displayPrev = originPrev[0]; }
+					if (button.mouseOver) displayPrev = originPrev[1];
+					else displayPrev = originPrev[0];
 					if (button.leftClicked)
 					{
 						changeMusicStats(0);
@@ -155,8 +147,8 @@ void Bar_Update()
 				case 1:
 					if (music.music.isPlaying())
 					{
-						if (button.mouseOver) { displayBrief = originBrief[1]; }
-						else { displayBrief = originBrief[0]; }
+						if (button.mouseOver) displayBrief = originBrief[1];
+						else displayBrief = originBrief[0];
 						if (button.leftClicked)
 						{
 							(get_nowScene() == Scene_Detail ? setMusicStats(0) : changeMusicStats(0));
@@ -165,8 +157,8 @@ void Bar_Update()
 					}
 					else
 					{
-						if (button.mouseOver) { displayPlay = originPlay[1]; }
-						else { displayPlay = originPlay[0]; }
+						if (button.mouseOver) displayPlay = originPlay[1];
+						else displayPlay = originPlay[0];
 						if (button.leftClicked)
 						{
 							(get_nowScene() == Scene_Detail ? setMusicStats(1) : changeMusicStats(1));
@@ -175,9 +167,9 @@ void Bar_Update()
 					}
 					break;
 				case 2:
-					if (button.mouseOver) { displayRep = originRep[1]; }
-					else { displayRep = originRep[0]; }
-					if (music.music.isLoop()) { displayRep = originRep[1]; }
+					if (button.mouseOver) displayRep = originRep[1];
+					else displayRep = originRep[0];
+					if (music.music.isLoop()) displayRep = originRep[1];
 					if (button.leftClicked)
 					{
 						const int tmpTime = (int)music.music.streamPosSample();
@@ -190,8 +182,8 @@ void Bar_Update()
 					x += mainRectWidth;
 					break;
 				case 3:
-					if (button.mouseOver) { displayStop = originStop[1]; }
-					else { displayStop = originStop[0]; }
+					if (button.mouseOver) displayStop = originStop[1];
+					else displayStop = originStop[0];
 					if (button.leftClicked)
 					{
 						changeMusicStats(2);
@@ -199,16 +191,13 @@ void Bar_Update()
 					}
 					break;
 				case 4:
-					if (button.mouseOver) { displayShare = originShare[1]; }
-					else { displayShare = originShare[0]; }
-					if (button.leftClicked)
-					{
-						Twitter::OpenTweetWindow(L"#MusicRoom v2.2.5 でアルバム『" + music.albumName + L"』の曲「" + music.text + L"」を聴いています！");
-					}
+					if (button.mouseOver) displayShare = originShare[1];
+					else displayShare = originShare[0];
+					if (button.leftClicked) Twitter::OpenTweetWindow(L"#MusicRoom v2.5 でアルバム『" + music.albumName + L"』の曲「" + music.text + L"」を聴いています！");
 					break;
 				case 5:
-					if (button.mouseOver) { displayNext = originNext[1]; }
-					else { displayNext = originNext[0]; }
+					if (button.mouseOver) displayNext = originNext[1];
+					else displayNext = originNext[0];
 					if (button.leftClicked)
 					{
 						changeMusicStats(0);
@@ -242,7 +231,7 @@ void Bar_Update()
 				break;
 			}
 		}
-		else { mainText = L"『" + music.albumName + L"』" + music.text; }
+		else mainText = L"『" + music.albumName + L"』" + music.text;
 	}
 
 	Update_drawMainText();
@@ -256,8 +245,8 @@ void Bar_Draw()
 
 	// ボタン 描画
 	{
-		if (draw_back_flag) { displayBack.draw(10, 10); }
-		if (draw_go_flag) { displayGo.draw(WINDOW_WIDTH - 10 - displayGo.width, 10); }
+		if (draw_back_flag) displayBack.draw(10, 10);
+		if (draw_go_flag) displayGo.draw(WINDOW_WIDTH - 10 - displayGo.width, 10);
 		int x = 768 / 2 - mainRectWidth / 2 - 40 * 3;
 		for (int cou = 0; cou < 6; ++cou)
 		{
@@ -267,8 +256,8 @@ void Bar_Draw()
 				displayPrev.draw(x, 12);
 				break;
 			case 1:
-				if (music.music.isPlaying()) { displayBrief.draw(x, 12); }
-				else { displayPlay.draw(x, 12); }
+				if (music.music.isPlaying()) displayBrief.draw(x, 12);
+				else displayPlay.draw(x, 12);
 				break;
 			case 2:
 				displayRep.draw(x, 12);
@@ -333,7 +322,7 @@ void Update_drawMainText()
 	{
 		if (!draw_mainText_stayFlag)
 		{
-			if (draw_mainText_x + width > rect.x + rect.w) { draw_mainText_x -= (double)DRAW_mainText_MOVE_X*(Time::GetMillisec64() - draw_mainText_stayMSec) / 1000; }
+			if (draw_mainText_x + width > rect.x + rect.w) draw_mainText_x -= (double)DRAW_mainText_MOVE_X*(Time::GetMillisec64() - draw_mainText_stayMSec) / 1000;
 			else
 			{
 				draw_mainText_startMSec = draw_mainText_stayMSec = (int)Time::GetMillisec64();
@@ -346,8 +335,8 @@ void Update_drawMainText()
 			{
 				draw_mainText_startMSec = draw_mainText_stayMSec;
 				const Rect tmpRect = mainFont(mainText).region();
-				if (draw_mainText_x == DEFAULT_mainText_X) { draw_mainText_stayFlag = false; }
-				else { draw_mainText_x = DEFAULT_mainText_X; }
+				if (draw_mainText_x == DEFAULT_mainText_X) draw_mainText_stayFlag = false;
+				else draw_mainText_x = DEFAULT_mainText_X;
 			}
 		}
 		draw_mainText_stayMSec = (int)Time::GetMillisec();
