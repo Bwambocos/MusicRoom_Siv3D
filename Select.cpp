@@ -22,7 +22,6 @@ static std::vector<Album> AlbumList;
 static Texture main, no_img, fav;
 static String setAlbum = L"", setAlbumB = L"";
 static Grid<double_t> z;
-static TextReader reader;
 static Triangle goUp({ 384,75 }, { 414,85 }, { 354,85 }), goDown({ 354,560 }, { 414,560 }, { 384,570 });
 static int startTime, nowTime, first_cou, selectedAlbumNum, scrollStartTime, scrollNowTime, scrollY;
 static bool scr_flag = false, scr_upflag;
@@ -31,6 +30,7 @@ static bool scr_flag = false, scr_upflag;
 void Select_Init()
 {
 	if (main) return;
+
 	// ÉÅÉCÉìîwåi
 	{
 		main = Texture(L"data\\Select\\main.png");
@@ -43,7 +43,7 @@ void Select_Init()
 	// album_list ì«Ç›çûÇ›
 	{
 		String temp;
-		reader = TextReader(L"music\\album_list.txt");
+		TextReader reader = TextReader(L"music\\album_list.txt");
 		while (reader.readLine(temp))
 		{
 			String name, creator, comment;
@@ -56,7 +56,7 @@ void Select_Init()
 			if (!image) image = no_img;
 			AlbumList.push_back({ name,temp,creator,comment,image });
 		}
-		z = Grid<double>(3, (AlbumList.size() + 1) / 3 + 1);
+		z = Grid<double>(3, (AlbumList.size() + 1) / 3 + 3);
 	}
 	startTime = (int)Time::GetMillisec();
 	comTime.resize(AlbumList.size() + 8);
