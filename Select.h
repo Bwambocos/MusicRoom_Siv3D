@@ -18,7 +18,7 @@ Rect MakeRect(int x, int y);
 Texture SelectImage(int cou);
 
 // 選択されたアルバム名を返す
-String getSetAlbum();
+std::pair<String, String> getSetAlbum();
 
 // 次のアルバムを返す
 void getNextAlbum();
