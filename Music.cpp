@@ -64,7 +64,8 @@ void Music_Init()
 			break;
 
 		case Scene_Fav:
-			setFavMusicName(music_albumName, music_albumBName, music_musicFileName, music_Music);
+			if (!favLoop_flag) setFavMusicName(music_albumName, music_albumBName, music_musicFileName, music_Music);
+			else setFavMusicName(prev_or_next, music_albumName, music_albumBName, music_musicFileName, music_Music);
 			break;
 
 		case Scene_Music:
@@ -114,7 +115,19 @@ void Music_Update()
 		Music_Init();
 	}
 	if (!music_Music.isPlaying() && !stop_flag
-		&& music_Music.samplesPlayed() % music_Music.lengthSample() == 0) changeMusic(1);
+		&& music_Music.samplesPlayed() % music_Music.lengthSample() == 0)
+	{
+		if (get_prevScene() == Scene_Fav)
+		{
+			favLoop_flag = true;
+		}
+		else
+		{
+			favLoop_flag = false;
+		}
+		prev_or_next = 1;
+		Music_Init();
+	}
 
 	// 再生バー 更新
 	{

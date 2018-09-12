@@ -423,7 +423,7 @@ String Detail_musicNameBeShort(String text)
 }
 
 // 曲操作
-// kind: 0->一時停止, 1->再生
+// kind: 0->一時停止, 1->再生, 2->停止
 void setMusicStats(int kind)
 {
 	if (albumList.empty()) return;
@@ -434,6 +434,9 @@ void setMusicStats(int kind)
 		break;
 	case 1:
 		albumList[selectedMusic_num].music.play();
+		break;
+	case 2:
+		albumList[selectedMusic_num].music.stop();
 		break;
 	}
 }

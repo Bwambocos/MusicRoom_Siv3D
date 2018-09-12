@@ -199,6 +199,11 @@ void removeFav(String albumName, String musicName)
 // ã»èÓïÒ éÛÇØìnÇµ
 void setFavMusicName(String& album_Name, String& album_BName, String& musicName, Sound& music)
 {
+	const auto data = musics[selectedMusic_num];
+	selectedAlbumName = data.albumName;
+	selectedAlbumBName = data.albumBName;
+	selectedMusicName = data.musicOriginName;
+	selectedMusicBName = data.musicBName;
 	album_Name = selectedAlbumName;
 	musicName = selectedMusicBName;
 	album_BName = selectedAlbumBName;
@@ -212,6 +217,10 @@ void setFavMusicName(int flag, String& album_Name, String& album_BName, String& 
 	album_BName = data.albumBName;
 	musicName = data.musicBName;
 	music = data.music;
+	selectedAlbumName = data.albumName;
+	selectedAlbumBName = data.albumBName;
+	selectedMusicName = data.musicOriginName;
+	selectedMusicBName = data.musicBName;
 	changeFavList_Begin();
 }
 

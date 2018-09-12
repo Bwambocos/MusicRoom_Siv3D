@@ -26,7 +26,7 @@ static Texture displayPlay, displayBrief, displayStop, displaySeek, displayRep, 
 static Rect fieldRect;
 static RoundRect mainRect(192, 0, mainRectWidth, BAR_HEIGHT, 16);
 static Sound nowMusic, dog;
-static String mainText = L"";
+static String mainText = L"", hoge = L"";
 static Font mainFont, timeFont;
 static bool stop_flag = false, draw_back_flag = false, draw_go_flag = false, draw_mainText_stayFlag;
 static int draw_mainText_startMSec, draw_mainText_stayMSec;
@@ -78,7 +78,11 @@ void Bar_Init()
 void Bar_Update()
 {
 	if (!music.music.isEmpty() && !music.music.isPlaying() && !stop_flag
-		&& music.music.samplesPlayed() % music.music.lengthSample() == 0) changeMusic(1);
+		&& music.music.samplesPlayed() % music.music.lengthSample() == 0)
+	{
+		if (get_prevScene() == Scene_Fav || get_nowScene() == Scene_Fav) setFavMusicName(1, music.albumName, hoge, music.text, music.music);
+		else changeMusic(1);
+	}
 	if (Input::KeyShift.pressed&&Input::KeyD.pressed&&Input::KeyO.pressed&&Input::KeyG.pressed) dog.play();
 
 	// ボタン 更新
@@ -106,7 +110,10 @@ void Bar_Update()
 		case Scene_Music:
 			draw_back_flag = true;
 			draw_go_flag = false;
-			if (backRect.leftClicked) SceneMgr_ChangeScene((get_prevScene() == Scene_Fav || isFavLooping() ? Scene_Fav : Scene_Detail));
+			if (backRect.leftClicked)
+			{
+				SceneMgr_ChangeScene((get_prevScene() == Scene_Fav || isFavLooping() ? Scene_Fav : Scene_Detail));
+			}
 			break;
 
 		case Scene_Fav:
@@ -118,7 +125,11 @@ void Bar_Update()
 				stop_flag = true;
 				SceneMgr_ChangeScene(Scene_Select);
 			}
-			if (draw_go_flag && goRect.leftClicked) SceneMgr_ChangeScene(Scene_Music);
+			if (draw_go_flag && goRect.leftClicked)
+			{
+				SceneMgr_ChangeScene(Scene_Music);
+				setFavMusicName(0, music.albumName, hoge, music.text, music.music);
+			}
 			break;
 		}
 		displayBack = originBack[(backRect.mouseOver ? 1 : 0)];
@@ -300,6 +311,7 @@ void giveMusicData(String albumName, String musicName, Sound musicData)
 	music.albumName = albumName;
 	music.text = musicName;
 	music.music = musicData;
+	stop_flag = false;
 
 	// 描画位置 初期化
 	draw_mainText_startMSec = (int)Time::GetMillisec();
