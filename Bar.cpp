@@ -204,7 +204,7 @@ void Bar_Update()
 				case 4:
 					if (button.mouseOver) displayShare = originShare[1];
 					else displayShare = originShare[0];
-					if (button.leftClicked) Twitter::OpenTweetWindow(L"#MusicRoom v2.5 でアルバム『" + music.albumName + L"』の曲「" + music.text + L"」を聴いています！");
+					if (button.leftClicked) Twitter::OpenTweetWindow(L"#MusicRoom v3.0 でアルバム『" + music.albumName + L"』の曲「" + music.text + L"」を聴いています！ダウンロードはこちらから：https://github.com/Bwambocos/MusicRoom_Siv3D/releases");
 					break;
 				case 5:
 					if (button.mouseOver) displayNext = originNext[1];

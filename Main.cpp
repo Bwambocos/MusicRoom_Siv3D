@@ -8,7 +8,7 @@
 void Main()
 {
 	Window::Resize({ WINDOW_WIDTH,WINDOW_HEIGHT + BAR_HEIGHT }, true);
-	Window::SetTitle(L"MusicRoom v2.5");
+	Window::SetTitle(L"MusicRoom v3.0");
 	Bar_Init(); Fav_Init();
 	SceneMgr_ChangeScene(Scene_Select);
 	while (System::Update())
