@@ -251,8 +251,8 @@ void Bar_Update()
 // バー 描画
 void Bar_Draw()
 {
-	fieldRect.draw(Color(200, 200, 200));
-	mainRect.draw(Color(618888));
+	fieldRect.draw(Color(204, 61, 104));
+	mainRect.draw(Color(224,67,114));
 
 	// ボタン 描画
 	{
